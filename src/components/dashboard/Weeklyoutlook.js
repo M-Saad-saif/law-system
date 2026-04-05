@@ -23,11 +23,11 @@ function typeBadge(caseType) {
 
 function dateTypeBadge(dateType) {
   return dateType === "hearing" ? (
-    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#027f7e]/10 text-[#027f7e]">
       Hearing
     </span>
   ) : (
-    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
+    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#103168]/20 text-[#103168]">
       Proceeding
     </span>
   );
@@ -39,13 +39,13 @@ function DayColumn({ day, isSelected, onClick }) {
   return (
     <button
       onClick={() => onClick(day.dateKey)}
-      className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-all min-w-[64px]
+      className={`w-full flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-all
         ${
           isSelected
-            ? "bg-indigo-600 text-white shadow-sm"
+            ? "bg-[#103168] text-white shadow-sm "
             : day.isToday
-              ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
-              : "text-gray-500 hover:bg-gray-100"
+              ? "bg-[#027f7e]/5 text-[#027f7e] border border-[#027f7e]/20"
+              : "text-gray-500 bg-gray-100 hover:bg-white hover:border-[0.5px] hover:border-gray-300"
         }`}
     >
       <span className="text-[10px] font-semibold uppercase tracking-wide opacity-80">
@@ -59,7 +59,7 @@ function DayColumn({ day, isSelected, onClick }) {
       {day.count > 0 ? (
         <span
           className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center
-          ${isSelected ? "bg-white text-indigo-700" : "bg-indigo-100 text-indigo-700"}`}
+          ${isSelected ? "bg-white text-[#103168]" : "bg-[#027f7e]/10 text-[#027f7e]"}`}
         >
           {day.count}
         </span>
@@ -74,11 +74,11 @@ function HearingCard({ hearing }) {
   return (
     <Link
       href={`/cases/${hearing._id}`}
-      className="group flex flex-col gap-2 p-3 rounded-xl border border-gray-100 bg-white
-        hover:border-indigo-200 hover:shadow-sm transition-all"
+      className="group flex flex-col gap-2 w- p-3 rounded-xl border  bg-white hover:bg-gradient-to-t hover:from-[#22656c0d] hover:to-transparent
+        border-[#027f7e]/30 hover:shadow-sm transition-all"
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-semibold text-gray-900 leading-snug group-hover:text-indigo-700 transition-colors line-clamp-2">
+        <p className="text-sm font-semibold text-gray-900 leading-snug  transition-colors line-clamp-2">
           {hearing.caseTitle}
         </p>
         {dateTypeBadge(hearing.dateType)}
@@ -196,7 +196,7 @@ export default function WeeklyOutlook() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 animate-pulse">
         <div className="h-5 w-40 bg-gray-100 rounded mb-4" />
         <div className="flex gap-2 mb-5">
-          {Array.from({ length: 10 }).map((_, i) => (
+          {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} className="h-16 w-16 rounded-xl bg-gray-100" />
           ))}
         </div>
@@ -215,7 +215,7 @@ export default function WeeklyOutlook() {
         <p className="text-sm text-red-500">{error}</p>
         <button
           onClick={fetchOutlook}
-          className="mt-2 text-xs text-indigo-600 underline"
+          className="mt-2 text-xs text-[#027f7e] underline"
         >
           Retry
         </button>
@@ -239,14 +239,14 @@ export default function WeeklyOutlook() {
         </div>
         <Link
           href="/calendar"
-          className="text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+          className="text-xs text-[#027f7e] hover:text-[#103168] font-medium transition-colors"
         >
           Full calendar →
         </Link>
       </div>
 
       {/* Day selector strip */}
-      <div className="flex items-center gap-1.5 px-4 pb-4 overflow-x-auto scrollbar-hide">
+      <div className="grid grid-cols-7 gap-1.5 px-4 pb-4">
         {outlook.map((day) => (
           <DayColumn
             key={day.dateKey}
@@ -269,7 +269,7 @@ export default function WeeklyOutlook() {
               {selectedDay.label}
             </p>
             {selectedDay.count > 0 && (
-              <span className="text-xs text-indigo-600 font-medium">
+              <span className="text-xs text-[#027f7e] font-medium">
                 {selectedDay.count} matter{selectedDay.count !== 1 ? "s" : ""}
               </span>
             )}
@@ -277,7 +277,7 @@ export default function WeeklyOutlook() {
         )}
 
         {selectedDay?.count > 0 ? (
-          <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             {selectedDay.hearings.map((h, i) => (
               <HearingCard key={`${h._id}-${i}`} hearing={h} />
             ))}

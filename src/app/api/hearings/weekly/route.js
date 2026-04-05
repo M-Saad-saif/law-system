@@ -13,14 +13,12 @@ export const GET = withAuth(async (req, context, user) => {
   sevenDaysLater.setDate(today.getDate() + 7);
   sevenDaysLater.setHours(23, 59, 59, 999);
 
-  // Build one day per slot for the 7-day window
-  const days = Array.from({ length: 10 }, (_, i) => {
+  const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     return d;
   });
 
-  // Fetch all cases with a nextHearingDate or nextProceedingDate in the window
   const cases = await Case.find({
     userId: user.id,
     $or: [

@@ -45,7 +45,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 font-display">
-            {greeting}, {user?.name?.split(" ")[0]} 👋
+            {greeting}, {user?.name} 👋
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             Here&apos;s your practice overview for today,{" "}
@@ -142,93 +142,85 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <div className="xl:col-span-1">
-          <WeeklyOutlook />
+      {/* Recent Cases Section - Full Width */}
+      <div className="card">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+          <h3 className="font-bold text-slate-800 font-display">Recent Cases</h3>
+          <Link href="/cases" className="btn-ghost text-xs gap-1">
+            View all <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
-        <div className="xl:col-span-2">
-          <div className="card h-full">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <h3 className="font-bold text-slate-800 font-display">
-                Recent Cases
-              </h3>
-              <Link href="/cases" className="btn-ghost text-xs gap-1">
-                View all <ArrowRight className="w-3.5 h-3.5" />
+        {!stats?.recentCases?.length ? (
+          <EmptyState
+            icon={FolderOpen}
+            title="No cases yet"
+            description="Add your first case to get started."
+            action={
+              <Link href="/cases/new" className="btn-primary mt-2">
+                <Plus className="w-4 h-4" /> Add Case
               </Link>
-            </div>
-
-            {!stats?.recentCases?.length ? (
-              <EmptyState
-                icon={FolderOpen}
-                title="No cases yet"
-                description="Add your first case to get started."
-                action={
-                  <Link href="/cases/new" className="btn-primary mt-2">
-                    <Plus className="w-4 h-4" /> Add Case
-                  </Link>
-                }
-              />
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Case</th>
-                      <th>Court</th>
-                      <th>Client</th>
-                      <th>Next Hearing</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {stats.recentCases.map((c) => (
-                      <tr
-                        key={c._id}
-                        onClick={() =>
-                          (window.location.href = `/cases/${c._id}`)
-                        }
-                        className="cursor-pointer"
-                      >
-                        <td>
-                          <div className="font-semibold text-slate-800 text-sm">
-                            {c.caseTitle}
+            }
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Case</th>
+                  <th>Court</th>
+                  <th>Client</th>
+                  <th>Next Hearing</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.recentCases.map((c) => (
+                  <tr
+                    key={c._id}
+                    onClick={() => (window.location.href = `/cases/${c._id}`)}
+                    className="cursor-pointer"
+                  >
+                    <td>
+                      <div className="font-semibold text-slate-800 text-sm">
+                        {c.caseTitle}
+                      </div>
+                      {c.caseNumber && (
+                        <div className="text-xs text-slate-400 font-mono mt-0.5">
+                          {c.caseNumber}
+                        </div>
+                      )}
+                    </td>
+                    <td className="text-slate-600">{c.courtType}</td>
+                    <td className="text-slate-600">{c.clientName || "—"}</td>
+                    <td>
+                      {c.nextHearingDate ? (
+                        <div>
+                          <div className="text-sm text-slate-700">
+                            {formatDate(c.nextHearingDate)}
                           </div>
-                          {c.caseNumber && (
-                            <div className="text-xs text-slate-400 font-mono mt-0.5">
-                              {c.caseNumber}
-                            </div>
-                          )}
-                        </td>
-                        <td className="text-slate-600">{c.courtType}</td>
-                        <td className="text-slate-600">
-                          {c.clientName || "—"}
-                        </td>
-                        <td>
-                          {c.nextHearingDate ? (
-                            <div>
-                              <div className="text-sm text-slate-700">
-                                {formatDate(c.nextHearingDate)}
-                              </div>
-                              <div className="text-xs text-slate-400">
-                                {relativeDate(c.nextHearingDate)}
-                              </div>
-                            </div>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                        <td>
-                          <StatusBadge status={c.status} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                          <div className="text-xs text-slate-400">
+                            {relativeDate(c.nextHearingDate)}
+                          </div>
+                        </div>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td>
+                      <StatusBadge status={c.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Weekly Outlook Section - Full Width Below Recent Cases */}
+      <div className="w-full">
+        <WeeklyOutlook />
       </div>
 
       {/* Today's schedule banner */}
