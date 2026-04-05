@@ -12,14 +12,11 @@ export function middleware(request) {
   if (isApi) return NextResponse.next();
 
   if (isPublic) {
-    if (pathname !== '/' && token) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
     return NextResponse.next();
   }
 
   if (!token) {
-    return NextResponse.redirect(new URL('/login', request.url));
+      return NextResponse.redirect(new URL('/login', request.url));
   }
 
   return NextResponse.next();
