@@ -32,8 +32,13 @@ export const GET = withAuth(async (req, context, user) => {
     )
     .lean();
 
-  // Group hearings by date string (YYYY-MM-DD)
-  const toKey = (date) => new Date(date).toISOString().split("T")[0];
+  const toKey = (date) => {
+    const d = new Date(date);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
 
   const grouped = {};
   days.forEach((d) => {
