@@ -1,4 +1,4 @@
-# LexisPortal — Legal Practice Management System
+# LawPortal — Legal Practice Management System
 
 A production-ready law firm management portal built for Pakistani lawyers with Next.js 14, MongoDB, and Tailwind CSS.
 
@@ -153,7 +153,7 @@ curl -X POST http://localhost:3000/api/seed
 
 **Demo credentials (after seeding):**
 ```
-Email:    demo@lexisportal.com
+Email:    demo@LawPortal.com
 Password: Demo@12345
 ```
 

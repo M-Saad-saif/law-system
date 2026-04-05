@@ -34,7 +34,7 @@ export default function Topbar() {
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const title = Object.entries(pageTitles).find(([path]) => pathname === path || pathname.startsWith(path + '/'))?.[1] || 'LexisPortal';
+  const title = Object.entries(pageTitles).find(([path]) => pathname === path || pathname.startsWith(path + '/'))?.[1] || 'LawPortal';
 
   return (
     <>
@@ -81,7 +81,7 @@ export default function Topbar() {
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-600">
                   <Scale className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-white font-bold text-sm font-display">LexisPortal</span>
+                <span className="text-white font-bold text-sm font-display">LawPortal</span>
               </div>
               <button onClick={() => setMobileOpen(false)} className="text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />

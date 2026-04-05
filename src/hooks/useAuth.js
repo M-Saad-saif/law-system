@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     setUser(null);
-    router.push("/login");
+    router.push("/");
   };
 
   return (

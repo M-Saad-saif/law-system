@@ -47,7 +47,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await api.post("/api/auth/register", form);
-      toast.success("Account created! Welcome to LexisPortal.");
+      toast.success("Account created! Welcome to LawPortal.");
       router.push("/dashboard");
     } catch (err) {
       toast.error(err.message);
@@ -63,7 +63,7 @@ export default function RegisterPage() {
           <Scale className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-3xl font-bold text-white font-display">
-          LexisPortal
+          LawPortal
         </h1>
         <p className="text-slate-400 text-sm mt-1">
           Create your practice account

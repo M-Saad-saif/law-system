@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const PUBLIC_PATHS = ['/login', '/register'];
+const PUBLIC_PATHS = ['/', '/login', '/register'];
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
@@ -12,7 +12,7 @@ export function middleware(request) {
   if (isApi) return NextResponse.next();
 
   if (isPublic) {
-    if (token) {
+    if (pathname !== '/' && token) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
     return NextResponse.next();

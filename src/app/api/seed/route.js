@@ -16,11 +16,11 @@ async function seedDemoData() {
   try {
     await connectDB();
 
-    await User.deleteMany({ email: "demo@lexisportal.com" });
+    await User.deleteMany({ email: "demo@LawPortal.com" });
 
     const user = await User.create({
       name: "Adv. Sanaullah Khan",
-      email: "demo@lexisportal.com",
+      email: "demo@LawPortal.com",
       password: "Demo@12345",
       role: "admin",
       phone: "+92-300-1234567",
@@ -179,7 +179,7 @@ async function seedDemoData() {
     return NextResponse.json({
       success: true,
       message: "Demo data seeded successfully.",
-      credentials: { email: "demo@lexisportal.com", password: "Demo@12345" },
+      credentials: { email: "demo@LawPortal.com", password: "Demo@12345" },
     });
   } catch (error) {
     return NextResponse.json(

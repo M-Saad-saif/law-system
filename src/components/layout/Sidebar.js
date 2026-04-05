@@ -30,7 +30,7 @@ export default function Sidebar() {
           <Scale className="w-4 h-4 text-white" />
         </div>
         <div>
-          <div className="text-white font-bold text-sm font-display leading-none">LexisPortal</div>
+          <div className="text-white font-bold text-sm font-display leading-none">LawPortal</div>
           <div className="text-slate-500 text-[10px] mt-0.5">Practice Manager</div>
         </div>
       </div>

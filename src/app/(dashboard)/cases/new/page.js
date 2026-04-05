@@ -1,6 +1,6 @@
 import CaseForm from '@/components/cases/CaseForm';
 
-export const metadata = { title: 'New Case — LexisPortal' };
+export const metadata = { title: 'New Case — LawPortal' };
 
 export default function NewCasePage() {
   return (
