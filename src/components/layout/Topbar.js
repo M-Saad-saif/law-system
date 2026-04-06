@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,6 +9,7 @@ import {
   FolderOpen, CalendarDays, BookOpen, Settings, LogOut
 } from 'lucide-react';
 import { cn } from '@/utils/helpers';
+import { api } from '@/utils/api';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -33,8 +34,25 @@ export default function Topbar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [upcomingCount, setUpcomingCount] = useState(0);
 
   const title = Object.entries(pageTitles).find(([path]) => pathname === path || pathname.startsWith(path + '/'))?.[1] || 'LawPortal';
+
+  const fetchUpcomingCount = useCallback(async () => {
+    try {
+      const data = await api.get('/api/reminders?filter=upcoming');
+      const reminders = data?.data?.reminders || [];
+      setUpcomingCount(reminders.length);
+    } catch {
+      setUpcomingCount(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUpcomingCount();
+    const interval = setInterval(fetchUpcomingCount, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [fetchUpcomingCount]);
 
   return (
     <>
@@ -55,6 +73,11 @@ export default function Topbar() {
             className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors relative"
           >
             <Bell className="w-4 h-4" />
+            {upcomingCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+                {upcomingCount > 99 ? '99+' : upcomingCount}
+              </span>
+            )}
           </Link>
           <div className="w-px h-5 bg-slate-200 mx-1" />
           <div className="flex items-center gap-2.5">
