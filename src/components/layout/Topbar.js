@@ -36,6 +36,7 @@ const pageTitles = {
   "/calendar": "Calendar",
   "/books": "Law Books",
   "/reminders": "Reminders",
+  "/intelligencefeed": "Intelligence Feed",
   "/settings": "Settings",
 };
 
