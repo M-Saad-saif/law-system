@@ -185,12 +185,22 @@ export default function IntelligenceFeed() {
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState("");
   const [searchSection, setSearchSection] = useState("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    limit: 4,
+    totalPages: 1,
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ limit: "8" });
+      const params = new URLSearchParams({
+        limit: "4",
+        page: String(page),
+      });
       if (activeFilter === "High") params.set("importance", "High");
       else if (activeFilter) params.set("caseType", activeFilter);
       if (searchSection.trim()) params.set("section", searchSection.trim());
@@ -198,16 +208,23 @@ export default function IntelligenceFeed() {
       const res = await apiFetch(`/api/intelligence?${params.toString()}`);
       if (!res.success) throw new Error(res.message || "Failed to load");
       setAlerts(res.data || []);
+      setPagination(
+        res.pagination || { total: 0, page: 1, limit: 4, totalPages: 1 },
+      );
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }, [activeFilter, searchSection]);
+  }, [activeFilter, searchSection, page]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [activeFilter, searchSection]);
 
   return (
     <div className="flex flex-col gap-5 max-w-6xl mx-auto pb-6 pt-2">
@@ -263,7 +280,7 @@ export default function IntelligenceFeed() {
                 : "border-slate-200 bg-white text-slate-600 hover:border-slate-400 hover:bg-slate-50"
             }`}
           >
-            {f.label} 
+            {f.label}
           </button>
         ))}
       </div>
@@ -292,11 +309,45 @@ export default function IntelligenceFeed() {
             No judgments found for this filter.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {alerts.map((j) => (
-              <JudgmentCard key={j._id} j={j} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {alerts.map((j) => (
+                <JudgmentCard key={j._id} j={j} />
+              ))}
+            </div>
+            
+            <div className="flex items-center justify-between mt-5">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={pagination.page <= 1}
+                className={`text-xs px-4 py-1.5 rounded-full font-semibold ${
+                  pagination.page <= 1
+                    ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                    : "bg-[#103168] text-white hover:bg-[#16418c]"
+                }`}
+              >
+                Prev
+              </button>
+
+              <span className="text-xs text-slate-500">
+                Page {pagination.page} of {pagination.totalPages}
+              </span>
+
+              <button
+                onClick={() =>
+                  setPage((p) => Math.min(pagination.totalPages, p + 1))
+                }
+                disabled={pagination.page >= pagination.totalPages}
+                className={`text-xs px-4 py-1.5 rounded-full font-semibold ${
+                  pagination.page >= pagination.totalPages
+                    ? "bg-slate-200 text-slate-500 cursor-not-allowed"
+                    : "bg-[#103168] text-white hover:bg-[#16418c]"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          </>
         )}
       </div>
     </div>
