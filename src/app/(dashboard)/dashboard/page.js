@@ -10,6 +10,7 @@ import { formatDate, relativeDate } from "@/utils/helpers";
 import { StatCard, StatusBadge, PageLoader, EmptyState } from "@/components/ui";
 import WeeklyOutlook from "@/components/dashboard/Weeklyoutlook";
 import IntelligenceFeed from "@/components/dashboard/IntelligenceFeed";
+import LegalUpdatesTicker from "@/components/dashboard/LegalUpdatesTicker";
 
 import {
   FolderOpen,
@@ -143,6 +144,8 @@ export default function DashboardPage() {
           </Link>
         ))}
       </div>
+
+        <LegalUpdatesTicker/>
 
       {/* Recent Cases Section - Full Width */}
       <div className="card">

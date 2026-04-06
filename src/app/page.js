@@ -1,7 +1,7 @@
-// app/page.js
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   Scale,
   ArrowRight,
@@ -16,6 +16,31 @@ import {
 } from "lucide-react";
 
 export default function LandingPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/me", { credentials: "include" });
+        if (!isMounted) return;
+        setIsLoggedIn(res.ok);
+      } catch {
+        if (!isMounted) return;
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkAuth();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const ctaHref = isLoggedIn ? "/dashboard" : "/register";
+  const ctaLabel = isLoggedIn ? "Dashboard" : "Create account";
+
   return (
     <div className="min-h-screen bg-black overflow-x-hidden">
       {/* ---- glow ---- */}
@@ -42,10 +67,10 @@ export default function LandingPage() {
               Log in
             </Link>
             <Link
-              href="/register"
+              href={ctaHref}
               className="px-5 py-2 text-sm font-medium bg-[#027f7e] text-white rounded-lg hover:bg-[#026a69] transition-all shadow-md shadow-[#027f7e]/20"
             >
-              Create account
+              {ctaLabel}
             </Link>
           </div>
         </div>
@@ -74,10 +99,10 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <Link
-                href="/register"
+                href={ctaHref}
                 className="group px-6 py-3 bg-[#027f7e] text-white font-semibold rounded-lg hover:bg-[#026a69] transition-all shadow-lg shadow-[#027f7e]/25 flex items-center gap-2 "
               >
-                Create account
+                {ctaLabel}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
@@ -85,7 +110,7 @@ export default function LandingPage() {
                 className="group px-6 py-3 border border-gray-700 text-gray-300 font-semibold rounded-lg hover:bg-white/5 transition-all flex items-center gap-2  "
               >
                 See features
-                 <ArrowRight className="w-4 h-4  rotate-90 group-hover:translate-y-1 transition-transform " />
+                <ArrowRight className="w-4 h-4  rotate-90 group-hover:translate-y-1 transition-transform " />
               </Link>
             </div>
             <div className="flex items-center gap-6 pt-6">
@@ -292,10 +317,11 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
-                href="/register"
+                href={ctaHref}
                 className="px-8 py-3 bg-[#027f7e] text-white font-semibold rounded-lg hover:bg-[#026a69] transition-all shadow-lg shadow-[#027f7e]/25 flex items-center gap-2"
               >
-                Get started <ArrowRight className="w-4 h-4" />
+                {isLoggedIn ? "Go to Dashboard" : "Get started"}{" "}
+                <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/login"
@@ -311,12 +337,12 @@ export default function LandingPage() {
       {/* ---- footer ---- */}
       <footer className="relative z-10 border-t border-gray-800/50 py-12">
         <div className="max-w-6xl mx-auto px-6">
-            <div className="flex items-center gap-2  justify-center">
-              <Scale className="w-5 h-5 text-[#027f7e]" />
-              <span className="text-sm text-gray-500 ">
-                © 2026 LawPortal — Legal Practice Management
-              </span>
-            </div>
+          <div className="flex items-center gap-2  justify-center">
+            <Scale className="w-5 h-5 text-[#027f7e]" />
+            <span className="text-sm text-gray-500 ">
+              © 2026 LawPortal — Legal Practice Management
+            </span>
+          </div>
         </div>
       </footer>
     </div>
