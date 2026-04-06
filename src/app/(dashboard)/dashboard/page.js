@@ -9,6 +9,8 @@ import { api } from "@/utils/api";
 import { formatDate, relativeDate } from "@/utils/helpers";
 import { StatCard, StatusBadge, PageLoader, EmptyState } from "@/components/ui";
 import WeeklyOutlook from "@/components/dashboard/Weeklyoutlook";
+import IntelligenceFeed from "@/components/dashboard/IntelligenceFeed";
+
 import {
   FolderOpen,
   CheckCircle,
@@ -145,7 +147,9 @@ export default function DashboardPage() {
       {/* Recent Cases Section - Full Width */}
       <div className="card">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <h3 className="font-bold text-slate-800 font-display">Recent Cases</h3>
+          <h3 className="font-bold text-slate-800 font-display">
+            Recent Cases
+          </h3>
           <Link href="/cases" className="btn-ghost text-xs gap-1">
             View all <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -221,6 +225,10 @@ export default function DashboardPage() {
       {/* Weekly Outlook Section - Full Width Below Recent Cases */}
       <div className="w-full">
         <WeeklyOutlook />
+      </div>
+
+      <div className="bg-white w-full rounded-2xl border border-gray-200 p-4">
+        <IntelligenceFeed />
       </div>
 
       {/* Today's schedule banner */}

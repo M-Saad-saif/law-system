@@ -4,6 +4,7 @@ import User from "@/models/User";
 import Case from "@/models/Case";
 import { Reminder } from "@/models/BookReminder";
 import { addDays, subDays } from "date-fns";
+import { seedIntelligenceFeed } from "./intelligence-seed-snippet";
 
 async function seedDemoData() {
   if (process.env.NODE_ENV === "production") {
@@ -15,6 +16,7 @@ async function seedDemoData() {
 
   try {
     await connectDB();
+    await seedIntelligenceFeed();
 
     await User.deleteMany({ email: "demo@LawPortal.com" });
 

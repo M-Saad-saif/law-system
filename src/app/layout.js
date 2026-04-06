@@ -21,7 +21,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: "LawPortal � Legal Practice Management",
+  title: "LawPortal - Legal Practice Management",
   description: "Professional law firm management system for Pakistani lawyers",
 };
 
