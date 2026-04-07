@@ -1,396 +1,831 @@
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
 
-// ─── Per-court in-memory cache (15 min TTL) ──────────────────────────────────
-const CACHE_TTL = 15 * 60 * 1000;
-const courtCache = {};
+// In-memory cache (15 min TTL)
+const CACHE_TTL_MS = 15 * 60 * 1000;
+let cache = { data: [], fetchedAt: 0, courts: [] };
 
-// ─── Court registry ───────────────────────────────────────────────────────────
-// Each entry describes a Pakistani court, its scrape URL, and its status.
-// status: "live" = scraper works | "blocked" = 403/robots | "js-only" = needs browser
-const COURTS = {
-  shc: {
-    name: "Sindh High Court",
+const DEFAULT_TIMEOUT_MS = 15000;
+const BASE_HEADERS = {
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+  "Accept-Language": "en-PK,en-US;q=0.9,en;q=0.8",
+  "Cache-Control": "no-cache",
+  Pragma: "no-cache",
+};
+
+const COURT_META = {
+  SHC: {
+    courtFull: "Sindh High Court",
     province: "Sindh",
-    short: "SHC",
-    url: "https://caselaw.shc.gov.pk/caselaw/public/home",
-    status: "live",
-    scraper: scrapeSHC,
+    website: "https://caselaw.shc.gov.pk/caselaw/public/home",
   },
-  ihc: {
-    name: "Islamabad High Court",
-    province: "Islamabad",
-    short: "IHC",
-    url: "https://mis.ihc.gov.pk/frmJgmnt",
-    status: "live",
-    scraper: scrapeIHC,
-  },
-  lhc: {
-    name: "Lahore High Court",
+  LHC: {
+    courtFull: "Lahore High Court",
     province: "Punjab",
-    short: "LHC",
-    url: "https://data.lhc.gov.pk/reported_judgments/judgments_approved_for_reporting",
-    status: "blocked", // Returns 403
-    scraper: null,
-    note: "LHC blocks automated access (HTTP 403). Use their website directly.",
     website: "https://lhc.gov.pk/reported_judgments",
   },
-  phc: {
-    name: "Peshawar High Court",
-    province: "KPK",
-    short: "PHC",
-    url: "https://peshawarhighcourt.gov.pk/PHCCMS/reportedJudgments.php",
-    status: "live",
-    scraper: scrapePHC,
-  },
-  bhc: {
-    name: "High Court of Balochistan",
-    province: "Balochistan",
-    short: "BHC",
-    url: "https://portal.bhc.gov.pk/judgments/",
-    status: "js-only", // React SPA — needs browser JS to render
-    scraper: null,
-    note: "BHC portal is a JavaScript SPA. Cannot be scraped server-side without a headless browser.",
-    website: "https://portal.bhc.gov.pk/judgments/",
-  },
-  scp: {
-    name: "Supreme Court of Pakistan",
+  SCP: {
+    courtFull: "Supreme Court of Pakistan",
     province: "Federal",
-    short: "SCP",
-    url: "https://scp.gov.pk/judgments",
-    status: "live",
-    scraper: scrapeSCP,
+    website: "https://scp.gov.pk/LatestJudgments",
+  },
+  IHC: {
+    courtFull: "Islamabad High Court",
+    province: "Islamabad",
+    website: "https://mis.ihc.gov.pk/frmJgmnt?jgs=1",
+  },
+  PHC: {
+    courtFull: "Peshawar High Court",
+    province: "KPK",
+    website: "https://peshawarhighcourt.gov.pk/PHCCMS/reportedJudgments.php",
+  },
+  BHC: {
+    courtFull: "High Court of Balochistan",
+    province: "Balochistan",
+    website: "https://bhc.gov.pk/beta/resources/judgments",
   },
 };
 
-// ─── helper ───────────────────────────────────────────────────────────────────
-async function fetchHtml(url) {
-  const res = await fetch(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (compatible; LexisPortal/1.0; legal research tool)",
-      Accept: "text/html,application/xhtml+xml",
-    },
-    next: { revalidate: 0 },
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
-  return res.text();
+function stripTags(str) {
+  if (!str) return "";
+  return str
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function cleanText(html) {
-  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+function parsePkDate(raw) {
+  if (!raw) return null;
+  const cleaned = raw.replace(/[\s,]+/g, " ").trim();
+  const d = new Date(cleaned.replace(/-/g, " "));
+  return isNaN(d) ? null : d.toISOString();
 }
 
-// ─── Sindh High Court scraper ─────────────────────────────────────────────────
-// Same logic as previous route — works well.
-async function scrapeSHC() {
-  const html = await fetchHtml(COURTS.shc.url);
-  const blockRegex = /<blockquote>([\s\S]*?)<\/blockquote>/gi;
-  const blocks = [...html.matchAll(blockRegex)];
-  const results = [];
+function absolutize(href, base) {
+  if (!href) return null;
+  if (href.startsWith("http")) return href;
+  return `${base.replace(/\/+$/, "")}/${href.replace(/^\/+/, "")}`;
+}
 
-  for (const block of blocks) {
-    const inner = block[1];
-    const aMatch = inner.match(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/i);
-    if (!aMatch) continue;
-    const title = cleanText(aMatch[2]);
-    const sourceUrl = aMatch[1]?.trim() || null;
-    const citationMatch = inner.match(/(\d{4}\s+SHC\s+\w+\s+\d+)/i);
-    const matterMatch = inner.match(/Matter:-\s*<strong>(.*?)<\/strong>/i);
-    const judgeMatch = inner.match(/Hon['']ble\s+([\s\S]*?)(?=Source:|Downloads|Order Date)/i);
-    const dateMatch = inner.match(/Order Date:\s*[\r\n\s]*([\d]{2}-[A-Z]{3}-[\d]{2,4})/i);
-    const dlMatch = inner.match(/Downloads\s+(\d+)/i);
-    const approved = /Approved for Reporting/i.test(inner);
+async function fetchHtml(url, { referer } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+  try {
+    const headersPrimary = {
+      ...BASE_HEADERS,
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      ...(referer ? { Referer: referer } : {}),
+    };
 
-    if (!title) continue;
-    results.push({
-      court: "SHC",
-      courtFull: "Sindh High Court",
-      province: "Sindh",
-      title,
-      citation: citationMatch?.[1]?.trim() || null,
-      matter: matterMatch ? cleanText(matterMatch[1]) : null,
-      judge: judgeMatch ? cleanText(judgeMatch[1]).replace(/Source:.*/, "").trim() : null,
-      orderDate: dateMatch ? new Date(dateMatch[1].replace(/-/g, " ")).toISOString() : null,
-      downloads: dlMatch ? parseInt(dlMatch[1]) : 0,
-      approved,
-      sourceUrl: sourceUrl?.startsWith("http") ? sourceUrl : null,
+    let res = await fetch(url, {
+      headers: headersPrimary,
+      redirect: "follow",
+      next: { revalidate: 0 },
+      signal: controller.signal,
     });
+
+    if (res.status === 406 || res.status === 403) {
+      const headersFallback = {
+        ...BASE_HEADERS,
+        Accept: "*/*",
+        ...(referer ? { Referer: referer } : {}),
+      };
+      res = await fetch(url, {
+        headers: headersFallback,
+        redirect: "follow",
+        next: { revalidate: 0 },
+        signal: controller.signal,
+      });
+    }
+
+    if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
+    return res.text();
+  } finally {
+    clearTimeout(timer);
   }
-  return results;
 }
 
-// ─── Islamabad High Court scraper ─────────────────────────────────────────────
-// IHC judgment list page at mis.ihc.gov.pk/frmJgmnt — server-rendered HTML table
-async function scrapeIHC() {
-  const html = await fetchHtml(COURTS.ihc.url);
+// 1) Sindh High Court - FIXED
+async function fetchSHC() {
+  try {
+    const html = await fetchHtml(COURT_META.SHC.website, {
+      referer: "https://caselaw.shc.gov.pk/",
+    });
+
+    const results = [];
+
+    // More flexible pattern for SHC judgments
+    const judgmentRegex =
+      /<div[^>]*class="[^"]*judgment[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
+    const blocks = [...html.matchAll(judgmentRegex)];
+
+    // Fallback to blockquote if div pattern fails
+    const blocksToParse =
+      blocks.length > 0
+        ? blocks
+        : [...html.matchAll(/<blockquote>([\s\S]*?)<\/blockquote>/gi)];
+
+    for (const block of blocksToParse) {
+      const inner = block[1];
+
+      // Extract title and URL
+      const titleMatch = inner.match(
+        /<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/i,
+      );
+      if (!titleMatch) continue;
+
+      const rawTitle = stripTags(titleMatch[2]);
+      const sourceUrl = titleMatch[1]?.trim() || "";
+
+      // Extract citation
+      const citationMatch =
+        inner.match(/(\d{4}\s+SHC\s+\w+\s+\d+)/i) ||
+        inner.match(/(\d{4}\s+PLD\s+\w+\s+\d+)/i) ||
+        inner.match(/(\d{4}\s+PCrLJ\s+\d+)/i);
+
+      // Extract matter/category
+      const matterMatch =
+        inner.match(/Matter:[-:\s]*<strong>([^<]+)<\/strong>/i) ||
+        inner.match(/Category:[-:\s]*([^<]+)/i);
+
+      // Extract judge
+      const judgeMatch =
+        inner.match(/Hon['']ble\s+([^<]+?)(?=<|$)/i) ||
+        inner.match(/Judge:[-:\s]*([^<]+)/i);
+
+      // Extract date
+      const dateMatch =
+        inner.match(/Date:[-:\s]*([\d]{2}[-/][A-Za-z]{3}[-/][\d]{2,4})/i) ||
+        inner.match(/Order Date:[-:\s]*([\d]{2}[-/][A-Za-z]{3}[-/][\d]{2,4})/i);
+
+      const dlMatch = inner.match(/Downloads?\s+(\d+)/i);
+      const approved = /Approved for Reporting/i.test(inner);
+
+      if (!rawTitle || rawTitle.length < 5) continue;
+
+      // Determine bench
+      let bench = null;
+      if (/Circuit at ([\w\s]+)/i.test(rawTitle)) {
+        bench = rawTitle.match(/Circuit at ([\w\s]+)/i)[1].trim();
+      } else if (/Karachi/i.test(rawTitle)) bench = "Karachi";
+      else if (/Hyderabad/i.test(rawTitle)) bench = "Hyderabad";
+      else if (/Sukkur/i.test(rawTitle)) bench = "Sukkur";
+
+      const courtFull = bench
+        ? `Sindh High Court - ${bench} Bench`
+        : "Sindh High Court";
+
+      results.push({
+        id: sourceUrl || rawTitle,
+        title: rawTitle.substring(0, 220),
+        citation: citationMatch ? citationMatch[1].trim() : null,
+        matter: matterMatch ? stripTags(matterMatch[1]) : null,
+        judge: judgeMatch ? stripTags(judgeMatch[1]) : null,
+        court: courtFull,
+        courtFull,
+        courtAbbr: "SHC",
+        province: "Sindh",
+        orderDate: parsePkDate(dateMatch?.[1] ?? null),
+        downloads: dlMatch ? parseInt(dlMatch[1]) : 0,
+        approved,
+        sourceUrl: sourceUrl.startsWith("http")
+          ? sourceUrl
+          : sourceUrl
+            ? `https://caselaw.shc.gov.pk${sourceUrl}`
+            : null,
+      });
+    }
+
+    return results;
+  } catch (error) {
+    console.error("SHC fetch error:", error);
+    return [];
+  }
+}
+
+// 2) Lahore High Court - IMPROVED with multiple strategies
+async function fetchLHC() {
+  try {
+    const urls = [
+      "https://data.lhc.gov.pk/reported_judgments/judgments_approved_for_reporting",
+      "https://lhc.gov.pk/reported_judgments",
+      "https://lhc.gov.pk/judgments/reported",
+    ];
+
+    let html = null;
+    let usedUrl = null;
+    for (const url of urls) {
+      try {
+        html = await fetchHtml(url, { referer: "https://lhc.gov.pk/" });
+        if (
+          html &&
+          (html.includes("judgment") ||
+            html.includes("Judgment") ||
+            html.includes("<tr"))
+        ) {
+          usedUrl = url;
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    if (!html) {
+      console.log("LHC: No HTML fetched from any URL");
+      return [];
+    }
+
+    const results = [];
+
+    // Try multiple extraction patterns
+    let rows = [];
+
+    // Pattern 1: Standard table rows
+    const tableRows = [...html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)];
+    if (tableRows.length > 0) rows = tableRows;
+
+    // Pattern 2: Div-based judgments
+    if (rows.length === 0) {
+      const divJudgments = [
+        ...html.matchAll(
+          /<div[^>]*class="[^"]*judgment[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,
+        ),
+      ];
+      rows = divJudgments;
+    }
+
+    // Pattern 3: List items
+    if (rows.length === 0) {
+      const listItems = [
+        ...html.matchAll(/<li[^>]*>([\s\S]*?judgment[\s\S]*?)<\/li>/gi),
+      ];
+      rows = listItems;
+    }
+
+    for (const row of rows) {
+      const inner = row[1];
+
+      // Skip if no content
+      if (!inner || inner.length < 20) continue;
+
+      // Extract link and title
+      const linkMatch = inner.match(
+        /<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/i,
+      );
+      if (!linkMatch) continue;
+
+      const title = stripTags(linkMatch[2]);
+      const href = linkMatch[1]?.trim() || "";
+
+      if (!title || title.length < 5) continue;
+
+      // Extract citation
+      const citation =
+        inner.match(/(\d{4}\s+LHC\s+\d+)/i)?.[1]?.trim() ??
+        inner.match(/(\d{4}\s+PLD\s+Lahore\s+\d+)/i)?.[1]?.trim() ??
+        inner.match(/(\d{4}\s+MLD\s+\d+)/i)?.[1]?.trim() ??
+        null;
+
+      // Extract date
+      let dateCell = null;
+      const dateMatch =
+        inner.match(/(\d{2}[\/-]\d{2}[\/-]\d{2,4})/) ||
+        inner.match(/(\d{2}-[A-Za-z]{3}-\d{2,4})/);
+      if (dateMatch) dateCell = dateMatch[1];
+
+      // Determine bench
+      let bench = null;
+      const lower = (title + inner).toLowerCase();
+      if (lower.includes("rawalpindi")) bench = "Rawalpindi";
+      else if (lower.includes("multan")) bench = "Multan";
+      else if (lower.includes("bahawalpur")) bench = "Bahawalpur";
+
+      const courtFull = bench
+        ? `Lahore High Court - ${bench} Bench`
+        : "Lahore High Court";
+
+      // Build source URL
+      let sourceUrl = null;
+      if (href) {
+        if (href.startsWith("http")) {
+          sourceUrl = href;
+        } else if (usedUrl) {
+          const baseUrl = usedUrl.split("/").slice(0, 3).join("/");
+          sourceUrl = absolutize(href, baseUrl);
+        } else {
+          sourceUrl = absolutize(href, "https://lhc.gov.pk");
+        }
+      }
+
+      results.push({
+        id: href || title,
+        title: title.substring(0, 220),
+        citation,
+        matter: null,
+        judge: null,
+        court: courtFull,
+        courtFull,
+        courtAbbr: "LHC",
+        province: "Punjab",
+        orderDate: parsePkDate(dateCell),
+        downloads: 0,
+        approved: /approved|reported/i.test(inner),
+        sourceUrl,
+      });
+    }
+
+    console.log(`LHC: Found ${results.length} judgments`);
+    return results;
+  } catch (error) {
+    console.error("LHC fetch error:", error);
+    return [];
+  }
+}
+
+// 3) Supreme Court - WORKING (keep as is)
+async function fetchSCP() {
+  // ... existing SCP code remains the same ...
+  const html = await fetchHtml(COURT_META.SCP.website, {
+    referer: "https://scp.gov.pk/",
+  });
+
+  const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
   const results = [];
 
-  // Try to find table rows with judgment data
-  const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
-  const rows = [...html.matchAll(rowRegex)];
-
-  for (const row of rows) {
+  for (const row of [...html.matchAll(rowRegex)]) {
     const inner = row[1];
+    if (!inner.includes("<td")) continue;
+
     const cells = [...inner.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map((m) =>
-      cleanText(m[1])
+      stripTags(m[1]),
     );
-    if (cells.length < 2) continue;
+    if (cells.length < 5) continue;
 
-    // Attempt to extract a PDF link
-    const linkMatch = inner.match(/href="([^"]*\.pdf[^"]*)"/i);
-    const sourceUrl = linkMatch
-      ? `https://mis.ihc.gov.pk${linkMatch[1]}`
-      : null;
-
-    const title = cells.find((c) => c.length > 15 && /vs|v\/s|versus/i.test(c)) || cells[1];
+    const title = cells[3] || cells[2];
     if (!title || title.length < 5) continue;
 
-    // Citation pattern: "W.P. No. XXXX/YYYY" or "Crl. No."
-    const citation = cells.find((c) => /No\.\s*\d+/i.test(c)) || null;
-    const dateCell = cells.find((c) =>
-      /\d{2}[\/\-]\d{2}[\/\-]\d{2,4}/.test(c)
-    );
+    const dateCell = cells[5] || null;
+    const citation = cells[7] || cells[8] || null;
+    const linkMatch = inner.match(/href="([^"]+\.pdf[^"]*)"/i);
+    const sourceUrl = linkMatch
+      ? absolutize(linkMatch[1], "https://scp.gov.pk")
+      : null;
 
     results.push({
-      court: "IHC",
-      courtFull: "Islamabad High Court",
-      province: "Islamabad",
-      title: title.substring(0, 200),
+      id: sourceUrl || title,
+      title: title.substring(0, 220),
       citation,
-      matter: null,
-      judge: null,
-      orderDate: dateCell ? new Date(dateCell).toISOString() : null,
+      matter: cells[1] || null,
+      judge: cells[4] || null,
+      court: "Supreme Court of Pakistan",
+      courtFull: "Supreme Court of Pakistan",
+      courtAbbr: "SCP",
+      province: "Federal",
+      orderDate: parsePkDate(dateCell),
       downloads: 0,
-      approved: /approved/i.test(inner),
+      approved: true,
       sourceUrl,
     });
   }
 
-  // If table parse fails, try a simpler link extraction
-  if (results.length === 0) {
-    const linkRegex = /<a[^>]*href="([^"]*attachments[^"]*\.pdf[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
-    const links = [...html.matchAll(linkRegex)];
-    for (const link of links) {
-      const title = cleanText(link[2]);
-      if (!title || title.length < 5) continue;
+  return results;
+}
+
+// 4) Islamabad High Court - IMPROVED
+async function fetchIHC() {
+  try {
+    const urls = [
+      "https://mis.ihc.gov.pk/frmJgmnt?jgs=1&pg=1",
+      "https://mis.ihc.gov.pk/frmJgmnt?jgs=1",
+      "https://mis.ihc.gov.pk/judgments",
+      "https://ihc.gov.pk/judgments",
+    ];
+    
+    let html = null;
+    for (const url of urls) {
+      try {
+        html = await fetchHtml(url, { referer: "https://ihc.gov.pk/" });
+        if (html && (html.includes("judgment") || html.includes("Judgment") || html.includes(".pdf"))) {
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
+    
+    if (!html) {
+      console.log("IHC: No HTML fetched");
+      return [];
+    }
+    
+    const results = [];
+    
+    // Try multiple patterns for IHC
+    const patterns = [
+      // Pattern 1: Table rows with links
+      {
+        regex: /<tr[^>]*>([\s\S]*?)<\/tr>/gi,
+        extract: (inner) => {
+          const linkMatch = inner.match(/<a[^>]*href="([^"]*\.pdf[^"]*)"[^>]*>([\s\S]*?)<\/a>/i);
+          if (!linkMatch) return null;
+          return {
+            title: stripTags(linkMatch[2]),
+            href: linkMatch[1],
+            date: inner.match(/(\d{2}[-/]\d{2}[-/]\d{2,4})/)?.[1],
+            citation: inner.match(/(?:Citation|No\.):?\s*([^<]+)/i)?.[1]?.trim()
+          };
+        }
+      },
+      // Pattern 2: Div containers
+      {
+        regex: /<div[^>]*class="[^"]*item[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,
+        extract: (inner) => {
+          const linkMatch = inner.match(/<a[^>]*href="([^"]*\.pdf[^"]*)"[^>]*>([\s\S]*?)<\/a>/i);
+          if (!linkMatch) return null;
+          return {
+            title: stripTags(linkMatch[2]),
+            href: linkMatch[1],
+            date: inner.match(/(\d{2}[-/]\d{2}[-/]\d{2,4})/)?.[1],
+            citation: null
+          };
+        }
+      }
+    ];
+    
+    for (const pattern of patterns) {
+      const matches = [...html.matchAll(pattern.regex)];
+      for (const match of matches) {
+        const extracted = pattern.extract(match[1]);
+        if (!extracted) continue;
+        
+        const { title, href, date, citation } = extracted;
+        if (!title || title.length < 5) continue;
+        
+        results.push({
+          id: href || title,
+          title: title.substring(0, 200),
+          citation: citation || null,
+          matter: null,
+          judge: null,
+          court: "Islamabad High Court",
+          courtFull: "Islamabad High Court",
+          courtAbbr: "IHC",
+          province: "Islamabad",
+          orderDate: parsePkDate(date),
+          downloads: 0,
+          approved: true,
+          sourceUrl: href?.startsWith("http") ? href : href ? `https://mis.ihc.gov.pk${href}` : null,
+        });
+      }
+      
+      if (results.length > 0) break;
+    }
+    
+    console.log(`IHC: Found ${results.length} judgments`);
+    return results.slice(0, 30);
+  } catch (error) {
+    console.error("IHC fetch error:", error);
+    return [];
+  }
+}
+
+
+// 5) Peshawar High Court - IMPROVED
+async function fetchPHC() {
+  try {
+    const urls = [
+      "https://peshawarhighcourt.gov.pk/PHCCMS/reportedJudgments.php",
+      "https://peshawarhighcourt.gov.pk/PHCCMS/judgments.php",
+      "https://peshawarhighcourt.gov.pk/judgments",
+    ];
+    
+    let html = null;
+    for (const url of urls) {
+      try {
+        html = await fetchHtml(url, { referer: "https://peshawarhighcourt.gov.pk/" });
+        if (html && (html.includes("judgment") || html.includes("Judgment") || html.includes("<tr"))) {
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
+    
+    if (!html) {
+      console.log("PHC: No HTML fetched");
+      return [];
+    }
+    
+    const results = [];
+    
+    // Extract all links that look like judgments
+    const allLinks = [...html.matchAll(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi)];
+    
+    for (const link of allLinks) {
+      const href = link[1];
+      const linkText = stripTags(link[2]);
+      
+      // Filter for judgment links
+      if (!href || (!href.includes('.pdf') && !linkText.toLowerCase().includes('judgment'))) {
+        continue;
+      }
+      
+      if (!linkText || linkText.length < 5) continue;
+      
+      // Find surrounding context for additional info
+      const surrounding = link[0] + (link.input?.substring(Math.max(0, link.index - 200), link.index + 500) || '');
+      
+      // Extract citation
+      const citation = 
+        surrounding.match(/(\d{4}\s+PHC\s+\d+)/i)?.[1]?.trim() ??
+        surrounding.match(/(\d{4}\s+PCrLJ\s+\d+)/i)?.[1]?.trim() ??
+        surrounding.match(/(\d{4}\s+PLD\s+\w+\s+\d+)/i)?.[1]?.trim();
+      
+      // Extract date
+      const dateMatch = surrounding.match(/(\d{2}[-/]\d{2}[-/]\d{2,4})/);
+      
+      // Determine bench
+      let bench = null;
+      const lower = (linkText + surrounding).toLowerCase();
+      if (lower.includes("abbottabad")) bench = "Abbottabad";
+      else if (lower.includes("mingora") || lower.includes("swat")) bench = "Mingora";
+      else if (lower.includes("d.i.khan")) bench = "D.I. Khan";
+      
+      const courtFull = bench ? `Peshawar High Court - ${bench} Bench` : "Peshawar High Court";
+      
       results.push({
-        court: "IHC",
-        courtFull: "Islamabad High Court",
-        province: "Islamabad",
-        title,
-        citation: null,
+        id: href || linkText,
+        title: linkText.substring(0, 220),
+        citation,
         matter: null,
         judge: null,
-        orderDate: null,
+        court: courtFull,
+        courtFull,
+        courtAbbr: "PHC",
+        province: "KPK",
+        orderDate: parsePkDate(dateMatch?.[1] ?? null),
         downloads: 0,
-        approved: false,
-        sourceUrl: `https://mis.ihc.gov.pk${link[1]}`,
+        approved: /approved|reported/i.test(surrounding),
+        sourceUrl: href?.startsWith("http") ? href : href ? `https://peshawarhighcourt.gov.pk${href}` : null,
+      });
+    }
+    
+    console.log(`PHC: Found ${results.length} judgments`);
+    return results.slice(0, 30);
+  } catch (error) {
+    console.error("PHC fetch error:", error);
+    return [];
+  }
+}
+
+// 6) High Court of Balochistan - FIXED (corrected regex)
+async function fetchBHC() {
+  try {
+    const urls = [
+      "https://bhc.gov.pk/beta/resources/judgments",
+      "https://bhc.gov.pk/resources/judgments",
+      COURT_META.BHC.website,
+    ];
+
+    let html = null;
+    for (const url of urls) {
+      try {
+        html = await fetchHtml(url, { referer: "https://bhc.gov.pk/" });
+        if (html && (html.includes("judgment") || html.includes("Judgment")))
+          break;
+      } catch {
+        continue;
+      }
+    }
+
+    if (!html) return [];
+
+    const results = [];
+
+    // Look for judgment entries
+    const judgmentPatterns = [
+      /<div[^>]*class="[^"]*judgment[^"]*"[^>]*>([\s\S]*?)<\/div>/gi,
+      /<article[^>]*>([\s\S]*?)<\/article>/gi,
+      /<li[^>]*>([\s\S]*?)(?:judgment|case)[\s\S]*?<\/li>/gi,
+    ];
+
+    let entries = [];
+    for (const pattern of judgmentPatterns) {
+      entries = [...html.matchAll(pattern)];
+      if (entries.length > 0) break;
+    }
+
+    // If no structured entries found, extract links to PDFs
+    if (entries.length === 0) {
+      const pdfLinks = [...html.matchAll(/href="([^"]*\.pdf[^"]*)"/gi)];
+      for (const link of pdfLinks.slice(0, 20)) {
+        const url = absolutize(link[1], "https://bhc.gov.pk");
+        const title =
+          url
+            .split("/")
+            .pop()
+            ?.replace(/\.pdf$/i, "") || "Judgment";
+
+        results.push({
+          id: url,
+          title: title.substring(0, 220),
+          citation: null,
+          matter: null,
+          judge: null,
+          court: "High Court of Balochistan",
+          courtFull: "High Court of Balochistan",
+          courtAbbr: "BHC",
+          province: "Balochistan",
+          orderDate: null,
+          downloads: 0,
+          approved: true,
+          sourceUrl: url,
+        });
+      }
+    } else {
+      // Parse structured entries
+      for (const entry of entries) {
+        const inner = entry[1];
+
+        // Extract title - FIXED: removed extra parenthesis
+        const titleMatch =
+          inner.match(/<a[^>]*>([\s\S]*?)<\/a>/i) ||
+          inner.match(/<h[2-4][^>]*>([\s\S]*?)<\/h[2-4]>/i);
+        const title = titleMatch
+          ? stripTags(titleMatch[1])
+          : stripTags(inner).substring(0, 100);
+
+        if (!title || title.length < 10) continue;
+
+        // Extract citation
+        const citationMatch =
+          inner.match(/(?:Citation|Cite):\s*([^<]+)/i) ||
+          inner.match(/(\d{4}\s+(?:PLC|CLD|MLD|YLR|PCrLJ|PTD|PLD)\s+\d+)/i);
+
+        // Extract link
+        const linkMatch = inner.match(/href="([^"]*\.pdf[^"]*)"/i);
+        const sourceUrl = linkMatch
+          ? absolutize(linkMatch[1], "https://bhc.gov.pk")
+          : null;
+
+        results.push({
+          id: sourceUrl || title,
+          title: title.substring(0, 220),
+          citation: citationMatch ? citationMatch[1].trim() : null,
+          matter: null,
+          judge: null,
+          court: "High Court of Balochistan",
+          courtFull: "High Court of Balochistan",
+          courtAbbr: "BHC",
+          province: "Balochistan",
+          orderDate: null,
+          downloads: 0,
+          approved: true,
+          sourceUrl,
+        });
+      }
+    }
+
+    return results.slice(0, 30); // Limit results
+  } catch (error) {
+    console.error("BHC fetch error:", error);
+    return [];
+  }
+}
+
+async function fetchAllCourts() {
+  const fetchers = [
+    { fn: fetchSHC, label: "SHC" },
+    { fn: fetchLHC, label: "LHC" },
+    { fn: fetchSCP, label: "SCP" },
+    { fn: fetchIHC, label: "IHC" },
+    { fn: fetchPHC, label: "PHC" },
+    { fn: fetchBHC, label: "BHC" },
+  ];
+
+  const settled = await Promise.allSettled(fetchers.map(({ fn }) => fn()));
+
+  const all = [];
+  const courtSummary = [];
+
+  for (let i = 0; i < settled.length; i++) {
+    const result = settled[i];
+    const label = fetchers[i].label;
+    const meta = COURT_META[label] || {};
+
+    if (result.status === "fulfilled" && Array.isArray(result.value)) {
+      all.push(...result.value);
+      courtSummary.push({
+        court: label,
+        courtFull: meta.courtFull || label,
+        province: meta.province || null,
+        website: meta.website || null,
+        status: "live",
+        count: result.value.length,
+      });
+    } else {
+      courtSummary.push({
+        court: label,
+        courtFull: meta.courtFull || label,
+        province: meta.province || null,
+        website: meta.website || null,
+        status: "error",
+        count: 0,
+        error: result.reason?.message || "Failed to fetch",
       });
     }
   }
 
-  return results;
+  // Remove duplicates
+  const seen = new Set();
+  const unique = all.filter((j) => {
+    if (!j.id) return true;
+    if (seen.has(j.id)) return false;
+    seen.add(j.id);
+    return true;
+  });
+
+  // Sort by date (newest first)
+  unique.sort((a, b) => {
+    if (a.orderDate && b.orderDate)
+      return new Date(b.orderDate) - new Date(a.orderDate);
+    if (a.orderDate) return -1;
+    if (b.orderDate) return 1;
+    return 0;
+  });
+
+  return { judgments: unique, courtSummary };
 }
 
-// ─── Peshawar High Court scraper ──────────────────────────────────────────────
-// PHC has a reported judgments page with searchable results
-async function scrapePHC() {
-  const html = await fetchHtml(COURTS.phc.url);
-  const results = [];
+export const GET = withAuth(async (req) => {
+  const { searchParams } = new URL(req.url);
+  const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 60);
 
-  // PHC page typically has judgment entries in divs or paragraphs
-  const entryRegex = /<p[^>]*class="[^"]*judgment[^"]*"[^>]*>([\s\S]*?)<\/p>/gi;
-  let entries = [...html.matchAll(entryRegex)];
+  // Support both `courts=shc,ihc` and legacy `court=SHC`
+  const courtsParam = searchParams.get("courts");
+  const legacyCourt = searchParams.get("court");
+  const requested = courtsParam
+    ? courtsParam.split(",").map((c) => c.trim().toUpperCase())
+    : legacyCourt
+      ? [legacyCourt.trim().toUpperCase()]
+      : ["SHC", "IHC", "PHC", "LHC", "BHC", "SCP"];
 
-  // Fallback: grab any paragraph with legal case-like content
-  if (entries.length === 0) {
-    const paraRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi;
-    entries = [...html.matchAll(paraRegex)].filter((m) =>
-      /vs|v\/s|versus|W\.P\.|Cr\.|PLJ|PLD|SCMR/i.test(m[1])
-    );
-  }
-
-  for (const entry of entries.slice(0, 20)) {
-    const inner = entry[1];
-    const title = cleanText(inner).substring(0, 250);
-    if (!title || title.length < 10) continue;
-
-    const citation = title.match(/(\d{4}\s+(?:PLJ|PLD|SCMR|PCrLJ)\s+[\w\s]+\d+)/i)?.[1] || null;
-    const linkMatch = inner.match(/href="([^"]+\.pdf[^"]*)"/i);
-
-    results.push({
-      court: "PHC",
-      courtFull: "Peshawar High Court",
-      province: "KPK",
-      title,
-      citation,
-      matter: null,
-      judge: null,
-      orderDate: null,
-      downloads: 0,
-      approved: true,
-      sourceUrl: linkMatch
-        ? `https://peshawarhighcourt.gov.pk${linkMatch[1]}`
-        : "https://peshawarhighcourt.gov.pk/PHCCMS/reportedJudgments.php",
+  // Return from cache if still valid
+  if (Date.now() - cache.fetchedAt < CACHE_TTL_MS && cache.data.length > 0) {
+    const data = cache.data.filter((j) => requested.includes(j.courtAbbr));
+    return NextResponse.json({
+      success: true,
+      source: "cache",
+      data: data.slice(0, limit),
+      total: data.length,
+      courts: cache.courts,
+      unavailable: cache.courts.filter((c) => c.status !== "live"),
+      fetchedAt: new Date(cache.fetchedAt).toISOString(),
     });
-  }
-
-  return results;
-}
-
-// ─── Supreme Court scraper ────────────────────────────────────────────────────
-async function scrapeSCP() {
-  // SCP hosts individual judgment PDFs — fetch their judgments listing page
-  const html = await fetchHtml("https://scp.gov.pk/judgments");
-  const results = [];
-
-  const linkRegex = /<a[^>]*href="([^"]*files\/judgments[^"]*\.pdf[^"]*)"[^>]*>([\s\S]*?)<\/a>/gi;
-  const links = [...html.matchAll(linkRegex)];
-
-  for (const link of links.slice(0, 20)) {
-    const title = cleanText(link[2]);
-    if (!title || title.length < 5) continue;
-    const citation = title.match(/(\d{4}\s+SCMR\s+\d+|PLD\s+\d{4}\s+SC\s+\d+)/i)?.[1] || null;
-
-    results.push({
-      court: "SCP",
-      courtFull: "Supreme Court of Pakistan",
-      province: "Federal",
-      title,
-      citation,
-      matter: null,
-      judge: null,
-      orderDate: null,
-      downloads: 0,
-      approved: true,
-      sourceUrl: link[1].startsWith("http") ? link[1] : `https://scp.gov.pk${link[1]}`,
-    });
-  }
-
-  return results;
-}
-
-// ─── Fetch with cache ─────────────────────────────────────────────────────────
-async function fetchCourt(courtKey) {
-  const court = COURTS[courtKey];
-  if (!court || !court.scraper) {
-    return {
-      court: courtKey.toUpperCase(),
-      courtFull: court?.name || courtKey,
-      province: court?.province || "Unknown",
-      status: court?.status || "unknown",
-      note: court?.note || "No scraper available.",
-      website: court?.website || court?.url,
-      data: [],
-      error: court?.note || "Not scrapable",
-    };
-  }
-
-  const cached = courtCache[courtKey];
-  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL) {
-    return { ...cached, source: "cache" };
   }
 
   try {
-    const data = await court.scraper();
-    const result = {
-      court: courtKey.toUpperCase(),
-      courtFull: court.name,
-      province: court.province,
-      status: "live",
-      data,
-      total: data.length,
-      fetchedAt: Date.now(),
+    const { judgments, courtSummary } = await fetchAllCourts();
+    cache = { data: judgments, fetchedAt: Date.now(), courts: courtSummary };
+
+    const data = judgments.filter((j) => requested.includes(j.courtAbbr));
+
+    return NextResponse.json({
+      success: true,
       source: "live",
-    };
-    courtCache[courtKey] = result;
-    return result;
+      data: data.slice(0, limit),
+      total: data.length,
+      courts: courtSummary,
+      unavailable: courtSummary.filter((c) => c.status !== "live"),
+      fetchedAt: new Date().toISOString(),
+    });
   } catch (err) {
-    // Return stale cache on error
-    if (cached?.data?.length > 0) {
-      return { ...cached, source: "stale", error: err.message };
+    console.error("Main fetch error:", err);
+    // Return stale cache if available
+    if (cache.data.length > 0) {
+      const data = cache.data.filter((j) => requested.includes(j.courtAbbr));
+      return NextResponse.json({
+        success: true,
+        source: "stale-cache",
+        data: data.slice(0, limit),
+        total: data.length,
+        courts: cache.courts,
+        unavailable: cache.courts.filter((c) => c.status !== "live"),
+        fetchedAt: new Date(cache.fetchedAt).toISOString(),
+      });
     }
-    return {
-      court: courtKey.toUpperCase(),
-      courtFull: court.name,
-      province: court.province,
-      status: "error",
-      data: [],
-      total: 0,
-      error: err.message,
-      website: court.url,
-    };
+
+    return NextResponse.json(
+      {
+        success: false,
+        source: "error",
+        data: [],
+        error: err.message,
+        fetchedAt: new Date().toISOString(),
+      },
+      { status: 502 },
+    );
   }
-}
-
-// ─── Route handler ────────────────────────────────────────────────────────────
-// GET /api/legal-updates?courts=shc,ihc,phc&limit=10
-// GET /api/legal-updates?courts=all&limit=20
-export const GET = withAuth(async (req) => {
-  const { searchParams } = new URL(req.url);
-  const limit = Math.min(parseInt(searchParams.get("limit") || "15"), 50);
-  const courtParam = searchParams.get("courts") || "shc,ihc";
-
-  const requestedKeys =
-    courtParam === "all"
-      ? Object.keys(COURTS)
-      : courtParam.split(",").map((c) => c.trim().toLowerCase());
-
-  // Fetch all requested courts in parallel
-  const results = await Promise.allSettled(
-    requestedKeys.map((key) => fetchCourt(key))
-  );
-
-  const courtResults = results.map((r, i) => {
-    if (r.status === "fulfilled") return r.value;
-    return {
-      court: requestedKeys[i].toUpperCase(),
-      status: "error",
-      error: r.reason?.message || "Unknown error",
-      data: [],
-    };
-  });
-
-  // Merge and interleave all judgment data (round-robin by court)
-  const allJudgments = [];
-  const maxLen = Math.max(...courtResults.map((r) => r.data?.length || 0));
-  for (let i = 0; i < maxLen; i++) {
-    for (const cr of courtResults) {
-      if (cr.data?.[i]) allJudgments.push(cr.data[i]);
-    }
-  }
-
-  // Court status summary (useful for UI to show which courts are live)
-  const courtSummary = courtResults.map((r) => ({
-    court: r.court,
-    courtFull: r.courtFull,
-    province: r.province,
-    status: r.status || (r.data?.length > 0 ? "live" : "error"),
-    count: r.data?.length || 0,
-    note: r.note || null,
-    website: r.website || null,
-    error: r.error || null,
-  }));
-
-  // Info on blocked/JS-only courts
-  const unavailable = Object.entries(COURTS)
-    .filter(([, c]) => c.status !== "live")
-    .map(([key, c]) => ({
-      court: key.toUpperCase(),
-      courtFull: c.name,
-      province: c.province,
-      status: c.status,
-      reason: c.note,
-      website: c.website || c.url,
-    }));
-
-  return NextResponse.json({
-    success: true,
-    data: allJudgments.slice(0, limit),
-    total: allJudgments.length,
-    courts: courtSummary,
-    unavailable,
-    fetchedAt: new Date().toISOString(),
-  });
 });

@@ -3,48 +3,74 @@
 import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@/utils/api";
 
-// ── court config for UI ───────────────────────────────────────────────────────
-const COURT_COLORS = {
-  SHC: { bg: "#E6F1FB", text: "#185FA5", dot: "#378ADD" },  // blue — Sindh
-  LHC: { bg: "#EAF3DE", text: "#3B6D11", dot: "#639922" },  // green — Punjab
-  IHC: { bg: "#FAEEDA", text: "#854F0B", dot: "#EF9F27" },  // amber — Islamabad
-  PHC: { bg: "#FAECE7", text: "#993C1D", dot: "#D85A30" },  // coral — KPK
-  BHC: { bg: "#EEEDFE", text: "#3C3489", dot: "#7F77DD" },  // purple — Balochistan
-  SCP: { bg: "#FCEBEB", text: "#A32D2D", dot: "#E24B4A" },  // red — Supreme Court
+// --─ Court metadata ---
+const COURTS = {
+  ALL: { label: "All Courts", color: "#6366f1", bg: "#eef2ff" },
+  SCP: { label: "Supreme Court", color: "#7c3aed", bg: "#f5f3ff" },
+  LHC: { label: "Lahore High Court", color: "#0369a1", bg: "#e0f2fe" },
+  SHC: { label: "Sindh High Court", color: "#0f766e", bg: "#ccfbf1" },
+  IHC: { label: "Islamabad High Court", color: "#b45309", bg: "#fef3c7" },
+  PHC: { label: "Peshawar High Court", color: "#be185d", bg: "#fce7f3" },
+  BHC: { label: "Balochistan HC", color: "#7c2d12", bg: "#ffedd5" },
 };
 
-const ALL_COURTS = [
-  { key: "shc", label: "SHC", full: "Sindh High Court", province: "Sindh" },
-  { key: "ihc", label: "IHC", full: "Islamabad High Court", province: "Islamabad" },
-  { key: "phc", label: "PHC", full: "Peshawar High Court", province: "KPK" },
-  { key: "scp", label: "SCP", full: "Supreme Court", province: "Federal" },
-  // These two are noted as unavailable but shown greyed out:
-  { key: "lhc", label: "LHC", full: "Lahore High Court", province: "Punjab", unavailable: true },
-  { key: "bhc", label: "BHC", full: "High Court Balochistan", province: "Balochistan", unavailable: true },
-];
+// Matter badge colours (same palette as before, extended)
+const MATTER_COLORS = {
+  default: { bg: "#f1f5f9", text: "#475569" },
+  SERVICE: { bg: "#e0f2fe", text: "#0369a1" },
+  CRIMINAL: { bg: "#fce7f3", text: "#be185d" },
+  CIVIL: { bg: "#f0fdf4", text: "#15803d" },
+  CONSTITUTION: { bg: "#f5f3ff", text: "#6d28d9" },
+  TAX: { bg: "#fef9c3", text: "#854d0e" },
+  FAMILY: { bg: "#fff7ed", text: "#c2410c" },
+  LABOUR: { bg: "#f0fdf4", text: "#166534" },
+};
+
+function matterColor(matter) {
+  if (!matter) return MATTER_COLORS.default;
+  const key = Object.keys(MATTER_COLORS).find((k) =>
+    matter.toUpperCase().includes(k),
+  );
+  return MATTER_COLORS[key] || MATTER_COLORS.default;
+}
 
 function formatDate(iso) {
   if (!iso) return "";
   return new Date(iso).toLocaleDateString("en-PK", {
-    day: "numeric", month: "short", year: "numeric",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 }
 
-// ── ticker item ───────────────────────────────────────────────────────────────
+// --─ Court badge pill --------------------------------------------------------─
+function CourtBadge({ abbr, small = false }) {
+  const meta = COURTS[abbr] || COURTS.ALL;
+  return (
+    <span
+      className={`font-bold rounded-full ${small ? "text-[9px] px-1.5 py-0.5" : "text-[10px] px-2 py-0.5"}`}
+      style={{ background: meta.bg, color: meta.color }}
+    >
+      {abbr}
+    </span>
+  );
+}
+
+// --─ Single item in the scrolling ticker strip --------------------------------
 function TickerItem({ j }) {
-  const colors = COURT_COLORS[j.court] || COURT_COLORS.SHC;
+  const mc = matterColor(j.matter);
   return (
     <span className="inline-flex items-center gap-2.5 px-1 whitespace-nowrap">
-      <span
-        className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-        style={{ background: colors.bg, color: colors.text }}
-      >
-        {j.court}
-      </span>
+      <CourtBadge abbr={j.courtAbbr} small />
       {j.matter && (
-        <span className="text-[10px] text-slate-400 font-medium">[{j.matter}]</span>
+        <span
+          className="text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+          style={{ background: mc.bg, color: mc.text }}
+        >
+          {j.matter}
+        </span>
       )}
-      <span className="text-[13px] text-slate-700 font-medium max-w-[380px] truncate">
+      <span className="text-[13px] text-slate-700 font-medium max-w-[340px] truncate">
         {j.title}
       </span>
       {j.citation && (
@@ -53,7 +79,9 @@ function TickerItem({ j }) {
         </span>
       )}
       {j.orderDate && (
-        <span className="text-[11px] text-slate-400">{formatDate(j.orderDate)}</span>
+        <span className="text-[11px] text-slate-400">
+          {formatDate(j.orderDate)}
+        </span>
       )}
       {j.sourceUrl && (
         <a
@@ -66,28 +94,32 @@ function TickerItem({ j }) {
           View
         </a>
       )}
-      <span className="text-slate-200 mx-1 select-none">◆</span>
+      <span className="text-slate-200 mx-2 select-none">◆</span>
     </span>
   );
 }
 
-// ── judgment row for expanded view ───────────────────────────────────────────
+// --─ Expanded row ------------------------------------------------------------─
 function JudgmentRow({ j, idx }) {
-  const colors = COURT_COLORS[j.court] || COURT_COLORS.SHC;
+  const mc = matterColor(j.matter);
   return (
-    <div className="flex items-start gap-3 py-3 border-b border-slate-50 last:border-0 group">
-      <span className="text-[10px] text-slate-300 font-mono mt-1 min-w-[20px]">{idx + 1}</span>
+    <div className="flex items-start gap-3 py-3 border-b border-slate-100 last:border-0 group">
+      <span className="text-xs text-slate-300 font-mono mt-0.5 min-w-[22px] text-right">
+        {idx + 1}
+      </span>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <span
-            className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-            style={{ background: colors.bg, color: colors.text }}
-          >
-            {j.court}
-          </span>
-          <span className="text-[10px] text-slate-400">{j.province}</span>
+        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+          <CourtBadge abbr={j.courtAbbr} />
+          {j.approved && (
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">
+              ✓ Approved
+            </span>
+          )}
           {j.matter && (
-            <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+            <span
+              className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+              style={{ background: mc.bg, color: mc.text }}
+            >
               {j.matter}
             </span>
           )}
@@ -96,22 +128,24 @@ function JudgmentRow({ j, idx }) {
               {j.citation}
             </span>
           )}
-          {j.approved && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">
-              Approved
-            </span>
-          )}
         </div>
         <p className="text-sm font-medium text-slate-800 leading-snug line-clamp-2 group-hover:text-indigo-700 transition-colors">
           {j.title}
         </p>
         <div className="flex items-center gap-3 mt-1 flex-wrap">
-          <span className="text-xs text-slate-400">{j.courtFull}</span>
+          <span className="text-xs text-slate-500">{j.court}</span>
           {j.judge && (
-            <span className="text-xs text-slate-400 truncate max-w-[180px]">{j.judge}</span>
+            <span className="text-xs text-slate-400 truncate max-w-[200px]">
+              {j.judge}
+            </span>
           )}
           {j.orderDate && (
-            <span className="text-xs text-slate-400">{formatDate(j.orderDate)}</span>
+            <span className="text-xs text-slate-400">
+              {formatDate(j.orderDate)}
+            </span>
+          )}
+          {j.downloads > 0 && (
+            <span className="text-xs text-slate-400">{j.downloads} ↓</span>
           )}
         </div>
       </div>
@@ -120,172 +154,157 @@ function JudgmentRow({ j, idx }) {
           href={j.sourceUrl}
           target="_blank"
           rel="noreferrer"
-          className="text-xs text-indigo-600 hover:text-indigo-800 font-medium shrink-0 border border-indigo-100 rounded-lg px-2.5 py-1 hover:bg-indigo-50 transition-colors no-underline mt-0.5"
+          className="text-xs text-indigo-600 hover:text-indigo-800 font-medium shrink-0 mt-0.5 border border-indigo-100 rounded-lg px-2.5 py-1 hover:bg-indigo-50 transition-colors no-underline"
         >
-          PDF
+          View
         </a>
       )}
     </div>
   );
 }
 
-// ── court status pill ─────────────────────────────────────────────────────────
-function CourtPill({ court, stats, selected, onClick }) {
-  const colors = COURT_COLORS[court.label] || COURT_COLORS.SHC;
-  const isUnavailable = court.unavailable;
-  const stat = stats?.[court.label];
-
+// --─ Court filter tabs --------------------------------------------------------
+function CourtTabs({ active, onChange, counts }) {
   return (
-    <button
-      onClick={() => !isUnavailable && onClick(court.key)}
-      disabled={isUnavailable}
-      title={isUnavailable ? `${court.full} — not available for live scraping` : court.full}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border
-        ${isUnavailable
-          ? "opacity-40 cursor-not-allowed border-slate-200 text-slate-400 bg-white"
-          : selected
-          ? "shadow-sm border-transparent"
-          : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-        }`}
-      style={selected && !isUnavailable ? { background: colors.bg, color: colors.text, borderColor: colors.dot } : {}}
-    >
-      <span
-        className="w-1.5 h-1.5 rounded-full"
-        style={{ background: isUnavailable ? "#cbd5e1" : colors.dot }}
-      />
-      {court.label}
-      {stat?.count > 0 && !isUnavailable && (
-        <span className="ml-0.5 opacity-70">({stat.count})</span>
-      )}
-      {isUnavailable && <span className="ml-0.5 text-[9px]">🔒</span>}
-    </button>
+    <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+      {Object.entries(COURTS).map(([abbr, meta]) => {
+        const count = abbr === "ALL" ? counts.total : (counts[abbr] ?? 0);
+        const isActive = active === abbr;
+        return (
+          <button
+            key={abbr}
+            onClick={() => onChange(abbr)}
+            className={`whitespace-nowrap text-[11px] font-semibold px-2.5 py-1 rounded-full transition-all border ${
+              isActive
+                ? "border-transparent text-white shadow-sm"
+                : "border-slate-200 text-slate-500 hover:border-slate-300 bg-white"
+            }`}
+            style={
+              isActive
+                ? { background: meta.color, borderColor: meta.color }
+                : {}
+            }
+          >
+            {abbr === "ALL" ? "All" : abbr}
+            {count > 0 && (
+              <span
+                className={`ml-1 text-[9px] ${isActive ? "opacity-80" : "text-slate-400"}`}
+              >
+                {count}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
-// ── main component ────────────────────────────────────────────────────────────
+// --─ Main component ----------------------------------------------------------─
 export default function LegalUpdatesTicker() {
-  const [judgments, setJudgments] = useState([]);
-  const [courtStats, setCourtStats] = useState({});
-  const [unavailable, setUnavailable] = useState([]);
+  const [allJudgments, setAllJudgments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState(false);
   const [paused, setPaused] = useState(false);
   const [fetchedAt, setFetchedAt] = useState(null);
-  const [selectedCourts, setSelectedCourts] = useState(["shc", "ihc", "phc", "scp"]);
-  const [showUnavailableInfo, setShowUnavailableInfo] = useState(false);
+  const [source, setSource] = useState(null);
+  const [activeTab, setActiveTab] = useState("ALL");
 
-  const load = async (courts) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const courtParam = courts.join(",");
-      const res = await apiFetch(`/api/legal-updates?courts=${courtParam}&limit=30`);
-      if (!res.success) throw new Error(res.error || "Failed");
-      setJudgments(res.data || []);
-      setFetchedAt(res.fetchedAt);
-      setUnavailable(res.unavailable || []);
-      // Build court stats map
-      const statsMap = {};
-      (res.courts || []).forEach((c) => { statsMap[c.court] = c; });
-      setCourtStats(statsMap);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  // Fetch
+  useEffect(() => {
+    async function load() {
+      try {
+        setLoading(true);
+        const res = await apiFetch("/api/legal-updates?limit=60");
+        if (!res.success)
+          throw new Error(res.error || "Failed to fetch legal updates");
+        setAllJudgments(res.data || []);
+        setFetchedAt(res.fetchedAt);
+        setSource(res.source);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    load();
+  }, []);
 
-  useEffect(() => { load(selectedCourts); }, []);
+  // Filtered view
+  const filtered =
+    activeTab === "ALL"
+      ? allJudgments
+      : allJudgments.filter((j) => j.courtAbbr === activeTab);
 
-  const toggleCourt = (key) => {
-    const label = key.toUpperCase();
-    const next = selectedCourts.includes(key)
-      ? selectedCourts.filter((k) => k !== key)
-      : [...selectedCourts, key];
-    if (next.length === 0) return; // always keep at least one
-    setSelectedCourts(next);
-    load(next);
-  };
+  // Count per court for tabs
+  const counts = { total: allJudgments.length };
+  for (const j of allJudgments) {
+    counts[j.courtAbbr] = (counts[j.courtAbbr] || 0) + 1;
+  }
 
-  const tickerContent = [...judgments, ...judgments];
-  const liveCount = Object.values(courtStats).filter((c) => c.status === "live" && c.count > 0).length;
+  // Ticker content (doubled for seamless loop)
+  const tickerContent = [...filtered, ...filtered];
+
+  // Ticker speed: longer content = faster scroll so items don't linger
+  const tickerDuration = Math.max(25, Math.min(60, filtered.length * 3));
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-
-      {/* ── header ── */}
-      <div className="px-4 pt-3.5 pb-2 border-b border-slate-100">
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-2.5">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+      {/* -- Header bar -- */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50/60 gap-3 flex-wrap">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {/* Live pulse */}
+          <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+          </span>
+          <span className="text-sm font-semibold text-slate-800 whitespace-nowrap">
+            Legal Updates
+          </span>
+          <span className="text-[11px] text-slate-400 font-medium whitespace-nowrap hidden sm:block">
+            Pakistani Courts — Live
+          </span>
+          {source === "stale-cache" && (
+            <span className="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+              Cached
             </span>
-            <span className="text-sm font-semibold text-slate-800">Legal Updates</span>
-            <span className="text-[11px] text-slate-400">
-              Pakistan Courts — {liveCount} court{liveCount !== 1 ? "s" : ""} live
+          )}
+          {source === "error" && (
+            <span className="text-[10px] text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+              Offline
             </span>
-          </div>
-          <div className="flex items-center gap-2">
-            {fetchedAt && (
-              <span className="text-[10px] text-slate-400 hidden sm:block">
-                {new Date(fetchedAt).toLocaleTimeString("en-PK", { hour: "2-digit", minute: "2-digit" })}
-              </span>
-            )}
-            <button
-              onClick={() => setExpanded((v) => !v)}
-              className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-2.5 py-1 rounded-lg hover:bg-indigo-50 transition-colors"
-            >
-              {expanded ? "Collapse ↑" : "View all →"}
-            </button>
-          </div>
-        </div>
-
-        {/* Court selector pills */}
-        <div className="flex items-center gap-1.5 flex-wrap pb-1">
-          {ALL_COURTS.map((court) => (
-            <CourtPill
-              key={court.key}
-              court={court}
-              stats={courtStats}
-              selected={selectedCourts.includes(court.key)}
-              onClick={toggleCourt}
-            />
-          ))}
-          {unavailable.length > 0 && (
-            <button
-              onClick={() => setShowUnavailableInfo((v) => !v)}
-              className="text-[10px] text-slate-400 hover:text-slate-600 underline ml-1"
-            >
-              Why are some greyed out?
-            </button>
           )}
         </div>
 
-        {/* Unavailable info box */}
-        {showUnavailableInfo && unavailable.length > 0 && (
-          <div className="mt-2 p-3 bg-amber-50 rounded-xl border border-amber-100 text-xs text-amber-800">
-            <p className="font-semibold mb-1">Courts not available for live scraping:</p>
-            {unavailable.map((c) => (
-              <div key={c.court} className="mb-1">
-                <span className="font-medium">{c.court} ({c.courtFull}):</span>{" "}
-                {c.reason}{" "}
-                {c.website && (
-                  <a href={c.website} target="_blank" rel="noreferrer" className="text-indigo-600 underline">
-                    Visit website →
-                  </a>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {fetchedAt && (
+            <span className="text-[10px] text-slate-400 hidden md:block">
+              Updated{" "}
+              {new Date(fetchedAt).toLocaleTimeString("en-PK", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          )}
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-2.5 py-1 rounded-lg hover:bg-indigo-50 transition-colors border border-transparent hover:border-indigo-100 whitespace-nowrap"
+          >
+            {expanded ? "Collapse ↑" : "View all →"}
+          </button>
+        </div>
       </div>
 
-      {/* ── ticker strip ── */}
+      {/* -- Court filter tabs (always visible) -- */}
+      <div className="px-4 py-2 border-b border-slate-50 bg-white">
+        <CourtTabs active={activeTab} onChange={setActiveTab} counts={counts} />
+      </div>
+
+      {/* -- Ticker strip -- */}
       {!expanded && (
         <div
-          className="relative overflow-hidden"
+          className="relative overflow-hidden border-b border-slate-50"
           style={{ height: "40px" }}
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
@@ -293,78 +312,104 @@ export default function LegalUpdatesTicker() {
           {loading ? (
             <div className="flex items-center h-full px-4 gap-2">
               <div className="w-4 h-4 border-2 border-slate-200 border-t-indigo-500 rounded-full animate-spin" />
-              <span className="text-xs text-slate-400">Loading from Pakistani courts…</span>
+              <span className="text-xs text-slate-400">
+                Fetching judgments from all Pakistani courts…
+              </span>
             </div>
           ) : error ? (
             <div className="flex items-center h-full px-4">
               <span className="text-xs text-red-500">{error}</span>
             </div>
-          ) : judgments.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <div className="flex items-center h-full px-4">
-              <span className="text-xs text-slate-400">No judgments found for selected courts.</span>
+              <span className="text-xs text-slate-400">
+                No judgments found.
+              </span>
             </div>
           ) : (
             <div
               className="flex items-center h-full"
               style={{
-                animation: paused ? "none" : "legalTicker 70s linear infinite",
+                animation: `legalTicker ${tickerDuration}s linear infinite`,
+                animationPlayState: paused ? "paused" : "running",
                 whiteSpace: "nowrap",
               }}
             >
               {tickerContent.map((j, i) => (
-                <TickerItem key={`${j.title}-${i}`} j={j} />
+                <TickerItem key={`${j.id}-${i}`} j={j} />
               ))}
             </div>
           )}
+          {/* Fade edges */}
           <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-white to-transparent z-10" />
           <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent z-10" />
         </div>
       )}
 
-      {/* ── expanded list ── */}
+      {/* -- Expanded list -- */}
       {expanded && (
         <div className="px-4 py-2 max-h-[460px] overflow-y-auto">
           {loading ? (
-            <div className="py-8 text-center text-sm text-slate-400">Loading…</div>
+            <div className="py-8 text-center text-sm text-slate-400">
+              Loading…
+            </div>
           ) : error ? (
             <div className="py-8 text-center text-sm text-red-500">{error}</div>
-          ) : judgments.length === 0 ? (
-            <div className="py-8 text-center text-sm text-slate-400">No judgments found.</div>
+          ) : filtered.length === 0 ? (
+            <div className="py-8 text-center text-sm text-slate-400">
+              No judgments found for {COURTS[activeTab]?.label}.
+            </div>
           ) : (
-            judgments.map((j, i) => <JudgmentRow key={`${j.title}-${i}`} j={j} idx={i} />)
-          )}
-          {/* Court source links */}
-          <div className="py-4 border-t border-slate-50 mt-2">
-            <p className="text-[11px] text-slate-400 font-medium mb-2">Direct links to court websites:</p>
-            <div className="flex flex-wrap gap-2">
-              {ALL_COURTS.map((c) => (
-                <a
-                  key={c.key}
-                  href={
-                    c.key === "shc" ? "https://caselaw.shc.gov.pk/caselaw/public/home"
-                    : c.key === "ihc" ? "https://mis.ihc.gov.pk/frmJgmnt"
-                    : c.key === "phc" ? "https://peshawarhighcourt.gov.pk/PHCCMS/reportedJudgments.php"
-                    : c.key === "lhc" ? "https://lhc.gov.pk/reported_judgments"
-                    : c.key === "bhc" ? "https://portal.bhc.gov.pk/judgments/"
-                    : "https://scp.gov.pk/judgments"
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-[11px] text-indigo-600 hover:text-indigo-800 font-medium no-underline border border-indigo-100 px-2 py-1 rounded-lg hover:bg-indigo-50 transition-colors"
-                >
-                  {c.label} ↗
-                </a>
+            <div>
+              {filtered.map((j, i) => (
+                <JudgmentRow key={j.id || i} j={j} idx={i} />
               ))}
             </div>
-          </div>
+          )}
+
+          {/* Footer links per court */}
+          {!loading && filtered.length > 0 && (
+            <div className="py-3 flex flex-wrap justify-center gap-x-4 gap-y-1">
+              {(activeTab === "ALL"
+                ? Object.keys(COURTS).filter(
+                    (k) => k !== "ALL" && counts[k] > 0,
+                  )
+                : [activeTab]
+              ).map((abbr) => {
+                const urls = {
+                  SCP: "https://www.supremecourt.gov.pk/category/judgements/",
+                  LHC: "https://lhc.gov.pk/reported_judgments",
+                  SHC: "https://caselaw.shc.gov.pk/caselaw/public/home",
+                  IHC: "https://ihc.gov.pk",
+                  PHC: "https://www.peshawarhighcourt.gov.pk/PHCCMS/reportedJudgments.php",
+                  BHC: "https://bhc.gov.pk/resources/judgments",
+                };
+                return (
+                  <a
+                    key={abbr}
+                    href={urls[abbr]}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] text-indigo-600 hover:text-indigo-800 font-medium no-underline"
+                    style={{ color: COURTS[abbr].color }}
+                  >
+                    {abbr} website →
+                  </a>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
+      {/* -- Ticker keyframe -- */}
       <style>{`
         @keyframes legalTicker {
-          0% { transform: translateX(0); }
+          0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );
