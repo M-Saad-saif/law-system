@@ -11,8 +11,6 @@ import {
   Bell,
   Shield,
   Users,
-  Clock,
-  CheckCircle,
 } from "lucide-react";
 
 export default function LandingPage() {
