@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import JudgementForm from "@/components/judgement-image/JudgementForm";
 import JudgementCard from "@/components/judgement-image/JudgementCard";
 

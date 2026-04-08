@@ -3,17 +3,11 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import JudgementImage from "@/models/JudgementImage";
 import connectDB from "@/lib/db";
-import { getToken } from "next-auth/jwt";
+import { withAuth } from "@/lib/api";
 
-export async function POST(request) {
+export const POST = withAuth(async (request, context, user) => {
   try {
     await connectDB();
-
-    // Get user from session
-    const token = await getToken({ req: request });
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const formData = await request.formData();
     const imageFile = formData.get("image");
@@ -49,7 +43,7 @@ export async function POST(request) {
     // Save to database
     const imageUrl = `/uploads/judgement-images/${filename}`;
     const judgementImage = await JudgementImage.create({
-      userId: token.sub,
+      userId: user.id,
       imageUrl,
       inputData,
       templateVersion: "v1",
@@ -67,21 +61,16 @@ export async function POST(request) {
     console.error("Image upload error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+});
 
-export async function GET(request) {
+export const GET = withAuth(async (request, context, user) => {
   try {
     await connectDB();
-
-    const token = await getToken({ req: request });
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "10");
 
-    const images = await JudgementImage.find({ userId: token.sub })
+    const images = await JudgementImage.find({ userId: user.id })
       .sort({ createdAt: -1 })
       .limit(limit);
 
@@ -90,4 +79,4 @@ export async function GET(request) {
     console.error("Fetch images error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+});
