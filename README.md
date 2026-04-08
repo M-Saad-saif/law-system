@@ -1,39 +1,77 @@
-# LawPortal — Legal Practice Management System
+# Lexis Portal — Legal Practice Management System
 
-A production-ready law firm management portal built for Pakistani lawyers with Next.js 14, MongoDB, and Tailwind CSS.
+A production-ready law firm management portal built for Pakistani legal professionals. Streamlines case management, hearings, document library, reminders, and automated judgement image generation.
 
----
+**Live Demo Credentials (after seeding):**
 
-## Features
-
-- **Dashboard** — Stats overview (total, active, today's, tomorrow's hearings), recent cases table, quick actions
-- **Case Management** — Full CRUD with case details, provisions, counsel info, FIR number, hearing dates
-- **Case Detail View** — Tabbed interface: Overview, Proceedings timeline, Accused/Bail info, Citations, Quick Notes
-- **Calendar** — Monthly calendar highlighting hearing/proceeding dates, upcoming events sidebar, day-click modal
-- **Law Books** — PDF upload library with drag & drop, inline iframe viewer, search
-- **Reminders** — Priority-based reminders with upcoming/overdue/completed filters
-- **Settings** — Profile management, demo data seeder
-- **Authentication** — JWT via httpOnly cookies, middleware-protected routes
+- Email: `demo@LawPortal.com`
+- Password: `Demo@12345`
 
 ---
 
-## Tech Stack
+## 📌 Table of Contents
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 14 (App Router) |
-| Language | JavaScript (ES Modules) |
-| Database | MongoDB via Mongoose |
-| Auth | JWT + bcryptjs |
-| Styling | Tailwind CSS |
-| Fonts | Playfair Display + DM Sans |
-| Toasts | react-hot-toast |
-| File Upload | Native FormData + fs/promises |
-| Date Utils | date-fns |
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Setup & Installation](#-setup--installation)
+- [Demo Data](#-demo-data)
+- [Database Schema](#-database-schema)
+- [API Reference](#-api-reference)
+- [Production Deployment](#-production-deployment)
+- [Recent Updates](#-recent-updates)
+- [Roadmap](#-roadmap)
+- [Contributors](#-contributors)
 
 ---
 
-## Project Structure
+## ✨ Features
+
+### Core Legal Practice Tools
+
+| Module                | Description                                                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Dashboard**         | Real-time stats overview (total/active cases, today's/tomorrow's hearings), recent cases table, quick action shortcuts |
+| **Case Management**   | Full CRUD operations with case details, PPC provisions, counsel info, FIR number, hearing dates, status tracking       |
+| **Case Detail View**  | Tabbed interface: Overview, Proceedings Timeline, Accused/Bail Info, Citations, Quick Notes                            |
+| **Calendar**          | Monthly calendar with hearing/proceeding date highlighting, upcoming events sidebar, day-click modal for details       |
+| **Law Books Library** | PDF upload with drag & drop, inline iframe viewer, search functionality, file metadata storage                         |
+| **Reminders**         | Priority-based reminders (High/Medium/Low) with filters: Upcoming, Overdue, Completed                                  |
+| **Authentication**    | JWT stored in httpOnly cookies, middleware-protected routes, role-based access (Admin/Lawyer/Associate)                |
+
+### Advanced Legal Tech (Recently Added)
+
+| Module                             | Description                                                                                                                                                                                                              |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Auto Judgement Image Generator** | Branded, formatted images for legal judgements. Input case details → automatically generates shareable JPG/PNG with firm logo, color scheme, and professional typography. Perfect for social media and client reporting. |
+
+### Coming Soon (In Development)
+
+- 🤖 **AI Judgement Extractor** – 7-section structured summary from raw judgement text
+- 📚 **Saved Judgements Library** – Curated repository with tags, notes, and "Most Important" flags
+- ✍️ **Cross-Examination Q&A Review Module** – Collaborative drafting with senior approval workflow
+- 📄 **Automatic Application Generator** – Bail, adjournment, exemption applications pre-filled from case data
+
+---
+
+## 🛠 Tech Stack
+
+| Layer                | Technology                        |
+| -------------------- | --------------------------------- |
+| **Framework**        | Next.js 14 (App Router)           |
+| **Language**         | JavaScript (ES Modules)           |
+| **Database**         | MongoDB with Mongoose ODM         |
+| **Authentication**   | JWT + bcryptjs (httpOnly cookies) |
+| **Styling**          | Tailwind CSS                      |
+| **Fonts**            | Playfair Display + DM Sans        |
+| **Notifications**    | react-hot-toast                   |
+| **File Upload**      | Native FormData + fs/promises     |
+| **Date Utilities**   | date-fns                          |
+| **Image Generation** | html-to-image + file-saver        |
+
+---
+
+## 📁 Project Structure
 
 ```
 src/
@@ -44,23 +82,23 @@ src/
 │   ├── (dashboard)/
 │   │   ├── dashboard/page.js
 │   │   ├── cases/
-│   │   │   ├── page.js              # Cases list
-│   │   │   ├── new/page.js          # Create case
+│   │   │   ├── page.js
+│   │   │   ├── new/page.js
 │   │   │   └── [id]/
-│   │   │       ├── page.js          # Case detail (tabbed)
-│   │   │       └── edit/page.js     # Edit case
 │   │   ├── calendar/page.js
 │   │   ├── books/page.js
 │   │   ├── reminders/page.js
+│   │   ├── judgement-image-generator/page.js
 │   │   └── settings/page.js
 │   └── api/
-│       ├── auth/                    # login, register, logout, me
-│       ├── cases/                   # CRUD + proceedings, notes, citations, accused
-│       ├── cases/stats/             # Dashboard metrics
-│       ├── hearings/                # Calendar events
-│       ├── books/                   # PDF upload/delete
-│       ├── reminders/               # CRUD
-│       └── seed/                    # Demo data
+│       ├── auth/
+│       ├── cases/
+│       ├── cases/stats/
+│       ├── hearings/
+│       ├── books/
+│       ├── reminders/
+│       ├── judgement-images/
+│       └── seed/
 ├── components/
 │   ├── layout/
 │   │   ├── Sidebar.js
@@ -71,44 +109,51 @@ src/
 │   │   ├── CitationsTab.js
 │   │   ├── NotesTab.js
 │   │   └── AccusedTab.js
+│   ├── judgement-image/
+│   │   ├── JudgementCard.jsx
+│   │   └── JudgementForm.jsx
 │   └── ui/
-│       ├── index.js                 # Modal, Spinner, StatCard, TabBar, etc.
+│       ├── index.js
 │       └── ToastProvider.js
-├── hooks/useAuth.js                 # Auth context + hook
+├── hooks/
+│   └── useAuth.js
 ├── lib/
-│   ├── db.js                        # MongoDB connection
-│   ├── auth.js                      # JWT utilities
-│   └── api.js                       # withAuth middleware
+│   ├── db.js
+│   ├── auth.js
+│   └── api.js
 ├── models/
 │   ├── User.js
 │   ├── Case.js
-│   └── BookReminder.js
-├── middleware.js                    # Route protection
+│   ├── BookReminder.js
+│   └── JudgementImage.js
+├── middleware.js
 └── utils/
-    ├── api.js                       # Fetch client
-    └── helpers.js                   # Date formatting, cn(), etc.
+    ├── api.js
+    └── helpers.js
 ```
 
 ---
 
-## Setup & Installation
+## 🚀 Setup & Installation
 
 ### Prerequisites
 
 - Node.js 18+
-- MongoDB (local or [MongoDB Atlas](https://cloud.mongodb.com) — free tier works)
+- MongoDB (local or MongoDB Atlas — free tier works)
 
-### 1. Install dependencies
+### Step 1: Clone & Install
 
 ```bash
+git clone https://github.com/M-Saad-saif/law-system.git
+cd law-system
 npm install
 ```
 
-### 2. Configure environment
+### Step 2: Environment Configuration
 
-Copy `.env.local` and fill in your values:
+Create `.env.local` in the root directory:
 
-```bash
+```env
 # .env.local
 MONGODB_URI=mongodb://localhost:27017/lexis-portal
 JWT_SECRET=your-super-secret-key-minimum-32-characters-long
@@ -117,18 +162,20 @@ NODE_ENV=development
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-**For MongoDB Atlas:**
-```
-MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/lexis-portal?retryWrites=true&w=majority
+**For MongoDB Atlas (recommended for production):**
+
+```env
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/lexis-portal?retryWrites=true&w=majority
 ```
 
-### 3. Create uploads directory
+### Step 3: Create Uploads Directory for Localhost
 
 ```bash
 mkdir -p public/uploads/books
+mkdir -p public/uploads/judgement-images
 ```
 
-### 4. Run development server
+### Step 4: Run Development Server
 
 ```bash
 npm run dev
@@ -138,120 +185,246 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Demo Data
+## 🧪 Demo Data
 
-After starting the server, seed demo data in two ways:
+After starting the server, populate with sample data:
 
-**Option A — Settings page:**
+**Option A — Via Settings UI:**
+
 1. Register an account
-2. Go to Settings → click "Seed Demo Data"
+2. Navigate to **Settings → Seed Demo Data**
 
-**Option B — API call:**
+**Option B — Via API (development only):**
+
 ```bash
 curl -X POST http://localhost:3000/api/seed
 ```
 
-**Demo credentials (after seeding):**
-```
-Email:    demo@LawPortal.com
-Password: Demo@12345
-```
+**What gets created:**
 
-This creates 5 sample cases (criminal, civil, family, tax, bail), 3 reminders, and realistic proceeding history.
+- 5 sample cases (criminal, civil, family, tax, bail)
+- 3 priority reminders
+- Realistic proceeding history with dates
 
 ---
 
-## Database Schema
+## 📊 Database Schema
 
 ### User
-```
-name, email, password (hashed), role (admin/lawyer/associate),
-phone, barCouncilNo, isActive
+
+```javascript
+(name,
+  email,
+  password(hashed),
+  role(admin / lawyer / associate),
+  phone,
+  barCouncilNo,
+  isActive);
 ```
 
 ### Case
-```
+
+```javascript
 userId, caseTitle, caseNumber, suitNo, courtType, courtName,
-caseType, counselFor, oppositeCounsel{name,contact},
+caseType, counselFor, oppositeCounsel {name, contact},
 provisions[], filingDate, nextHearingDate, nextProceedingDate,
 status, judgeName, firNo, clientName, clientContact,
-phone, proceedings[], citations[], accused[], documents[], notes[]
+proceedings[], citations[], accused[], documents[], notes[]
 ```
 
-### Book
-```
+### Book (Law Books Library)
+
+```javascript
 userId, name, author, description, fileUrl, fileSize, tags[]
 ```
 
 ### Reminder
-```
+
+```javascript
 userId, title, description, dateTime, isCompleted, priority,
 linkedCase (ref: Case)
 ```
 
----
+### JudgementImage (NEW)
 
-## API Reference
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register new user |
-| POST | `/api/auth/login` | Login |
-| POST | `/api/auth/logout` | Logout |
-| GET | `/api/auth/me` | Get current user |
-| PUT | `/api/auth/me` | Update profile |
-| GET | `/api/cases` | List cases (search, filter, paginate) |
-| POST | `/api/cases` | Create case |
-| GET | `/api/cases/:id` | Get case with all sub-documents |
-| PUT | `/api/cases/:id` | Update case |
-| DELETE | `/api/cases/:id` | Delete case |
-| GET | `/api/cases/stats` | Dashboard metrics |
-| POST | `/api/cases/:id/proceedings` | Add proceeding |
-| DELETE | `/api/cases/:id/proceedings` | Remove proceeding |
-| POST | `/api/cases/:id/citations` | Add citation |
-| DELETE | `/api/cases/:id/citations` | Remove citation |
-| POST | `/api/cases/:id/notes` | Add note |
-| DELETE | `/api/cases/:id/notes` | Remove note |
-| POST | `/api/cases/:id/accused` | Add accused |
-| GET | `/api/hearings` | Calendar events by month/year |
-| GET | `/api/books` | List books |
-| POST | `/api/books` | Upload PDF |
-| DELETE | `/api/books/:id` | Delete book |
-| GET | `/api/reminders` | List reminders (filter: upcoming/overdue/completed) |
-| POST | `/api/reminders` | Create reminder |
-| PUT | `/api/reminders/:id` | Update reminder |
-| DELETE | `/api/reminders/:id` | Delete reminder |
-| POST | `/api/seed` | Seed demo data (dev only) |
+```javascript
+caseId (ref), userId, imageUrl, inputData (judgement details),
+templateVersion, downloadCount, shareCount, createdAt
+```
 
 ---
 
-## Production Deployment
+## 📡 API Reference
 
-### Build
+### Authentication
+
+| Method | Endpoint             | Description               |
+| ------ | -------------------- | ------------------------- |
+| POST   | `/api/auth/register` | Register new user         |
+| POST   | `/api/auth/login`    | Login with email/password |
+| POST   | `/api/auth/logout`   | Logout (clears cookie)    |
+| GET    | `/api/auth/me`       | Get current user profile  |
+| PUT    | `/api/auth/me`       | Update profile            |
+
+### Cases
+
+| Method | Endpoint                     | Description                           |
+| ------ | ---------------------------- | ------------------------------------- |
+| GET    | `/api/cases`                 | List cases (search, filter, paginate) |
+| POST   | `/api/cases`                 | Create new case                       |
+| GET    | `/api/cases/:id`             | Get case with all sub-documents       |
+| PUT    | `/api/cases/:id`             | Update case                           |
+| DELETE | `/api/cases/:id`             | Delete case                           |
+| GET    | `/api/cases/stats`           | Dashboard metrics                     |
+| POST   | `/api/cases/:id/proceedings` | Add proceeding entry                  |
+| DELETE | `/api/cases/:id/proceedings` | Remove proceeding                     |
+| POST   | `/api/cases/:id/citations`   | Add citation                          |
+| DELETE | `/api/cases/:id/citations`   | Remove citation                       |
+| POST   | `/api/cases/:id/notes`       | Add quick note                        |
+| DELETE | `/api/cases/:id/notes`       | Remove note                           |
+| POST   | `/api/cases/:id/accused`     | Add accused person                    |
+
+### Calendar & Reminders
+
+| Method | Endpoint             | Description                                 |
+| ------ | -------------------- | ------------------------------------------- |
+| GET    | `/api/hearings`      | Calendar events by month/year               |
+| GET    | `/api/reminders`     | List reminders (upcoming/overdue/completed) |
+| POST   | `/api/reminders`     | Create reminder                             |
+| PUT    | `/api/reminders/:id` | Update reminder                             |
+| DELETE | `/api/reminders/:id` | Delete reminder                             |
+
+### Law Books
+
+| Method | Endpoint         | Description                      |
+| ------ | ---------------- | -------------------------------- |
+| GET    | `/api/books`     | List all uploaded PDFs           |
+| POST   | `/api/books`     | Upload PDF (multipart/form-data) |
+| DELETE | `/api/books/:id` | Delete book                      |
+
+### Judgement Images (NEW)
+
+| Method | Endpoint                | Description                          |
+| ------ | ----------------------- | ------------------------------------ |
+| POST   | `/api/judgement-images` | Generate and save judgement image    |
+| GET    | `/api/judgement-images` | Fetch recent images for current user |
+
+### Development
+
+| Method | Endpoint    | Description                            |
+| ------ | ----------- | -------------------------------------- |
+| POST   | `/api/seed` | Seed demo data (blocked in production) |
+
+---
+
+## ☁️ Production Deployment
+
+### Build for Production
+
 ```bash
 npm run build
 npm start
 ```
 
-### Environment checklist
-- [ ] Set `NODE_ENV=production`
-- [ ] Use a strong `JWT_SECRET` (32+ random chars)
-- [ ] Use MongoDB Atlas or a managed MongoDB instance
-- [ ] Set up a reverse proxy (nginx/Caddy) for HTTPS
-- [ ] Configure `NEXT_PUBLIC_APP_URL` to your domain
+### Environment Checklist (Production)
 
-### Vercel (recommended)
+- [ ] Set `NODE_ENV=production`
+- [ ] Use strong `JWT_SECRET` (32+ random characters)
+- [ ] Use MongoDB Atlas (or managed DB service)
+- [ ] Configure `NEXT_PUBLIC_APP_URL` to your domain
+- [ ] Set up HTTPS (reverse proxy with nginx/Caddy)
+
+### Deploy to Vercel (Recommended)
+
 ```bash
 npm install -g vercel
 vercel
 ```
-Set all `.env.local` variables in the Vercel dashboard.
+
+Set all `.env.local` variables in the Vercel Dashboard.
+
+### File Uploads in Production
+
+Current implementation uses local filesystem (`public/uploads/`). For production, switch to:
+
+- **AWS S3** (recommended)
+- **Cloudinary** (easier setup)
+- **Vercel Blob Storage** (if using Vercel)
 
 ---
 
-## Notes
+## 📅 Recent Updates
 
-- **File uploads** are stored in `public/uploads/`. In production, use S3 or Cloudinary instead.
-- **Prerender warnings** during `next build` are expected — all routes are server-rendered on demand (not statically exported). `npm start` and `npm run dev` work correctly.
-- The seed endpoint is blocked in production (`NODE_ENV=production`).
-"# law-system" 
+**April 8, 2026**
+
+- ✅ **Auto Judgement Image Generator** – Fully functional with branded templates
+- ✅ PNG/JPEG export with one-click download
+- ✅ Preview before saving
+- ✅ Recent images gallery on generator page
+- ✅ Database persistence for generated images
+
+**April 7, 2026**
+
+- ✅ Overdue notification bar
+- ✅ Legal ticker component
+
+**April 6, 2026**
+
+- ✅ Initial production build
+- ✅ Complete case management system
+- ✅ Authentication with JWT cookies
+- ✅ Calendar and reminders module
+
+---
+
+## 🗺 Roadmap
+
+### Q2 2026 (Current Sprint)
+
+- [ ] **AI Judgement Extractor** – Parse raw judgement text into 7 structured sections
+- [ ] **Saved Judgements Library** – Personal/team repository with tags and notes
+- [ ] **Cross-Examination Q&A Review Module** – Collaborative drafting workflow
+
+### Q3 2026
+
+- [ ] Automatic Application Generator (Bail, Adjournment, Exemption)
+- [ ] Advanced search with full-text indexing
+- [ ] Email notifications for hearings and reminders
+
+### Q4 2026
+
+- [ ] Mobile app (React Native)
+- [ ] Client portal for case tracking
+- [ ] Billing and invoicing module
+
+---
+
+## 👥 Contributors
+
+- **Muhammad Saad Saif** – Lead Developer  
+  [GitHub](https://github.com/M-Saad-saif)
+
+---
+
+## ⚠️ Important Notes
+
+1. **File Uploads:** Currently stored locally in `public/uploads/`. For production, migrate to S3/Cloudinary.
+2. **Prerender Warnings:** Expected during `next build` – all routes are server-rendered on demand, not statically exported.
+3. **Seed Endpoint:** Automatically disabled when `NODE_ENV=production`.
+
+---
+
+## 🆘 Support
+
+For issues or feature requests:
+
+- Open an issue on [GitHub](https://github.com/M-Saad-saif/law-system/issues)
+- Contact development team at GenZomate
+
+---
+
+**Built with Next.js 14, MongoDB, and Tailwind CSS – Optimized for Pakistani legal practice.**
+
+```
+
+```

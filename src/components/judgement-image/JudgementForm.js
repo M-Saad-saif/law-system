@@ -92,7 +92,6 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto p-6">
-      {/* Header with new color theme */}
       <div className="bg-gradient-to-br from-[#171a2a] via-[#1e2235] to-[#026665] text-white p-8 rounded-2xl shadow-xl">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
@@ -144,11 +143,8 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
         </div>
       </div>
 
-      {/* Form Fields Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column */}
         <div className="space-y-6">
-          {/* Judgement Title */}
           <div>
             <label className="block text-sm font-semibold text-[#171a2a] mb-2">
               Judgement Title / Case Name{" "}
@@ -173,7 +169,6 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
             )}
           </div>
 
-          {/* Case Number */}
           <div>
             <label className="block text-sm font-semibold text-[#171a2a] mb-2">
               Case Number / Citation <span className="text-[#026665]">*</span>
@@ -259,7 +254,6 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
           </div>
         </div>
 
-        {/* Right Column */}
         <div className="space-y-6">
           {/* Petitioner */}
           <div>

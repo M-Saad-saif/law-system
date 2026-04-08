@@ -4,8 +4,9 @@ import path from "path";
 import JudgementImage from "@/models/JudgementImage";
 import connectDB from "@/lib/db";
 import { withAuth } from "@/lib/api";
+import { error } from "console";
 
-export const POST = withAuth(async (request, context, user) => {
+export const POST = withAuth(async (request, user) => {
   try {
     await connectDB();
 
@@ -21,7 +22,6 @@ export const POST = withAuth(async (request, context, user) => {
       );
     }
 
-    // Create unique filename
     const timestamp = Date.now();
     const filename = `judgement_${timestamp}.png`;
     const uploadDir = path.join(
@@ -40,7 +40,6 @@ export const POST = withAuth(async (request, context, user) => {
     const buffer = Buffer.from(bytes);
     await writeFile(filePath, buffer);
 
-    // Save to database
     const imageUrl = `/uploads/judgement-images/${filename}`;
     const judgementImage = await JudgementImage.create({
       userId: user.id,

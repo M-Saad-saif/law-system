@@ -41,12 +41,12 @@ export default function JudgementImageGenerator() {
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Image saved:", result);
+        // console.log("Image saved:", result);
 
         toast.success("Image generated and saved!");
       }
     } catch (error) {
-      console.error("Failed to save image:", error);
+      // console.error("Failed to save image:", error);
     } finally {
       setIsSaving(false);
     }
@@ -91,7 +91,7 @@ export default function JudgementImageGenerator() {
   );
 }
 
-// Recent Images Gallery Component
+// Recent Images Gallery COMPONENT
 function RecentImagesGallery() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -106,7 +106,6 @@ function RecentImagesGallery() {
       const data = await response.json();
       setImages(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Failed to fetch images:", error);
     } finally {
       setLoading(false);
     }

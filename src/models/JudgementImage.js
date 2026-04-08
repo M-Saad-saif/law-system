@@ -1,28 +1,22 @@
 import mongoose from "mongoose";
 
 const JudgementImageSchema = new mongoose.Schema({
-  // Reference to original case (optional)
   caseId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Case",
   },
 
-  // User who generated this image
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
 
-  // Image data
   imageUrl: {
-    type: String, // Path to stored image
+    type: String,
     required: true,
   },
 
-  imagePublicId: String, // For cloud storage
-
-  // Input data used to generate
   inputData: {
     judgementTitle: String,
     courtName: String,
@@ -36,7 +30,6 @@ const JudgementImageSchema = new mongoose.Schema({
     respondent: String,
   },
 
-  // Metadata
   templateVersion: {
     type: String,
     default: "v1",
