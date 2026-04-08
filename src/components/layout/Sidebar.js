@@ -24,6 +24,7 @@ const navItems = [
   { href: "/books", icon: BookOpen, label: "Law Books" },
   { href: "/reminders", icon: Bell, label: "Reminders" },
   { href: "/intelligencefeed", icon: Newspaper, label: "Intelligence Feed" },
+  { href: "/judgement-image-generator", icon: Newspaper, label: "Image Generator" },
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 

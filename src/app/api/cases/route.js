@@ -20,6 +20,8 @@ export const GET = withAuth(async (request, context, user) => {
       query.$or = [
         { caseTitle: { $regex: search, $options: "i" } },
         { caseNumber: { $regex: search, $options: "i" } },
+        { suitNo: { $regex: search, $options: "i" } },
+        { firNo: { $regex: search, $options: "i" } },
         { courtName: { $regex: search, $options: "i" } },
         { clientName: { $regex: search, $options: "i" } },
       ];

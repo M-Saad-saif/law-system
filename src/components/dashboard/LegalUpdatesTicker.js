@@ -200,7 +200,7 @@ function CourtTabs({ active, onChange, counts }) {
   );
 }
 
-// --─ Main component ----------------------------------------------------------─
+// --─ Main component --------
 export default function LegalUpdatesTicker() {
   const [allJudgments, setAllJudgments] = useState([]);
   const [loading, setLoading] = useState(true);
