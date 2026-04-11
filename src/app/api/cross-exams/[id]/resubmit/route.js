@@ -24,6 +24,8 @@ export const POST = withAuth(async (req, { params }, user) => {
 
   const body = await req.json().catch(() => ({}));
 
+  exam.revisionNote = "";
+
   const result = await applyTransition({
     exam,
     action: "resubmit",

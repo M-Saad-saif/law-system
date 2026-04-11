@@ -15,7 +15,6 @@ export const POST = withAuth(async (req, { params }, user) => {
     );
   }
 
-  // Only the assigned reviewer (or any senior if unassigned) can request changes
   const isSenior = user.seniority === "senior" || user.role === "admin";
   if (exam.assignedTo && exam.assignedTo.toString() !== user.id.toString()) {
     return NextResponse.json(
@@ -32,6 +31,9 @@ export const POST = withAuth(async (req, { params }, user) => {
 
   const body = await req.json().catch(() => ({}));
   const notes = body.notes || "";
+
+  exam.revisionNote = notes;
+  await exam.save();
 
   const result = await applyTransition({
     exam,

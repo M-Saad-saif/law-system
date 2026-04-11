@@ -198,8 +198,8 @@ export default function CrossExamsPage() {
               Cross-Examinations
             </h1>
             <p className="text-slate-500 text-sm mt-1">
-              Collaborative drafting &amp; review — like Google Docs meets
-              GitHub PR
+              Collaborative drafting &amp; reviewing
+              
             </p>
           </div>
           <Link

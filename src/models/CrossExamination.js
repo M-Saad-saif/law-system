@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 const versionSnapshotSchema = new mongoose.Schema(
   {
     version: { type: Number, required: true },
-
     snapshot: { type: mongoose.Schema.Types.Mixed, required: true },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -63,6 +62,8 @@ const crossExaminationSchema = new mongoose.Schema(
     isLocked: { type: Boolean, default: false },
 
     generalComments: { type: mongoose.Schema.Types.Mixed, default: [] },
+
+    revisionNote: { type: String, default: "" },
   },
   { timestamps: true },
 );
