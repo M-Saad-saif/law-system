@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { apiFetch } from "@/utils/api";
 
-// --- Tiny status pill ------
+// --- Tiny status pill ─---
 function Pill({ children, color }) {
   const map = {
     red: "bg-red-50 text-red-700 border-red-200",
@@ -25,7 +25,7 @@ function Pill({ children, color }) {
   );
 }
 
-// --- QA pair for review ----
+// --- QA pair for review ---
 function ReviewCard({
   pair,
   witnessId,
@@ -210,7 +210,7 @@ function ReviewCard({
   );
 }
 
-// --- Comment thread (right column) ------------------------------------------------------------─
+// --- Comment thread (right column) ---
 function CommentPanel({
   examId,
   witnessId,
@@ -220,7 +220,6 @@ function CommentPanel({
   onCommentResolved,
 }) {
   const [text, setText] = useState("");
-  const [replyTo, setReplyTo] = useState(null);
   const [posting, setPosting] = useState(false);
 
   const post = async () => {
@@ -233,13 +232,12 @@ function CommentPanel({
           method: "POST",
           body: JSON.stringify({
             text: text.trim(),
-            parentComment: replyTo || null,
+            parentComment: null,
           }),
         },
       );
       onCommentAdded(data.comment);
       setText("");
-      setReplyTo(null);
     } catch {
       toast.error("Failed to post.");
     } finally {
@@ -320,58 +318,39 @@ function CommentPanel({
                     ? format(new Date(c.createdAt), "dd MMM HH:mm")
                     : ""}
                 </p>
-                <div className="flex gap-2">
-                  {!c.resolved && (
-                    <button
-                      onClick={() => setReplyTo(c._id)}
-                      className="text-[10px] text-indigo-500 hover:text-indigo-700 font-medium"
-                    >
-                      Reply
-                    </button>
-                  )}
-                  <button
-                    onClick={() => resolve(c._id, !c.resolved)}
-                    className={`text-[10px] font-medium ${c.resolved ? "text-slate-400 hover:text-slate-600" : "text-emerald-600 hover:text-emerald-800"}`}
-                  >
-                    {c.resolved ? "↩ Reopen" : "✓ Resolve"}
-                  </button>
-                </div>
+                <button
+                  onClick={() => resolve(c._id, !c.resolved)}
+                  className={`text-[10px] font-medium ${c.resolved ? "text-slate-400 hover:text-slate-600" : "text-emerald-600 hover:text-emerald-800"}`}
+                >
+                  {c.resolved ? "↩ Reopen" : "✓ Resolve"}
+                </button>
               </div>
             </div>
             {getReplies(c._id).map((r) => (
               <div
                 key={r._id}
-                className={`ml-4 mt-1.5 rounded-xl p-3 border border-l-2 border-l-indigo-200 ${r.resolved ? "bg-slate-50 border-slate-100 opacity-60" : "bg-white border-slate-200"}`}
+                className={`ml-4 mt-1.5 rounded-xl p-3 border border-l-2 border-l-indigo-400 ${r.resolved ? "bg-slate-50 border-slate-100 opacity-60" : "bg-indigo-50/60 border-indigo-100"}`}
               >
                 <p className="text-xs text-slate-700 leading-relaxed">
                   {r.text}
                 </p>
-                <p className="text-[10px] text-slate-400 mt-1.5">
-                  {r.author?.name || "Unknown"} ·{" "}
-                  {r.createdAt
-                    ? format(new Date(r.createdAt), "dd MMM HH:mm")
-                    : ""}
-                </p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[10px] font-semibold text-indigo-500">
+                    {r.author?.name || "Junior"}
+                  </span>
+                  {r.createdAt && (
+                    <span className="text-[10px] text-slate-400">
+                      · {format(new Date(r.createdAt), "dd MMM HH:mm")}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         ))}
       </div>
 
-      {/* Reply indicator */}
-      {replyTo && (
-        <div className="mx-4 mb-2 px-3 py-2 bg-indigo-50 rounded-lg border border-indigo-200 flex items-center justify-between">
-          <span className="text-xs text-indigo-700">Replying to a comment</span>
-          <button
-            onClick={() => setReplyTo(null)}
-            className="text-indigo-400 hover:text-indigo-700 text-xs font-medium"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
-
-      {/* Input */}
+      {/* Input — senior posts new top-level comments */}
       <div className="px-4 pb-4 pt-2 border-t border-slate-100 flex-shrink-0">
         <textarea
           rows={3}
@@ -395,7 +374,7 @@ function CommentPanel({
   );
 }
 
-// --- Main review page -----
+// --- Main review page ---
 export default function ReviewPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -550,7 +529,7 @@ export default function ReviewPage() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
-      {/* --- Top bar --- */}
+      {/* ── Top bar --- */}
       <div className="flex items-center justify-between px-6 py-3.5 bg-white border-b border-slate-200 shadow-sm flex-shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <Link
@@ -620,7 +599,7 @@ export default function ReviewPage() {
         </div>
       </div>
 
-      {/* --- 3-column body ---- */}
+      {/*--- 3-column body --- */}
       <div className="flex flex-1 overflow-hidden">
         {/* Column 1 — Witness list */}
         <aside className="w-56 border-r border-slate-200 bg-white overflow-y-auto flex-shrink-0">

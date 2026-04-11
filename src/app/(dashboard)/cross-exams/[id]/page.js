@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -37,7 +35,7 @@ function StatusPill({ status }) {
   );
 }
 
-// --- Add Witness modal ------------------------------------------------------------------------------─
+// --- Add Witness modal ---
 function AddWitnessModal({ onAdd, onClose }) {
   const [form, setForm] = useState({
     witnessName: "",
@@ -138,7 +136,7 @@ function AddWitnessModal({ onAdd, onClose }) {
   );
 }
 
-// --- Add QA inline form -----
+// --- Add QA inline form ---
 function AddQAForm({ witnessId, onAdd, onClose }) {
   const [q, setQ] = useState("");
   const [a, setA] = useState("");
@@ -203,17 +201,53 @@ function AddQAForm({ witnessId, onAdd, onClose }) {
   );
 }
 
-// --- Read-only comment thread shown to junior --
-function ReviewerComments({ comments }) {
+// ── Read-only comment thread shown to junior ──────────────────────────────
+// ── Read-only comment thread shown to junior (with reply capability) ─────────
+function ReviewerComments({
+  comments,
+  examId,
+  witnessId,
+  qaId,
+  onCommentAdded,
+}) {
   const [open, setOpen] = useState(true);
+  // Track which comment the junior is replying to: null = none
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const [posting, setPosting] = useState(false);
+
   if (!comments || comments.length === 0) return null;
 
-  // Only show unresolved top-level comments + their replies
   const topLevel = comments.filter((c) => !c.parentComment);
   const getReplies = (parentId) =>
     comments.filter(
       (c) => c.parentComment?.toString() === parentId?.toString(),
     );
+
+  const handleReply = async (parentId) => {
+    if (!replyText.trim()) return;
+    setPosting(true);
+    try {
+      const data = await apiFetch(
+        `/api/cross-exams/${examId}/witnesses/${witnessId}/qa/${qaId}/comment`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            text: replyText.trim(),
+            parentComment: parentId,
+          }),
+        },
+      );
+      onCommentAdded(data.comment);
+      setReplyText("");
+      setReplyingTo(null);
+      toast.success("Reply posted.");
+    } catch {
+      toast.error("Failed to post reply.");
+    } finally {
+      setPosting(false);
+    }
+  };
 
   return (
     <div className="mt-3 rounded-xl border border-red-100 bg-red-50/60 overflow-hidden">
@@ -255,35 +289,48 @@ function ReviewerComments({ comments }) {
                 <p className="text-xs text-slate-800 leading-relaxed">
                   {c.text}
                 </p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[10px] font-semibold text-red-500">
-                    {c.author?.name || "Reviewer"}
-                  </span>
-                  {c.createdAt && (
-                    <span className="text-[10px] text-slate-400">
-                      · {format(new Date(c.createdAt), "dd MMM HH:mm")}
+                <div className="flex items-center justify-between mt-1.5 gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-semibold text-red-500">
+                      {c.author?.name || "Reviewer"}
                     </span>
-                  )}
-                  {c.resolved && (
-                    <span className="text-[10px] text-slate-400 italic">
-                      · resolved
-                    </span>
+                    {c.createdAt && (
+                      <span className="text-[10px] text-slate-400">
+                        · {format(new Date(c.createdAt), "dd MMM HH:mm")}
+                      </span>
+                    )}
+                    {c.resolved && (
+                      <span className="text-[10px] text-slate-400 italic">
+                        · resolved
+                      </span>
+                    )}
+                  </div>
+                  {/* Junior can reply to unresolved senior comments */}
+                  {!c.resolved && (
+                    <button
+                      onClick={() =>
+                        setReplyingTo((prev) => (prev === c._id ? null : c._id))
+                      }
+                      className="text-[10px] font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
+                    >
+                      {replyingTo === c._id ? "Cancel" : "↩ Reply"}
+                    </button>
                   )}
                 </div>
               </div>
 
-              {/* Threaded replies */}
+              {/* Existing replies */}
               {getReplies(c._id).map((r) => (
                 <div
                   key={r._id}
-                  className="ml-4 mt-1 rounded-lg p-2.5 border border-l-2 border-l-red-200 bg-white border-slate-100"
+                  className="ml-4 mt-1 rounded-lg p-2.5 border border-l-2 border-l-indigo-300 bg-indigo-50/50 border-slate-100"
                 >
                   <p className="text-xs text-slate-700 leading-relaxed">
                     {r.text}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] font-semibold text-slate-500">
-                      {r.author?.name || "Reviewer"}
+                    <span className="text-[10px] font-semibold text-indigo-500">
+                      {r.author?.name || "You"}
                     </span>
                     {r.createdAt && (
                       <span className="text-[10px] text-slate-400">
@@ -293,6 +340,42 @@ function ReviewerComments({ comments }) {
                   </div>
                 </div>
               ))}
+
+              {/* Inline reply box — appears under the comment being replied to */}
+              {replyingTo === c._id && (
+                <div className="ml-4 mt-1.5 p-2.5 bg-indigo-50 rounded-lg border border-indigo-200">
+                  <textarea
+                    rows={2}
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Write your reply…"
+                    autoFocus
+                    className="w-full border border-indigo-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white"
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
+                        handleReply(c._id);
+                    }}
+                  />
+                  <div className="flex gap-2 mt-1.5">
+                    <button
+                      onClick={() => handleReply(c._id)}
+                      disabled={posting || !replyText.trim()}
+                      className="text-[10px] font-bold bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      {posting ? "Posting…" : "Post Reply"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setReplyingTo(null);
+                        setReplyText("");
+                      }}
+                      className="text-[10px] text-slate-400 hover:text-slate-600 px-2"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -301,8 +384,15 @@ function ReviewerComments({ comments }) {
   );
 }
 
-// --- QA pair display -------
-function QAPairCard({ pair, witnessId, isEditable, onUpdate }) {
+// --- QA pair display ---
+function QAPairCard({
+  pair,
+  witnessId,
+  examId,
+  isEditable,
+  onUpdate,
+  onCommentAdded,
+}) {
   const [editMode, setEditMode] = useState(false);
   const [q, setQ] = useState(pair.originalQuestion || "");
   const [a, setA] = useState(pair.originalAnswer || "");
@@ -416,9 +506,15 @@ function QAPairCard({ pair, witnessId, isEditable, onUpdate }) {
             </div>
           )}
 
-          {/* Show reviewer comments to junior — read-only */}
+          {/* Show reviewer comments to junior — with reply support */}
           {pair.comments?.length > 0 && (
-            <ReviewerComments comments={pair.comments} />
+            <ReviewerComments
+              comments={pair.comments}
+              examId={examId}
+              witnessId={witnessId}
+              qaId={pair._id}
+              onCommentAdded={onCommentAdded}
+            />
           )}
 
           {isEditable && (
@@ -435,8 +531,16 @@ function QAPairCard({ pair, witnessId, isEditable, onUpdate }) {
   );
 }
 
-// --- Witness accordion -----
-function WitnessCard({ witness, isEditable, onDelete, onAddQA, onUpdateQA }) {
+// --- Witness accordion ---
+function WitnessCard({
+  witness,
+  examId,
+  isEditable,
+  onDelete,
+  onAddQA,
+  onUpdateQA,
+  onCommentAdded,
+}) {
   const [open, setOpen] = useState(true);
   const [addingQA, setAddingQA] = useState(false);
 
@@ -520,8 +624,12 @@ function WitnessCard({ witness, isEditable, onDelete, onAddQA, onUpdateQA }) {
                   key={pair._id}
                   pair={pair}
                   witnessId={witness._id}
+                  examId={examId}
                   isEditable={isEditable}
                   onUpdate={onUpdateQA}
+                  onCommentAdded={(comment) =>
+                    onCommentAdded(witness._id, pair._id, comment)
+                  }
                 />
               ))
           )}
@@ -547,7 +655,7 @@ function WitnessCard({ witness, isEditable, onDelete, onAddQA, onUpdateQA }) {
   );
 }
 
-// --- Main page ------
+// --- Main page ---
 export default function CrossExamEditPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -624,6 +732,25 @@ export default function CrossExamEditPage() {
           ? {
               ...w,
               qaPairs: w.qaPairs.map((q) => (q._id === qaId ? data.qaPair : q)),
+            }
+          : w,
+      ),
+    }));
+  };
+
+  // Append a new comment into local state after junior posts a reply
+  const handleAddComment = (wId, qaId, newComment) => {
+    setExam((p) => ({
+      ...p,
+      witnesses: p.witnesses.map((w) =>
+        w._id === wId
+          ? {
+              ...w,
+              qaPairs: w.qaPairs.map((q) =>
+                q._id === qaId
+                  ? { ...q, comments: [...(q.comments || []), newComment] }
+                  : q,
+              ),
             }
           : w,
       ),
@@ -902,10 +1029,12 @@ export default function CrossExamEditPage() {
                   <WitnessCard
                     key={w._id}
                     witness={w}
+                    examId={id}
                     isEditable={isEditable}
                     onDelete={handleDeleteWitness}
                     onAddQA={handleAddQA}
                     onUpdateQA={handleUpdateQA}
+                    onCommentAdded={handleAddComment}
                   />
                 ))}
               </div>
