@@ -55,7 +55,7 @@ export default function LoginPage() {
             <Scale className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white font-display">
-            LexisPortal
+          LawPortal
           </h1>
           <p className="text-white/50 text-sm mt-1">
             Legal Practice Management System

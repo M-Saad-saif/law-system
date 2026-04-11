@@ -54,7 +54,7 @@ export default function LandingPage() {
               <Scale className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold tracking-tight text-white">
-              Lexis<span className="text-[#027f7e]">Portal</span>
+              Law<span className="text-[#027f7e]">Portal</span>
             </span>
           </div>
           <div className="flex items-center gap-3">

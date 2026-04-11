@@ -234,7 +234,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* --- Navigation ------------------------------------─ */}
+      {/* --- Navigation --- */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5 scrollbar-thin scrollbar-thumb-slate-700">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
@@ -250,7 +250,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* --- User footer ------------------------------------ */}
+      {/* --- User footer ---- */}
       {user && (
         <div className="border-t border-slate-800 px-4 py-4">
           <div className="flex items-center gap-3">
