@@ -6,6 +6,7 @@ import {
   BookUser,
   Calendar,
   Home,
+  LogOutIcon,
   Scale,
   Settings,
 } from "lucide-react";
@@ -13,6 +14,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Icon = {
   Dashboard: () => (
@@ -77,18 +79,8 @@ const Icon = {
     </svg>
   ),
   Logout: () => (
-    <svg
-      className="w-5 h-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.7}
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-      />
+    <svg className="w-5 h-5" viewBox="0 0 24 24">
+      <LogOutIcon />
     </svg>
   ),
 };
@@ -213,8 +205,9 @@ function NavItem({ item, pathname }) {
 
 // --- Main Sidebar ------------
 
-export default function Sidebar({ user, onLogout }) {
+export default function Sidebar() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   return (
     <aside
@@ -275,15 +268,14 @@ export default function Sidebar({ user, onLogout }) {
                 {user.role || "Lawyer"}
               </p>
             </div>
-            {onLogout && (
-              <button
-                onClick={onLogout}
-                className="text-slate-600 hover:text-red-400 transition-colors"
-                title="Logout"
-              >
-                <Icon.Logout />
-              </button>
-            )}
+
+            <button
+              onClick={logout}
+              className="text-slate-600 hover:text-red-400 transition-colors"
+              title="Logout"
+            >
+              <Icon.Logout />
+            </button>
           </div>
         </div>
       )}
