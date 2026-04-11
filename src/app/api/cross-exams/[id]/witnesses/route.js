@@ -42,7 +42,8 @@ export const POST = withAuth(async (req, { params }, user) => {
   // Both junior (creator) and senior (assignedTo) can add witnesses while in_review
   const isCreator  = exam.createdBy.toString() === user.id.toString();
   const isReviewer = exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
-  if (!isCreator && !isReviewer) {
+  const isAdmin    = user.role === 'admin';
+  if (!isCreator && !isReviewer && !isAdmin) {
     return NextResponse.json({ error: 'Access denied.' }, { status: 403 });
   }
 

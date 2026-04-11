@@ -22,7 +22,8 @@ async function loadAndCheck(params, user) {
 
   const isCreator  = exam.createdBy.toString() === user.id.toString();
   const isReviewer = exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
-  if (!isCreator && !isReviewer) return { error: 'Access denied.', status: 403 };
+  const isAdmin    = user.role === 'admin';
+  if (!isCreator && !isReviewer && !isAdmin) return { error: 'Access denied.', status: 403 };
 
   return { exam, witness };
 }

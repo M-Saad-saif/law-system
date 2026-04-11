@@ -26,11 +26,12 @@ export const GET = withAuth(async (req, { params }, user) => {
     return NextResponse.json({ error: 'Cross-examination not found.' }, { status: 404 });
   }
 
-  // Access check: creator or assigned reviewer
+  // Access check: creator, assigned reviewer, or admin
   const isOwner    = exam.createdBy._id.toString() === user.id.toString();
   const isAssigned = exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
+  const isAdmin    = user.role === 'admin';
 
-  if (!isOwner && !isAssigned) {
+  if (!isOwner && !isAssigned && !isAdmin) {
     return NextResponse.json({ error: 'Access denied.' }, { status: 403 });
   }
 

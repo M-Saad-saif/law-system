@@ -28,7 +28,8 @@ export const GET = withAuth(async (req, { params }, user) => {
 
   const isOwner    = exam.createdBy._id.toString() === user.id.toString();
   const isAssigned = exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
-  if (!isOwner && !isAssigned) {
+  const isAdmin    = user.role === 'admin';
+  if (!isOwner && !isAssigned && !isAdmin) {
     return NextResponse.json({ error: 'Access denied.' }, { status: 403 });
   }
 
