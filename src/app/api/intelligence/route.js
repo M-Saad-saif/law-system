@@ -4,7 +4,6 @@ import JudgmentAlert from "@/models/JudgmentAlert";
 import { withAuth } from "@/lib/api";
 import { seedIntelligenceFeed } from "../seed/intelligence-seed-snippet";
 
-// GET /api/intelligence?section=302&caseType=Bail&importance=High&limit=10
 export const GET = withAuth(async (req) => {
   await dbConnect();
 

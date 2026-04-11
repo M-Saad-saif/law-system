@@ -1,9 +1,3 @@
-// app/api/cross-exams/[id]/witnesses/[wId]/qa/[qaId]/comment/route.js
-// POST — Add a comment (or threaded reply) to a QA pair
-// PUT  — Resolve / unresolve a comment   Body: { commentId, resolved }
-//
-// Body for POST: { text, parentComment? }
-
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
 import connectDB from "@/lib/db";
@@ -11,9 +5,6 @@ import CrossExamination from "@/models/CrossExamination";
 import WitnessSection from "@/models/WitnessSection";
 import { logActivity } from "@/lib/crossExamWorkflow";
 
-// ---------------------------------------------------------------------------
-// POST — add comment
-// ---------------------------------------------------------------------------
 export const POST = withAuth(async (req, { params }, user) => {
   await connectDB();
 
@@ -78,10 +69,6 @@ export const POST = withAuth(async (req, { params }, user) => {
   return NextResponse.json({ comment: newComment }, { status: 201 });
 });
 
-// ---------------------------------------------------------------------------
-// PUT — resolve or unresolve a comment
-// Body: { commentId, resolved }
-// ---------------------------------------------------------------------------
 export const PUT = withAuth(async (req, { params }, user) => {
   await connectDB();
 

@@ -1,6 +1,3 @@
-// components/cross-exam/StatusBadge.js
-// Reusable status badge used across all cross-exam pages
-
 "use client";
 
 const STATUS_CONFIG = {

@@ -1,8 +1,3 @@
-// app/api/cross-exams/[id]/witnesses/[wId]/qa/[qaId]/edit/route.js
-// PUT — Senior edits the edited fields; Junior updates original text (draft / changes_requested only)
-// Body: { editedQuestion?, editedAnswer?, originalQuestion?, originalAnswer?,
-//         useEditedVersion?, strategyNote?, evidenceNote?, caseLawNote? }
-
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
 import connectDB from "@/lib/db";

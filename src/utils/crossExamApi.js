@@ -1,11 +1,6 @@
-// utils/crossExamApi.js
-// Typed client-side fetch helpers for all cross-exam API endpoints.
-// All functions throw with the server's { error } message on failure.
-// Import apiFetch from your existing utils/api.js — these wrappers use it.
-
 import { apiFetch } from "@/utils/api";
 
-// ─── Cross-Examination CRUD ───────────────────────────────────────────────
+// --------- Cross-Examination CRUD ------------
 
 export const listCrossExams = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
@@ -26,7 +21,7 @@ export const updateCrossExam = (id, body) =>
 export const deleteCrossExam = (id) =>
   apiFetch(`/api/cross-exams/${id}`, { method: "DELETE" });
 
-// ─── Workflow actions ─────────────────────────────────────────────────────
+// --------- Workflow actions --------
 
 export const submitCrossExam = (id, message = "") =>
   apiFetch(`/api/cross-exams/${id}/submit`, {
@@ -64,7 +59,7 @@ export const approveCrossExam = (id, message = "") =>
     body: JSON.stringify({ message }),
   });
 
-// ─── Witnesses ────────────────────────────────────────────────────────────
+// --------- Witnesses -----
 
 export const listWitnesses = (examId) =>
   apiFetch(`/api/cross-exams/${examId}/witnesses`);
@@ -84,7 +79,7 @@ export const updateWitness = (examId, wId, body) =>
 export const deleteWitness = (examId, wId) =>
   apiFetch(`/api/cross-exams/${examId}/witnesses/${wId}`, { method: "DELETE" });
 
-// ─── QA Pairs ─────────────────────────────────────────────────────────────
+// --------- QA Pairs -----
 
 export const addQAPair = (examId, wId, body) =>
   apiFetch(`/api/cross-exams/${examId}/witnesses/${wId}/qa`, {
@@ -104,7 +99,7 @@ export const flagQAPair = (examId, wId, qaId, body) =>
     body: JSON.stringify(body),
   });
 
-// ─── Comments ─────────────────────────────────────────────────────────────
+// --------- Comments -------
 
 export const addComment = (examId, wId, qaId, body) =>
   apiFetch(`/api/cross-exams/${examId}/witnesses/${wId}/qa/${qaId}/comment`, {
@@ -118,7 +113,7 @@ export const resolveComment = (examId, wId, qaId, commentId, resolved) =>
     body: JSON.stringify({ commentId, resolved }),
   });
 
-// ─── Versions ─────────────────────────────────────────────────────────────
+// --------- Versions ------
 
 export const getVersionHistory = (examId) =>
   apiFetch(`/api/cross-exams/${examId}/versions`);
@@ -128,9 +123,8 @@ export const compareVersions = (examId, versionA, versionB) =>
     `/api/cross-exams/${examId}/compare?versionA=${versionA}&versionB=${versionB}`,
   );
 
-// ─── PDF ──────────────────────────────────────────────────────────────────
+// --------- PDF -----
 
-/** Opens the PDF in a new tab — the page auto-triggers window.print() */
 export const openPDF = (examId) => {
   window.open(`/api/cross-exams/${examId}/pdf`, "_blank");
 };

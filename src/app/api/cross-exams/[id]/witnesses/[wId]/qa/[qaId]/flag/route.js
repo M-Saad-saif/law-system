@@ -1,6 +1,4 @@
-// app/api/cross-exams/[id]/witnesses/[wId]/qa/[qaId]/flag/route.js
-// POST — Toggle isFlagged / isApproved on a QA pair (reviewer only)
-// Body: { isFlagged?, isApproved? }
+
 
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
@@ -21,7 +19,7 @@ export const POST = withAuth(async (req, { params }, user) => {
   if (exam.isLocked)
     return NextResponse.json({ error: "Document is locked." }, { status: 403 });
 
-  // Only a senior reviewer (assigned or any senior) can flag / approve individual QA pairs
+  // Only a senior reviewer 
   const isSenior = user.seniority === "senior" || user.role === "admin";
   const isAssignedReviewer =
     exam.assignedTo && exam.assignedTo.toString() === user.id.toString();

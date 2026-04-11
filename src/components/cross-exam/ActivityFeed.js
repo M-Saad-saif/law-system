@@ -1,6 +1,3 @@
-// components/cross-exam/ActivityFeed.js
-// Renders the audit trail (ActivityLog) for a cross-examination
-
 "use client";
 
 import { format } from "date-fns";

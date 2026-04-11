@@ -1,29 +1,32 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import toast from 'react-hot-toast';
-import { api } from '@/utils/api';
-import { formatDate } from '@/utils/helpers';
-import { EmptyState, Modal, Spinner, ConfirmDialog } from '@/components/ui';
-import { Plus, Calendar, Trash2, Clock } from 'lucide-react';
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { api } from "@/utils/api";
+import { formatDate } from "@/utils/helpers";
+import { EmptyState, Modal, Spinner, ConfirmDialog } from "@/components/ui";
+import { Plus, Calendar, Trash2, Clock } from "lucide-react";
 
 export default function ProceedingsTab({ caseId, proceedings, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ date: '', notes: '', nextDate: '' });
+  const [form, setForm] = useState({ date: "", notes: "", nextDate: "" });
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  const sorted = [...proceedings].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sorted = [...proceedings].sort(
+    (a, b) => new Date(b.date) - new Date(a.date),
+  );
 
   const handleAdd = async (e) => {
     e.preventDefault();
-    if (!form.date || !form.notes) return toast.error('Date and notes are required.');
+    if (!form.date || !form.notes)
+      return toast.error("Date and notes are required.");
     setSaving(true);
     try {
       await api.post(`/api/cases/${caseId}/proceedings`, form);
-      toast.success('Proceeding added.');
-      setForm({ date: '', notes: '', nextDate: '' });
+      toast.success("Proceeding added.");
+      setForm({ date: "", notes: "", nextDate: "" });
       setShowForm(false);
       onUpdate();
     } catch (err) {
@@ -36,8 +39,10 @@ export default function ProceedingsTab({ caseId, proceedings, onUpdate }) {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      await api.delete(`/api/cases/${caseId}/proceedings`, { proceedingId: deleteTarget._id });
-      toast.success('Proceeding removed.');
+      await api.delete(`/api/cases/${caseId}/proceedings`, {
+        proceedingId: deleteTarget._id,
+      });
+      toast.success("Proceeding removed.");
       setDeleteTarget(null);
       onUpdate();
     } catch (err) {
@@ -78,8 +83,14 @@ export default function ProceedingsTab({ caseId, proceedings, onUpdate }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <div className="text-sm font-semibold text-slate-700">{formatDate(p.date)}</div>
-                      {p.addedBy && <div className="text-xs text-slate-400">Added by {p.addedBy}</div>}
+                      <div className="text-sm font-semibold text-slate-700">
+                        {formatDate(p.date)}
+                      </div>
+                      {p.addedBy && (
+                        <div className="text-xs text-slate-400">
+                          Added by {p.addedBy}
+                        </div>
+                      )}
                     </div>
                     <button
                       onClick={() => setDeleteTarget(p)}
@@ -88,7 +99,9 @@ export default function ProceedingsTab({ caseId, proceedings, onUpdate }) {
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <p className="text-sm text-slate-600 mt-1.5 leading-relaxed">{p.notes}</p>
+                  <p className="text-sm text-slate-600 mt-1.5 leading-relaxed">
+                    {p.notes}
+                  </p>
                   {p.nextDate && (
                     <div className="inline-flex items-center gap-1 mt-2 text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded-md border border-amber-100">
                       <Calendar className="w-3 h-3" />
@@ -102,14 +115,29 @@ export default function ProceedingsTab({ caseId, proceedings, onUpdate }) {
         </div>
       )}
 
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title="Add Proceeding" size="sm">
+      <Modal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        title="Add Proceeding"
+        size="sm"
+      >
         <form onSubmit={handleAdd} className="space-y-4">
           <div className="form-group">
-            <label className="label">Date <span className="text-red-500">*</span></label>
-            <input type="date" className="input" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
+            <label className="label">
+              Date <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              className="input"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              required
+            />
           </div>
           <div className="form-group">
-            <label className="label">Proceeding Notes <span className="text-red-500">*</span></label>
+            <label className="label">
+              Proceeding Notes <span className="text-red-500">*</span>
+            </label>
             <textarea
               className="textarea"
               rows={4}
@@ -121,12 +149,27 @@ export default function ProceedingsTab({ caseId, proceedings, onUpdate }) {
           </div>
           <div className="form-group">
             <label className="label">Next Date (optional)</label>
-            <input type="date" className="input" value={form.nextDate} onChange={(e) => setForm({ ...form, nextDate: e.target.value })} />
+            <input
+              type="date"
+              className="input"
+              value={form.nextDate}
+              onChange={(e) => setForm({ ...form, nextDate: e.target.value })}
+            />
           </div>
           <div className="flex gap-2 justify-end">
-            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">Cancel</button>
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="btn-secondary"
+            >
+              Cancel
+            </button>
             <button type="submit" disabled={saving} className="btn-primary">
-              {saving ? <Spinner size="sm" className="text-white" /> : 'Add Proceeding'}
+              {saving ? (
+                <Spinner size="sm" className="text-white" />
+              ) : (
+                "Add Proceeding"
+              )}
             </button>
           </div>
         </form>

@@ -1,8 +1,3 @@
-// app/api/cross-exams/[id]/start-review/route.js
-// POST /api/cross-exams/:id/start-review
-// Transitions: submitted → in_review
-// Only the assigned senior reviewer (or any senior) can call this.
-
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
 import connectDB from "@/lib/db";
@@ -20,8 +15,6 @@ export const POST = withAuth(async (req, { params }, user) => {
     );
   }
 
-  // If there is an assignedTo reviewer, only they can start the review.
-  // If unassigned, any senior (or admin) can pick it up.
   const isSenior = user.seniority === "senior" || user.role === "admin";
   if (exam.assignedTo && exam.assignedTo.toString() !== user.id.toString()) {
     return NextResponse.json(
@@ -46,7 +39,7 @@ export const POST = withAuth(async (req, { params }, user) => {
     action: "start-review",
     userId: user.id,
     message: "Review started.",
-    skipSnapshot: true, // No snapshot needed here — snapshot was made on submit
+    skipSnapshot: true,
   });
 
   if (!result.ok) {

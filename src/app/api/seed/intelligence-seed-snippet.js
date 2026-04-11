@@ -1,9 +1,3 @@
-// Paste this inside your existing src/app/api/seed/route.js  POST handler,
-// after your existing case/reminder seeding block.
-// ────────────────────────────────────────────────────────────────────────────
-// SEED: Intelligence Feed (Judgment Alerts)
-// ────────────────────────────────────────────────────────────────────────────
-
 import JudgmentAlert from "@/models/JudgmentAlert";
 
 export const seedIntelligenceFeed = async () => {
@@ -117,7 +111,3 @@ export const seedIntelligenceFeed = async () => {
   await JudgmentAlert.insertMany(alerts);
   console.log("Intelligence Feed seeded:", alerts.length, "alerts");
 };
-
-// ─── Call this in your existing seed handler ──────────────────────────────
-// Inside your POST handler in api/seed/route.js, add:
-//   await seedIntelligenceFeed();

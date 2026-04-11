@@ -1,8 +1,3 @@
-// app/api/cross-exams/[id]/request-changes/route.js
-// POST /api/cross-exams/:id/request-changes
-// Transitions: in_review → changes_requested
-// Body: { notes?: string }   — overall revision instructions from senior
-
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
 import connectDB from "@/lib/db";

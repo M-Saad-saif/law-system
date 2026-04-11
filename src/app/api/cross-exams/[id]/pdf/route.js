@@ -1,82 +1,89 @@
-// app/api/cross-exams/[id]/pdf/route.js
-// GET /api/cross-exams/:id/pdf
-// Generates a structured HTML document and returns it as a downloadable PDF
-// using the browser's print stream (via Puppeteer-style approach won't work
-// serverless, so we return a styled HTML that the client can window.print()).
-//
-// For a true server-side PDF, install @react-pdf/renderer and swap the
-// renderToBuffer approach in. This implementation returns a fully styled
-// static HTML page so it works without any extra native dependencies.
-
-import { NextResponse } from 'next/server';
-import { withAuth } from '@/lib/api';
-import connectDB from '@/lib/db';
-import CrossExamination from '@/models/CrossExamination';
-import WitnessSection from '@/models/WitnessSection';
-import { format } from 'date-fns';
+import { NextResponse } from "next/server";
+import { withAuth } from "@/lib/api";
+import connectDB from "@/lib/db";
+import CrossExamination from "@/models/CrossExamination";
+import WitnessSection from "@/models/WitnessSection";
+import { format } from "date-fns";
 
 export const GET = withAuth(async (req, { params }, user) => {
   await connectDB();
 
   const exam = await CrossExamination.findById(params.id)
-    .populate('createdBy', 'name email')
-    .populate('assignedTo', 'name email')
-    .populate('caseId', 'caseTitle caseNumber')
+    .populate("createdBy", "name email")
+    .populate("assignedTo", "name email")
+    .populate("caseId", "caseTitle caseNumber")
     .lean();
 
-  if (!exam) return NextResponse.json({ error: 'Cross-examination not found.' }, { status: 404 });
+  if (!exam)
+    return NextResponse.json(
+      { error: "Cross-examination not found." },
+      { status: 404 },
+    );
 
-  const isOwner    = exam.createdBy._id.toString() === user.id.toString();
-  const isAssigned = exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
-  const isAdmin    = user.role === 'admin';
+  const isOwner = exam.createdBy._id.toString() === user.id.toString();
+  const isAssigned =
+    exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
+  const isAdmin = user.role === "admin";
   if (!isOwner && !isAssigned && !isAdmin) {
-    return NextResponse.json({ error: 'Access denied.' }, { status: 403 });
+    return NextResponse.json({ error: "Access denied." }, { status: 403 });
   }
 
   const witnesses = await WitnessSection.find({ crossExamId: exam._id })
     .sort({ createdAt: 1 })
     .lean();
 
-  const formatDate = (d) => (d ? format(new Date(d), 'dd MMM yyyy') : 'N/A');
+  const formatDate = (d) => (d ? format(new Date(d), "dd MMM yyyy") : "N/A");
 
   // Build QA rows HTML for a witness
   const buildQaRows = (pairs) =>
     pairs
       .sort((a, b) => a.sequence - b.sequence)
       .map((p) => {
-        const question = p.useEditedVersion && p.editedQuestion ? p.editedQuestion : p.originalQuestion;
-        const answer   = p.useEditedVersion && p.editedAnswer   ? p.editedAnswer   : p.originalAnswer;
-        const flag     = p.isFlagged  ? '<span class="badge flag">⚑ Flagged</span>'   : '';
-        const approved = p.isApproved ? '<span class="badge ok">✓ Approved</span>' : '';
-        const edited   = p.useEditedVersion ? '<span class="badge edited">Edited</span>' : '';
+        const question =
+          p.useEditedVersion && p.editedQuestion
+            ? p.editedQuestion
+            : p.originalQuestion;
+        const answer =
+          p.useEditedVersion && p.editedAnswer
+            ? p.editedAnswer
+            : p.originalAnswer;
+        const flag = p.isFlagged
+          ? '<span class="badge flag">⚑ Flagged</span>'
+          : "";
+        const approved = p.isApproved
+          ? '<span class="badge ok">✓ Approved</span>'
+          : "";
+        const edited = p.useEditedVersion
+          ? '<span class="badge edited">Edited</span>'
+          : "";
         return `
-          <tr class="${p.isFlagged ? 'row-flagged' : p.isApproved ? 'row-ok' : ''}">
+          <tr class="${p.isFlagged ? "row-flagged" : p.isApproved ? "row-ok" : ""}">
             <td class="seq">${p.sequence}</td>
             <td>
               <div class="q-label">Q:</div>
-              <div class="q-text">${question || '<em>—</em>'}</div>
+              <div class="q-text">${question || "<em>—</em>"}</div>
               <div class="q-label" style="margin-top:6px">A:</div>
-              <div class="a-text">${answer || '<em>—</em>'}</div>
-              ${p.strategyNote ? `<div class="note"><strong>Strategy:</strong> ${p.strategyNote}</div>` : ''}
+              <div class="a-text">${answer || "<em>—</em>"}</div>
+              ${p.strategyNote ? `<div class="note"><strong>Strategy:</strong> ${p.strategyNote}</div>` : ""}
             </td>
             <td class="badges">${flag}${approved}${edited}</td>
           </tr>`;
       })
-      .join('');
+      .join("");
 
   const witnessBlocks = witnesses
     .map(
       (w) => `
       <div class="witness-block">
         <h3>${w.witnessName} <span class="witness-type">(${w.witnessType})</span></h3>
-        ${w.role ? `<p class="witness-role">${w.role}</p>` : ''}
+        ${w.role ? `<p class="witness-role">${w.role}</p>` : ""}
         <table>
           <thead><tr><th>#</th><th>Question / Answer</th><th>Status</th></tr></thead>
           <tbody>${buildQaRows(w.qaPairs)}</tbody>
         </table>
-      </div>`
+      </div>`,
     )
-    .join('');
+    .join("");
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -125,12 +132,12 @@ export const GET = withAuth(async (req, { params }, user) => {
 <header>
   <h1>${exam.title}</h1>
   <div class="meta">
-    <span><strong>Case</strong>${exam.caseId ? `${exam.caseId.caseTitle} (${exam.caseId.caseNumber})` : 'N/A'}</span>
+    <span><strong>Case</strong>${exam.caseId ? `${exam.caseId.caseTitle} (${exam.caseId.caseNumber})` : "N/A"}</span>
     <span><strong>Status</strong><span class="status-pill">${exam.status}</span></span>
     <span><strong>Version</strong>v${exam.version - 1}</span>
     <span><strong>Prepared by</strong>${exam.createdBy.name}</span>
-    ${exam.assignedTo ? `<span><strong>Reviewed by</strong>${exam.assignedTo.name}</span>` : ''}
-    ${exam.hearingDate ? `<span><strong>Hearing Date</strong>${formatDate(exam.hearingDate)}</span>` : ''}
+    ${exam.assignedTo ? `<span><strong>Reviewed by</strong>${exam.assignedTo.name}</span>` : ""}
+    ${exam.hearingDate ? `<span><strong>Hearing Date</strong>${formatDate(exam.hearingDate)}</span>` : ""}
     <span><strong>Generated</strong>${formatDate(new Date())}</span>
   </div>
 </header>
@@ -151,8 +158,8 @@ ${witnessBlocks || '<p style="color:#999;font-style:italic">No witness sections 
 
   return new Response(html, {
     headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Content-Disposition': `inline; filename="cross-exam-${params.id}.html"`,
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Disposition": `inline; filename="cross-exam-${params.id}.html"`,
     },
   });
 });

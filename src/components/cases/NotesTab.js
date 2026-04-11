@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import toast from 'react-hot-toast';
-import { api } from '@/utils/api';
-import { EmptyState, Spinner } from '@/components/ui';
-import { Plus, StickyNote, X } from 'lucide-react';
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { api } from "@/utils/api";
+import { EmptyState, Spinner } from "@/components/ui";
+import { Plus, StickyNote, X } from "lucide-react";
 
 const NOTE_COLORS = [
-  { label: 'Yellow', bg: '#fef9c3', border: '#fde047', text: '#713f12' },
-  { label: 'Blue', bg: '#dbeafe', border: '#93c5fd', text: '#1e3a8a' },
-  { label: 'Green', bg: '#dcfce7', border: '#86efac', text: '#14532d' },
-  { label: 'Pink', bg: '#fce7f3', border: '#f9a8d4', text: '#831843' },
+  { label: "Yellow", bg: "#fef9c3", border: "#fde047", text: "#713f12" },
+  { label: "Blue", bg: "#dbeafe", border: "#93c5fd", text: "#1e3a8a" },
+  { label: "Green", bg: "#dcfce7", border: "#86efac", text: "#14532d" },
+  { label: "Pink", bg: "#fce7f3", border: "#f9a8d4", text: "#831843" },
 ];
 
 export default function NotesTab({ caseId, notes, onUpdate }) {
   const [showForm, setShowForm] = useState(false);
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [color, setColor] = useState(NOTE_COLORS[0].bg);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -26,8 +26,8 @@ export default function NotesTab({ caseId, notes, onUpdate }) {
     setSaving(true);
     try {
       await api.post(`/api/cases/${caseId}/notes`, { content, color });
-      toast.success('Note added.');
-      setContent('');
+      toast.success("Note added.");
+      setContent("");
       setColor(NOTE_COLORS[0].bg);
       setShowForm(false);
       onUpdate();
@@ -42,7 +42,7 @@ export default function NotesTab({ caseId, notes, onUpdate }) {
     setDeletingId(noteId);
     try {
       await api.delete(`/api/cases/${caseId}/notes`, { noteId });
-      toast.success('Note removed.');
+      toast.success("Note removed.");
       onUpdate();
     } catch (err) {
       toast.error(err.message);
@@ -51,7 +51,8 @@ export default function NotesTab({ caseId, notes, onUpdate }) {
     }
   };
 
-  const colorObj = (bg) => NOTE_COLORS.find((c) => c.bg === bg) || NOTE_COLORS[0];
+  const colorObj = (bg) =>
+    NOTE_COLORS.find((c) => c.bg === bg) || NOTE_COLORS[0];
 
   return (
     <div className="space-y-4">
@@ -71,13 +72,21 @@ export default function NotesTab({ caseId, notes, onUpdate }) {
                 type="button"
                 onClick={() => setColor(c.bg)}
                 className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110"
-                style={{ backgroundColor: c.bg, borderColor: color === c.bg ? c.border : 'transparent', boxShadow: color === c.bg ? `0 0 0 2px ${c.border}` : 'none' }}
+                style={{
+                  backgroundColor: c.bg,
+                  borderColor: color === c.bg ? c.border : "transparent",
+                  boxShadow: color === c.bg ? `0 0 0 2px ${c.border}` : "none",
+                }}
               />
             ))}
           </div>
           <textarea
             className="w-full px-3 py-2.5 rounded-lg border text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary-400/30"
-            style={{ backgroundColor: color, borderColor: colorObj(color).border, color: colorObj(color).text }}
+            style={{
+              backgroundColor: color,
+              borderColor: colorObj(color).border,
+              color: colorObj(color).text,
+            }}
             rows={3}
             placeholder="Write a quick note..."
             value={content}
@@ -85,9 +94,26 @@ export default function NotesTab({ caseId, notes, onUpdate }) {
             autoFocus
           />
           <div className="flex gap-2 justify-end">
-            <button type="button" onClick={() => { setShowForm(false); setContent(''); }} className="btn-secondary">Cancel</button>
-            <button onClick={handleAdd} disabled={saving || !content.trim()} className="btn-primary">
-              {saving ? <Spinner size="sm" className="text-white" /> : 'Save Note'}
+            <button
+              type="button"
+              onClick={() => {
+                setShowForm(false);
+                setContent("");
+              }}
+              className="btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAdd}
+              disabled={saving || !content.trim()}
+              className="btn-primary"
+            >
+              {saving ? (
+                <Spinner size="sm" className="text-white" />
+              ) : (
+                "Save Note"
+              )}
             </button>
           </div>
         </div>
@@ -95,7 +121,11 @@ export default function NotesTab({ caseId, notes, onUpdate }) {
 
       {notes.length === 0 && !showForm ? (
         <div className="card">
-          <EmptyState icon={StickyNote} title="No notes yet" description="Add quick sticky notes for this case." />
+          <EmptyState
+            icon={StickyNote}
+            title="No notes yet"
+            description="Add quick sticky notes for this case."
+          />
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -105,7 +135,10 @@ export default function NotesTab({ caseId, notes, onUpdate }) {
               <div
                 key={n._id}
                 className="rounded-xl p-4 relative border shadow-sm"
-                style={{ backgroundColor: n.color || c.bg, borderColor: c.border }}
+                style={{
+                  backgroundColor: n.color || c.bg,
+                  borderColor: c.border,
+                }}
               >
                 <button
                   onClick={() => handleDelete(n._id)}
@@ -113,9 +146,16 @@ export default function NotesTab({ caseId, notes, onUpdate }) {
                   className="absolute top-2 right-2 p-1 rounded-full opacity-40 hover:opacity-100 transition-opacity"
                   style={{ color: c.text }}
                 >
-                  {deletingId === n._id ? <Spinner size="sm" /> : <X className="w-3.5 h-3.5" />}
+                  {deletingId === n._id ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    <X className="w-3.5 h-3.5" />
+                  )}
                 </button>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap pr-5" style={{ color: c.text }}>
+                <p
+                  className="text-sm leading-relaxed whitespace-pre-wrap pr-5"
+                  style={{ color: c.text }}
+                >
                   {n.content}
                 </p>
               </div>

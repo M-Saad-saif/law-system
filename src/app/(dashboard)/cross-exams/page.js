@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// /cross-exams — Junior + Senior Dashboard
-// Matches LexisPortal aesthetic: slate-900 sidebar, white content, gold accents
-// ─────────────────────────────────────────────────────────────────────────────
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -13,7 +8,7 @@ import toast from "react-hot-toast";
 import { apiFetch } from "@/utils/api";
 import { useAuth } from "@/hooks/useAuth";
 
-// ── Status config ─────────────────────────────────────────────────────────
+// --- Status config ---─
 const STATUS = {
   draft: {
     label: "Draft",
@@ -59,7 +54,7 @@ function StatusPill({ status }) {
   );
 }
 
-// ── Stat card ─────────────────────────────────────────────────────────────
+// --- Stat card ---
 function StatCard({ label, count, status, active, onClick }) {
   const s = STATUS[status] || STATUS.draft;
   return (
@@ -89,7 +84,7 @@ function StatCard({ label, count, status, active, onClick }) {
   );
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────
+// --- Empty state ------─
 function EmptyState({ hasFilters }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -141,7 +136,7 @@ function EmptyState({ hasFilters }) {
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────
+// --- Main page ---------─
 export default function CrossExamsPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -188,13 +183,12 @@ export default function CrossExamsPage() {
   const fmtDate = (d) => (d ? format(new Date(d), "dd MMM yyyy") : "—");
   const hasFilters = !!(filters.search || filters.status);
 
-  // Count per status across all loaded exams
   const countBy = (s) => exams.filter((e) => e.status === s).length;
 
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* ── Page header ──────────────────────────────────────────────── */}
+        {/* --- Page header ---- */}
         <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
           <div>
             <h1
@@ -229,7 +223,7 @@ export default function CrossExamsPage() {
           </Link>
         </div>
 
-        {/* ── Stat cards ───────────────────────────────────────────────── */}
+        {/* --- Stat cards --- */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
           {Object.entries(STATUS).map(([key, cfg]) => (
             <StatCard
@@ -249,7 +243,7 @@ export default function CrossExamsPage() {
           ))}
         </div>
 
-        {/* ── Filters ──────────────────────────────────────────────────── */}
+        {/* --- Filters ------ */}
         <div className="flex flex-wrap gap-3 mb-5">
           <div className="relative">
             <svg
@@ -294,7 +288,7 @@ export default function CrossExamsPage() {
           )}
         </div>
 
-        {/* ── Table ────────────────────────────────────────────────────── */}
+        {/* --- Table ---*/}
         {loading ? (
           <div className="flex justify-center py-24">
             <div className="w-8 h-8 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />

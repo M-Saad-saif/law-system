@@ -1,8 +1,3 @@
-// app/api/cross-exams/[id]/approve/route.js
-// POST /api/cross-exams/:id/approve
-// Transitions: in_review → approved
-// Locks the document and creates a final version snapshot.
-
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
 import connectDB from "@/lib/db";

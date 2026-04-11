@@ -1,8 +1,3 @@
-// app/api/cross-exams/[id]/resubmit/route.js
-// POST /api/cross-exams/:id/resubmit
-// Transitions: changes_requested → submitted
-// Creates a new version snapshot.
-
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
 import connectDB from "@/lib/db";

@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// /cross-exams/[id]/review — Senior Review Panel (3-column)
-// Left: witness list | Centre: Q&A pairs | Right: comment thread
-// ─────────────────────────────────────────────────────────────────────────────
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -12,7 +7,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { apiFetch } from "@/utils/api";
 
-// ── Tiny status pill ──────────────────────────────────────────────────────
+// --- Tiny status pill ------
 function Pill({ children, color }) {
   const map = {
     red: "bg-red-50 text-red-700 border-red-200",
@@ -30,7 +25,7 @@ function Pill({ children, color }) {
   );
 }
 
-// ── QA pair for review ────────────────────────────────────────────────────
+// --- QA pair for review ----
 function ReviewCard({
   pair,
   witnessId,
@@ -215,7 +210,7 @@ function ReviewCard({
   );
 }
 
-// ── Comment thread (right column) ─────────────────────────────────────────
+// --- Comment thread (right column) ------------------------------------------------------------─
 function CommentPanel({
   examId,
   witnessId,
@@ -400,7 +395,7 @@ function CommentPanel({
   );
 }
 
-// ── Main review page ──────────────────────────────────────────────────────
+// --- Main review page -----
 export default function ReviewPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -555,7 +550,7 @@ export default function ReviewPage() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
-      {/* ── Top bar ──────────────────────────────────────────────────── */}
+      {/* --- Top bar --- */}
       <div className="flex items-center justify-between px-6 py-3.5 bg-white border-b border-slate-200 shadow-sm flex-shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <Link
@@ -625,7 +620,7 @@ export default function ReviewPage() {
         </div>
       </div>
 
-      {/* ── 3-column body ────────────────────────────────────────────── */}
+      {/* --- 3-column body ---- */}
       <div className="flex flex-1 overflow-hidden">
         {/* Column 1 — Witness list */}
         <aside className="w-56 border-r border-slate-200 bg-white overflow-y-auto flex-shrink-0">

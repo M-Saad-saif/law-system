@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// /cross-exams/[id] — Junior Draft Editor
-// Full witness + QA management, submit, resubmit
-// ─────────────────────────────────────────────────────────────────────────────
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -12,7 +7,7 @@ import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { apiFetch } from "@/utils/api";
 
-// ── Status pill ───────────────────────────────────────────────────────────
+// --- Status pill ----
 const STATUS_STYLES = {
   draft: "bg-slate-100 text-slate-600",
   submitted: "bg-blue-50 text-blue-700",
@@ -40,7 +35,7 @@ function StatusPill({ status }) {
   );
 }
 
-// ── Add Witness modal ─────────────────────────────────────────────────────
+// --- Add Witness modal ---`
 function AddWitnessModal({ onAdd, onClose }) {
   const [form, setForm] = useState({
     witnessName: "",
@@ -141,7 +136,7 @@ function AddWitnessModal({ onAdd, onClose }) {
   );
 }
 
-// ── Add QA inline form ────────────────────────────────────────────────────
+// --- Add QA inline form ---
 function AddQAForm({ witnessId, onAdd, onClose }) {
   const [q, setQ] = useState("");
   const [a, setA] = useState("");
@@ -206,7 +201,7 @@ function AddQAForm({ witnessId, onAdd, onClose }) {
   );
 }
 
-// ── QA pair display ───────────────────────────────────────────────────────
+// --- QA pair display -----
 function QAPairCard({ pair, witnessId, isEditable, onUpdate }) {
   const [editMode, setEditMode] = useState(false);
   const [q, setQ] = useState(pair.originalQuestion || "");
@@ -333,7 +328,7 @@ function QAPairCard({ pair, witnessId, isEditable, onUpdate }) {
   );
 }
 
-// ── Witness accordion ─────────────────────────────────────────────────────
+// --- Witness accordion ---─
 function WitnessCard({ witness, isEditable, onDelete, onAddQA, onUpdateQA }) {
   const [open, setOpen] = useState(true);
   const [addingQA, setAddingQA] = useState(false);
@@ -445,7 +440,7 @@ function WitnessCard({ witness, isEditable, onDelete, onAddQA, onUpdateQA }) {
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────
+// --- Main page -------
 export default function CrossExamEditPage() {
   const { id } = useParams();
   const router = useRouter();

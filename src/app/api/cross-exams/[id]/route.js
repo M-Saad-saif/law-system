@@ -1,8 +1,3 @@
-// app/api/cross-exams/[id]/route.js
-// GET    /api/cross-exams/:id  — fetch with witnesses populated
-// PUT    /api/cross-exams/:id  — update title / hearingDate (draft only)
-// DELETE /api/cross-exams/:id  — soft-delete (creator + admin only, draft only)
-
 import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
 import connectDB from "@/lib/db";
@@ -10,9 +5,6 @@ import CrossExamination from "@/models/CrossExamination";
 import WitnessSection from "@/models/WitnessSection";
 import ActivityLog from "@/models/ActivityLog";
 
-// ---------------------------------------------------------------------------
-// GET — return exam with witnesses and QA pairs populated
-// ---------------------------------------------------------------------------
 export const GET = withAuth(async (req, { params }, user) => {
   await connectDB();
 
@@ -29,7 +21,7 @@ export const GET = withAuth(async (req, { params }, user) => {
     );
   }
 
-  // Access check: creator, assigned reviewer, any senior, or admin
+  // Access check
   const isOwner = exam.createdBy._id.toString() === user.id.toString();
   const isAssigned =
     exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
@@ -55,10 +47,6 @@ export const GET = withAuth(async (req, { params }, user) => {
   return NextResponse.json({ exam: { ...exam, witnesses }, activity });
 });
 
-// ---------------------------------------------------------------------------
-// PUT — update mutable fields (title, hearingDate, assignedTo)
-// Editing is blocked once the exam is locked (approved/archived)
-// ---------------------------------------------------------------------------
 export const PUT = withAuth(async (req, { params }, user) => {
   await connectDB();
 
@@ -106,9 +94,6 @@ export const PUT = withAuth(async (req, { params }, user) => {
   return NextResponse.json({ exam });
 });
 
-// ---------------------------------------------------------------------------
-// DELETE — remove exam and all related witnesses (draft only)
-// ---------------------------------------------------------------------------
 export const DELETE = withAuth(async (req, { params }, user) => {
   await connectDB();
 

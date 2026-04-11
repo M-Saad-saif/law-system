@@ -1,7 +1,3 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// /cross-exams/new — Create a new cross-examination draft
-// ─────────────────────────────────────────────────────────────────────────────
-
 "use client";
 
 import { useState, useEffect } from "react";

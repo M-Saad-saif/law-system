@@ -1,13 +1,9 @@
-// components/cross-exam/WitnessPanel.js
-// Accordion-style witness list with inline QA pair editor.
-// Used by the junior editor page (mode="junior").
-
 "use client";
 
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-// ─── Add Witness Form ─────────────────────────────────────────────────────
+// --- Add Witness Form --------
 function AddWitnessForm({ onAdd, onCancel }) {
   const [form, setForm] = useState({
     witnessName: "",
@@ -88,7 +84,7 @@ function AddWitnessForm({ onAdd, onCancel }) {
   );
 }
 
-// ─── Add QA Pair Form ─────────────────────────────────────────────────────
+// --- Add QA Pair Form ----
 function AddQAForm({ witnessId, onAdd, onCancel }) {
   const [q, setQ] = useState("");
   const [a, setA] = useState("");
@@ -155,7 +151,7 @@ function AddQAForm({ witnessId, onAdd, onCancel }) {
   );
 }
 
-// ─── Single QA Pair (junior editable) ────────────────────────────────────
+// --- Single QA Pair (junior editable) ------
 function QAPairRow({ pair, witnessId, isEditable, onUpdate }) {
   const [editMode, setEditMode] = useState(false);
   const [q, setQ] = useState(pair.originalQuestion || "");
@@ -293,7 +289,7 @@ function QAPairRow({ pair, witnessId, isEditable, onUpdate }) {
   );
 }
 
-// ─── Main Witness Panel ───────────────────────────────────────────────────
+// --- Main Witness Panel ------
 export default function WitnessPanel({
   witnesses = [],
   isEditable,

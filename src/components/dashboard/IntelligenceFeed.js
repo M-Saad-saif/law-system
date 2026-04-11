@@ -315,7 +315,7 @@ export default function IntelligenceFeed() {
                 <JudgmentCard key={j._id} j={j} />
               ))}
             </div>
-            
+
             <div className="flex items-center justify-between mt-5">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}

@@ -5,7 +5,6 @@ import JudgementImage from "@/models/JudgementImage";
 import connectDB from "@/lib/db";
 import { withAuth } from "@/lib/api";
 
-// POST - Generate and save judgement image
 export const POST = withAuth(async (request, context, user) => {
   try {
     await connectDB();
