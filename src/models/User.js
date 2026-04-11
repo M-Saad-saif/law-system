@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "lawyer", "associate"],
       default: "lawyer",
     },
+    seniority: { type: String, enum: ["senior", "junior"], default: "junior" },
     phone: { type: String, trim: true },
     barCouncilNo: { type: String, trim: true },
     isActive: { type: Boolean, default: true },

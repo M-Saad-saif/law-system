@@ -9,7 +9,14 @@ import toast from "react-hot-toast";
 import { Scale, ArrowRight } from "lucide-react";
 import { api } from "@/utils/api";
 
-function Field({ label, type = "text", placeholder, required, value, onChange }) {
+function Field({
+  label,
+  type = "text",
+  placeholder,
+  required,
+  value,
+  onChange,
+}) {
   return (
     <div className="form-group">
       <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -35,6 +42,7 @@ export default function RegisterPage() {
     password: "",
     phone: "",
     barCouncilNo: "",
+    seniority: "junior",
   });
   const [loading, setLoading] = useState(false);
 
@@ -115,6 +123,43 @@ export default function RegisterPage() {
               value={form.barCouncilNo}
               onChange={set("barCouncilNo")}
             />
+          </div>
+
+          {/* Seniority selector */}
+          <div className="form-group">
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+              Role <span className="text-red-400">*</span>
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                {
+                  value: "senior",
+                  label: "Senior Lawyer",
+                  desc: "Reviews & approves drafts",
+                },
+                {
+                  value: "junior",
+                  label: "Junior / Associate",
+                  desc: "Creates & submits drafts",
+                },
+              ].map(({ value, label, desc }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, seniority: value }))}
+                  className={`text-left px-3 py-2.5 rounded-lg border transition-all text-sm ${
+                    form.seniority === value
+                      ? "border-primary-400 bg-primary-600/20 text-white"
+                      : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20"
+                  }`}
+                >
+                  <span className="block font-semibold">{label}</span>
+                  <span className="block text-xs opacity-70 mt-0.5">
+                    {desc}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <button

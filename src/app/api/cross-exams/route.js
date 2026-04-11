@@ -12,49 +12,36 @@ export const GET = withAuth(async (req, context, user) => {
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
 
-    let query = {};
+    const isSenior = user.seniority === "senior" || user.role === "admin";
 
-    if (user.role === "senior" || user.role === "admin") {
-      if (status === "draft") {
-        query = {
-          $or: [
-            { createdBy: user.id, status: "draft" },
-            {
-              status: {
-                $in: ["submitted", "in_review", "approved", "rejected"],
-              },
+    let query;
+    if (isSenior) {
+      query = {
+        $or: [
+          { createdBy: user.id },
+          {
+            status: {
+              $in: [
+                "submitted",
+                "in_review",
+                "changes_requested",
+                "approved",
+                "archived",
+              ],
             },
-          ],
-        };
-      } else {
-        query = {
-          $or: [
-            { createdBy: user.id, status: "draft" },
-            { status: { $ne: "draft" } },
-          ],
-        };
-      }
-    } else if (user.role === "junior") {
-      query = { createdBy: user.id };
+          },
+        ],
+      };
     } else {
       query = { createdBy: user.id };
     }
 
-    if (status) {
-      if (user.role === "senior" || user.role === "admin") {
-        query.status = status;
-      } else {
-        query = { createdBy: user.id, status };
-      }
-    }
-
+    if (status) query.status = status;
     if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: "i" } },
-        ...(user.role === "senior" || user.role === "admin"
-          ? [{ "createdBy.name": { $regex: search, $options: "i" } }]
-          : []),
-      ];
+      const searchClause = {
+        $or: [{ title: { $regex: search, $options: "i" } }],
+      };
+      query = { $and: [query, searchClause] };
     }
 
     const total = await CrossExamination.countDocuments(query);
@@ -66,13 +53,14 @@ export const GET = withAuth(async (req, context, user) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
+    const totalPages = Math.ceil(total / limit);
     return NextResponse.json({
       success: true,
       exams,
       total,
       page,
-      totalPages: Math.ceil(total / limit),
-      userRole: user.role, // Include role in response for UI to adjust display
+      totalPages,
+      pagination: { total, page, pages: totalPages },
     });
   } catch (error) {
     console.error("Failed to fetch cross-exams:", error);
@@ -88,18 +76,10 @@ export const POST = withAuth(async (req, context, user) => {
     await connectDB();
     const body = await req.json();
 
-    // Auto-assign status based on role?
-    // Juniors create drafts, Seniors can create directly as submitted?
-    let initialStatus = "draft";
-    if (user.role === "senior" || user.role === "admin") {
-      // Seniors/admins might want to create exams directly as 'in_review' or 'approved'
-      initialStatus = body.status || "draft";
-    }
-
     const newExam = await CrossExamination.create({
       ...body,
       createdBy: user.id,
-      status: initialStatus,
+      status: "draft",
     });
 
     await newExam.populate("createdBy", "name email role");

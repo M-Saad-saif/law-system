@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { apiFetch } from "@/utils/api";
+import { useAuth } from "@/hooks/useAuth";
 
 // ── Status config ─────────────────────────────────────────────────────────
 const STATUS = {
@@ -143,6 +144,8 @@ function EmptyState({ hasFilters }) {
 // ── Main page ─────────────────────────────────────────────────────────────
 export default function CrossExamsPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const isSenior = user?.seniority === "senior" || user?.role === "admin";
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ total: 0, pages: 1, page: 1 });
@@ -381,12 +384,16 @@ export default function CrossExamsPage() {
                     {/* Actions */}
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {exam.status === "in_review" ? (
+                        {/* Senior: Review button for submitted + in_review */}
+                        {isSenior &&
+                        ["submitted", "in_review"].includes(exam.status) ? (
                           <Link
                             href={`/cross-exams/${exam._id}/review`}
                             className="px-3 py-1.5 bg-amber-500 text-white text-xs font-semibold rounded-lg hover:bg-amber-600 transition-colors"
                           >
-                            Review
+                            {exam.status === "submitted"
+                              ? "Start Review"
+                              : "Review"}
                           </Link>
                         ) : (
                           <Link
@@ -416,7 +423,7 @@ export default function CrossExamsPage() {
                             PDF
                           </a>
                         )}
-                        {exam.status === "draft" && (
+                        {exam.status === "draft" && !isSenior && (
                           <button
                             onClick={() => handleDelete(exam._id, exam.title)}
                             className="px-2 py-1.5 text-red-400 hover:text-red-600 text-xs transition-colors"
