@@ -3,17 +3,13 @@ import { withAuth } from "@/lib/api";
 import connectDB from "@/lib/db";
 import CrossExamination from "@/models/CrossExamination";
 import WitnessSection from "@/models/WitnessSection";
-import { logActivity } from "@/lib/crossExamWorkflow";
+import { logActivity, validateQAPair } from "@/lib/crossExamWorkflow";
 
 export const POST = withAuth(async (req, { params }, user) => {
   await connectDB();
 
   const exam = await CrossExamination.findById(params.id);
-  if (!exam)
-    return NextResponse.json(
-      { error: "Cross-examination not found." },
-      { status: 404 },
-    );
+  if (!exam) return NextResponse.json({ error: "Not found." }, { status: 404 });
   if (exam.isLocked)
     return NextResponse.json({ error: "Document is locked." }, { status: 403 });
 
@@ -22,42 +18,56 @@ export const POST = withAuth(async (req, { params }, user) => {
     crossExamId: params.id,
   });
   if (!witness)
-    return NextResponse.json(
-      { error: "Witness section not found." },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: "Witness not found." }, { status: 404 });
 
   const isCreator = exam.createdBy.toString() === user.id.toString();
   const isReviewer =
     exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
-  const isAdmin = user.role === "admin";
-  if (!isCreator && !isReviewer && !isAdmin) {
+  if (!isCreator && !isReviewer && user.role !== "admin") {
     return NextResponse.json({ error: "Access denied." }, { status: 403 });
   }
 
   const body = await req.json();
-  const { originalQuestion = "", originalAnswer = "" } = body;
 
-  // Auto-assign next sequence number
+  // Validate before inserting
+  const validation = validateQAPair(body);
+  if (!validation.valid) {
+    return NextResponse.json(
+      { error: validation.errors.join(" "), warnings: validation.warnings },
+      { status: 400 },
+    );
+  }
+
   const maxSeq = witness.qaPairs.reduce((m, p) => Math.max(m, p.sequence), 0);
 
   witness.qaPairs.push({
     sequence: body.sequence ?? maxSeq + 1,
-    originalQuestion,
-    originalAnswer,
-    editedQuestion: "",
-    editedAnswer: "",
-    useEditedVersion: false,
-    isApproved: false,
-    isFlagged: false,
-    strategyNote: "",
-    evidenceNote: "",
-    caseLawNote: "",
+    originalQuestion: body.originalQuestion ?? "",
+    originalAnswer: body.originalAnswer ?? "",
+    editedQuestion: body.editedQuestion ?? "",
+    editedAnswer: body.editedAnswer ?? "",
+    useEditedVersion: body.useEditedVersion ?? false,
+
+    // Enhanced fields
+    questionType: body.questionType ?? "leading",
+    phase: body.phase ?? "factEstablish",
+    objective: body.objective ?? "",
+    expectedAnswer: body.expectedAnswer ?? "",
+    ifWitnessDenies: body.ifWitnessDenies ?? "",
+    linkedToEvidence: body.linkedToEvidence ?? "",
+    possibleObjections: body.possibleObjections ?? [],
+    reviewStatus: "pending",
+
+    strategyNote: body.strategyNote ?? "",
+    evidenceNote: body.evidenceNote ?? "",
+    caseLawNote: body.caseLawNote ?? "",
+    internalNote: body.internalNote ?? "",
     comments: [],
+    scoring: {},
+    courtroomUsage: {},
   });
 
   await witness.save();
-
   const newPair = witness.qaPairs[witness.qaPairs.length - 1];
 
   await logActivity({
@@ -69,8 +79,11 @@ export const POST = withAuth(async (req, { params }, user) => {
       qaId: newPair._id,
       sequence: newPair.sequence,
     },
-    message: `QA pair #${newPair.sequence} added for witness "${witness.witnessName}".`,
+    message: `Q${newPair.sequence} added for witness "${witness.witnessName}" [${newPair.phase} / ${newPair.questionType}].`,
   });
 
-  return NextResponse.json({ qaPair: newPair }, { status: 201 });
+  return NextResponse.json(
+    { qaPair: newPair, warnings: validation.warnings },
+    { status: 201 },
+  );
 });
