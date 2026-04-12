@@ -392,11 +392,14 @@ function QAPairCard({
   isEditable,
   onUpdate,
   onCommentAdded,
+  onDelete,
 }) {
   const [editMode, setEditMode] = useState(false);
   const [q, setQ] = useState(pair.originalQuestion || "");
   const [a, setA] = useState(pair.originalAnswer || "");
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleSave = async () => {
     setSaving(true);
@@ -408,6 +411,17 @@ function QAPairCard({
       setEditMode(false);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!onDelete) return;
+    setDeleting(true);
+    try {
+      await onDelete(witnessId, pair._id);
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
     }
   };
 
@@ -525,6 +539,35 @@ function QAPairCard({
               Edit
             </button>
           )}
+
+          {pair.isApproved &&
+            (confirmDelete ? (
+              <div className="mt-3 flex items-center gap-1.5">
+                <span className="text-[11px] text-red-600 font-semibold">
+                  Delete?
+                </span>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="text-[11px] px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold disabled:opacity-60 transition-colors"
+                >
+                  {deleting ? "…" : "Yes, delete"}
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="text-[11px] px-2 py-1.5 text-slate-500 hover:text-slate-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="mt-3 text-[11px] px-2.5 py-1.5 border border-red-200 rounded-lg text-red-500 hover:bg-red-50 hover:border-red-300 font-medium transition-colors"
+              >
+                🗑 Delete
+              </button>
+            ))}
         </>
       )}
     </div>
@@ -539,6 +582,7 @@ function WitnessCard({
   onDelete,
   onAddQA,
   onUpdateQA,
+  onDeleteQA,
   onCommentAdded,
 }) {
   const [open, setOpen] = useState(true);
@@ -627,6 +671,7 @@ function WitnessCard({
                   examId={examId}
                   isEditable={isEditable}
                   onUpdate={onUpdateQA}
+                  onDelete={onDeleteQA}
                   onCommentAdded={(comment) =>
                     onCommentAdded(witness._id, pair._id, comment)
                   }
@@ -736,6 +781,26 @@ export default function CrossExamEditPage() {
           : w,
       ),
     }));
+  };
+
+  const handleDeleteQA = async (wId, qaId) => {
+    try {
+      await apiFetch(
+        `/api/cross-exams/${id}/witnesses/${wId}/qa/${qaId}/delete`,
+        { method: "DELETE" },
+      );
+      setExam((p) => ({
+        ...p,
+        witnesses: p.witnesses.map((w) =>
+          w._id === wId
+            ? { ...w, qaPairs: w.qaPairs.filter((q) => q._id !== qaId) }
+            : w,
+        ),
+      }));
+      toast.success("QA pair deleted.");
+    } catch (err) {
+      toast.error(err.message || "Failed to delete QA pair.");
+    }
   };
 
   // Append a new comment into local state after junior posts a reply
@@ -1034,6 +1099,7 @@ export default function CrossExamEditPage() {
                     onDelete={handleDeleteWitness}
                     onAddQA={handleAddQA}
                     onUpdateQA={handleUpdateQA}
+                    onDeleteQA={handleDeleteQA}
                     onCommentAdded={handleAddComment}
                   />
                 ))}

@@ -33,6 +33,7 @@ function ReviewCard({
   isLocked,
   onUpdate,
   onFlag,
+  onDelete,
   onSelectComment,
 }) {
   const [editMode, setEditMode] = useState(false);
@@ -40,6 +41,18 @@ function ReviewCard({
   const [editedA, setEditedA] = useState(pair.editedAnswer || "");
   const [useEdited, setUseEdited] = useState(pair.useEditedVersion || false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await onDelete(witnessId, pair._id);
+    } finally {
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
+  };
 
   const handleSaveEdit = async () => {
     setSaving(true);
@@ -165,14 +178,16 @@ function ReviewCard({
       ) : null}
 
       {/* Action buttons */}
-      {!isLocked && (
-        <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-slate-100">
+      <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-slate-100">
+        {!isLocked && (
           <button
             onClick={() => setEditMode((v) => !v)}
             className="text-[11px] px-2.5 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition-colors"
           >
             {editMode ? "Cancel" : "✏️ Edit"}
           </button>
+        )}
+        {!isLocked && (
           <button
             onClick={() =>
               onFlag(witnessId, pair._id, { isFlagged: !pair.isFlagged })
@@ -185,6 +200,8 @@ function ReviewCard({
           >
             {pair.isFlagged ? "× Unflag" : "⚑ Flag"}
           </button>
+        )}
+        {!isLocked && (
           <button
             onClick={() =>
               onFlag(witnessId, pair._id, { isApproved: !pair.isApproved })
@@ -197,15 +214,44 @@ function ReviewCard({
           >
             {pair.isApproved ? "✓ Approved" : "✓ Approve"}
           </button>
-          <button
-            onClick={() => onSelectComment(witnessId, pair._id)}
-            className="ml-auto text-[11px] px-2.5 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition-colors"
-          >
-            💬 Comment{" "}
-            {pair.comments?.length > 0 ? `(${pair.comments.length})` : ""}
-          </button>
-        </div>
-      )}
+        )}
+        <button
+          onClick={() => onSelectComment(witnessId, pair._id)}
+          className="ml-auto text-[11px] px-2.5 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition-colors"
+        >
+          💬 Comment{" "}
+          {pair.comments?.length > 0 ? `(${pair.comments.length})` : ""}
+        </button>
+
+        {pair.isApproved &&
+          (confirmDelete ? (
+            <div className="flex items-center gap-1.5 ml-1">
+              <span className="text-[11px] text-red-600 font-semibold">
+                Delete?
+              </span>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="text-[11px] px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold disabled:opacity-60 transition-colors"
+              >
+                {deleting ? "…" : "Yes, delete"}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-[11px] px-2 py-1.5 text-slate-500 hover:text-slate-700"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="text-[11px] px-2.5 py-1.5 border border-red-200 rounded-lg text-red-500 hover:bg-red-50 hover:border-red-300 font-medium transition-colors"
+            >
+              🗑 Delete
+            </button>
+          ))}
+      </div>
     </div>
   );
 }
@@ -489,6 +535,26 @@ export default function ReviewPage() {
     }));
   };
 
+  const handleDeleteQA = async (wId, qaId) => {
+    try {
+      await apiFetch(
+        `/api/cross-exams/${id}/witnesses/${wId}/qa/${qaId}/delete`,
+        { method: "DELETE" },
+      );
+      setExam((p) => ({
+        ...p,
+        witnesses: p.witnesses.map((w) =>
+          w._id === wId
+            ? { ...w, qaPairs: w.qaPairs.filter((q) => q._id !== qaId) }
+            : w,
+        ),
+      }));
+      toast.success("QA pair deleted.");
+    } catch (err) {
+      toast.error(err.message || "Failed to delete QA pair.");
+    }
+  };
+
   const updateCommentInState = (wId, qaId, fn) => {
     setExam((p) => ({
       ...p,
@@ -680,6 +746,7 @@ export default function ReviewPage() {
                   isLocked={exam.isLocked}
                   onUpdate={handleUpdateQA}
                   onFlag={handleFlag}
+                  onDelete={handleDeleteQA}
                   onSelectComment={(wId, qaId) =>
                     setCommentTarget({ witnessId: wId, qaId })
                   }
