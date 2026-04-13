@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { verifyToken } from './auth';
+import { verifyToken } from './authtoken';
 import { cookies } from 'next/headers';
 
 export function apiSuccess(data, status = 200) {

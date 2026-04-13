@@ -128,3 +128,23 @@ export const compareVersions = (examId, versionA, versionB) =>
 export const openPDF = (examId) => {
   window.open(`/api/cross-exams/${examId}/pdf`, "_blank");
 };
+
+// --------- Courtroom -----
+
+export const activateCourtroom = (examId, body) =>
+  apiFetch(`/api/cross-exams/${examId}/courtroom`, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+
+export const deactivateCourtroom = (examId, body) =>
+  apiFetch(`/api/cross-exams/${examId}/courtroom`, {
+    method: "DELETE",
+    body: JSON.stringify(body),
+  });
+
+export const updateCourtroomQA = (examId, body) =>
+  apiFetch(`/api/cross-exams/${examId}/courtroom/qa`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });

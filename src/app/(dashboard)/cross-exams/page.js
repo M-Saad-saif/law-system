@@ -35,6 +35,11 @@ const STATUS = {
     dot: "bg-emerald-400",
     pill: "bg-emerald-50 text-emerald-700",
   },
+  courtroom_active: {
+    label: "🔴 Live in Court",
+    dot: "bg-red-500",
+    pill: "bg-red-100 text-red-700",
+  },
   archived: {
     label: "Archived",
     dot: "bg-gray-300",
@@ -199,7 +204,6 @@ export default function CrossExamsPage() {
             </h1>
             <p className="text-slate-500 text-sm mt-1">
               Collaborative drafting &amp; reviewing
-              
             </p>
           </div>
           <Link

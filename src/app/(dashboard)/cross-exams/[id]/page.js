@@ -14,6 +14,7 @@ const STATUS_STYLES = {
   in_review: "bg-amber-50 text-amber-700",
   changes_requested: "bg-orange-50 text-orange-700",
   approved: "bg-emerald-50 text-emerald-700",
+  courtroom_active: "bg-red-100 text-red-700",
   archived: "bg-gray-100 text-gray-500",
 };
 const STATUS_LABELS = {
@@ -22,6 +23,7 @@ const STATUS_LABELS = {
   in_review: "In Review",
   changes_requested: "Changes Requested",
   approved: "Approved",
+  courtroom_active: "🔴 Live in Court",
   archived: "Archived",
 };
 
@@ -917,6 +919,15 @@ export default function CrossExamEditPage() {
             >
               History
             </Link>
+            {(exam.status === "approved" ||
+              exam.status === "courtroom_active") && (
+              <Link
+                href={`/cross-exams/${id}/courtroom`}
+                className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5"
+              >
+                🏛 Courtroom
+              </Link>
+            )}
             {exam.status === "approved" && (
               <a
                 href={`/api/cross-exams/${id}/pdf`}

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import { signToken, setAuthCookie } from "@/lib/auth";
+import { signToken, setAuthCookie } from "@/lib/authtoken";
 
 export async function POST(request) {
   try {
