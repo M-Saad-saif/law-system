@@ -27,10 +27,10 @@ const JUDGE_REACTION_LABELS = {
 };
 
 const OUTCOME_OPTIONS = [
-  { value: "favorable", label: "✅ Favorable" },
-  { value: "neutral", label: "➖ Neutral" },
-  { value: "unfavorable", label: "❌ Unfavorable" },
-  { value: "adjourned", label: "⏸ Adjourned" },
+  { value: "favorable", label: "Favorable" },
+  { value: "neutral", label: "Neutral" },
+  { value: "unfavorable", label: "Unfavorable" },
+  { value: "adjourned", label: "Adjourned" },
 ];
 
 function JudgeReactionBadge({ reaction }) {

@@ -45,6 +45,31 @@ const noteSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// ---- Fee Payment Entry ----
+const feePaymentSchema = new mongoose.Schema(
+  {
+    amount: { type: Number, required: true, min: 0 },
+    date: { type: Date, required: true, default: Date.now },
+    method: {
+      type: String,
+      enum: ["cash", "bank_transfer", "cheque", "online", "other"],
+      default: "cash",
+    },
+    note: { type: String, default: "", trim: true },
+  },
+  { timestamps: true },
+);
+
+// ---- Fee Structure ----
+const feeSchema = new mongoose.Schema(
+  {
+    agreedAmount: { type: Number, default: 0, min: 0 },
+    payments: { type: [feePaymentSchema], default: [] },
+    notes: { type: String, default: "", trim: true },
+  },
+  { _id: false },
+);
+
 const caseSchema = new mongoose.Schema(
   {
     userId: {
@@ -124,6 +149,7 @@ const caseSchema = new mongoose.Schema(
     accused: [accusedSchema],
     documents: [documentSchema],
     notes: [noteSchema],
+    fee: { type: feeSchema, default: () => ({}) },
   },
   { timestamps: true },
 );

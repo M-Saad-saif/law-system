@@ -19,6 +19,7 @@ import ProceedingsTab from "@/components/cases/ProceedingsTab";
 import CitationsTab from "@/components/cases/CitationsTab";
 import NotesTab from "@/components/cases/NotesTab";
 import AccusedTab from "@/components/cases/AccusedTab";
+import FeeTab from "@/components/cases/FeeTab";
 import {
   Pencil,
   Trash2,
@@ -34,6 +35,7 @@ import {
   FileText,
   StickyNote,
   BookMarked,
+  Banknote,
 } from "lucide-react";
 
 const TABS = [
@@ -42,6 +44,7 @@ const TABS = [
   { id: "accused", label: "Accused / Bail", icon: User },
   { id: "citations", label: "Citations", icon: BookMarked },
   { id: "notes", label: "Notes", icon: StickyNote },
+  { id: "fee", label: "Fee", icon: Banknote },
 ];
 
 export default function CaseDetailPage() {
@@ -170,7 +173,9 @@ export default function CaseDetailPage() {
                   ? caseData.notes?.length
                   : t.id === "accused"
                     ? caseData.accused?.length
-                    : undefined,
+                    : t.id === "fee"
+                      ? caseData.fee?.payments?.length || undefined
+                      : undefined,
         }))}
         active={activeTab}
         onChange={setActiveTab}
@@ -206,6 +211,7 @@ export default function CaseDetailPage() {
           onUpdate={fetchCase}
         />
       )}
+      {activeTab === "fee" && <FeeTab caseId={id} onUpdate={fetchCase} />}
 
       <ConfirmDialog
         isOpen={showDelete}
