@@ -9,6 +9,10 @@ import {
   LogOutIcon,
   Scale,
   Settings,
+  Library,
+  FileText,
+  Microscope,
+  Image,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -17,11 +21,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 const Icon = {
-  Dashboard: () => (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
-      <Home />
-    </svg>
-  ),
+  Dashboard: Home,
   Cases: () => (
     <svg
       className="w-5 h-5"
@@ -37,31 +37,17 @@ const Icon = {
       />
     </svg>
   ),
-  Calendar: () => (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
-      <Calendar />
-    </svg>
-  ),
-  Books: () => (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
-      <BookUser />
-    </svg>
-  ),
-  Reminders: () => (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
-      <Bell />
-    </svg>
-  ),
-  CrossExam: () => (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
-      <BookOpenText />
-    </svg>
-  ),
-  Settings: () => (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
-      <Settings />
-    </svg>
-  ),
+  Calendar,
+  Books: BookUser,
+  Reminders: Bell,
+  CrossExam: BookOpenText,
+  Settings,
+  Scale,
+  Library,
+  Applications: FileText,
+  Extractor: Microscope,
+  ImageGen: Image,
+  Logout: LogOutIcon,
   ChevronDown: () => (
     <svg
       className="w-4 h-4"
@@ -71,16 +57,6 @@ const Icon = {
       viewBox="0 0 24 24"
     >
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-    </svg>
-  ),
-  Scale: () => (
-    <svg className="w-6 h-6" viewBox="0 0 24 24">
-      <Scale />
-    </svg>
-  ),
-  Logout: () => (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
-      <LogOutIcon />
     </svg>
   ),
 };
@@ -106,6 +82,31 @@ const NAV_SECTIONS = [
           { label: "+ New Draft", href: "/cross-exams/new" },
         ],
       },
+      {
+        label: "Application Generator",
+        href: "/applications",
+        icon: Icon.Applications,
+      },
+    ],
+  },
+  {
+    label: "Judgements",
+    items: [
+      {
+        label: "Judgement Library",
+        href: "/library",
+        icon: Icon.Library,
+      },
+      {
+        label: "Extractor & Summary",
+        href: "/judgement-extractor",
+        icon: Icon.Extractor,
+      },
+      {
+        label: "Image Generator",
+        href: "/judgement-image-generator",
+        icon: Icon.ImageGen,
+      },
     ],
   },
   {
@@ -121,13 +122,10 @@ const NAV_SECTIONS = [
   },
 ];
 
-// --- Single nav item ------─
-
 function NavItem({ item, pathname }) {
   const isActive =
     pathname === item.href || pathname.startsWith(item.href + "/");
   const [subOpen, setSubOpen] = useState(isActive);
-
   const hasSubLinks = item.subLinks && item.subLinks.length > 0;
 
   return (
@@ -152,7 +150,7 @@ function NavItem({ item, pathname }) {
                 : "text-slate-500 group-hover:text-slate-300"
             }
           >
-            <item.icon />
+            <item.icon className="w-5 h-5" />
           </span>
           <span className="flex-1 truncate">{item.label}</span>
           {item.badge && (
@@ -161,7 +159,6 @@ function NavItem({ item, pathname }) {
             </span>
           )}
         </Link>
-
         {hasSubLinks && (
           <button
             onClick={() => setSubOpen((v) => !v)}
@@ -175,7 +172,6 @@ function NavItem({ item, pathname }) {
           </button>
         )}
       </div>
-
       {hasSubLinks && subOpen && (
         <div className="ml-8 mt-1 space-y-0.5 border-l border-slate-700 pl-3">
           {item.subLinks.map((sub) => {
@@ -203,23 +199,15 @@ function NavItem({ item, pathname }) {
   );
 }
 
-// --- Main Sidebar ------------
-
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
 
   return (
-    <aside
-      className="
-      h-screen w-60 flex flex-col
-      bg-[#0f172a] border-r border-slate-800
-      z-40 select-none
-    "
-    >
+    <aside className="h-screen w-60 flex flex-col bg-[#0f172a] border-r border-slate-800 z-40 select-none">
       <div className="flex items-center gap-2.5 px-5 py-5 border-b border-slate-800">
         <div className="w-8 h-8 rounded-lg bg-[#026665] flex items-center justify-center flex-shrink-0 text-white">
-          <Icon.Scale />
+          <Scale className="w-6 h-6" />
         </div>
         <div>
           <p
@@ -234,7 +222,6 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* --- Navigation --- */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5 scrollbar-thin scrollbar-thumb-slate-700">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
@@ -250,11 +237,9 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* --- User footer ---- */}
       {user && (
         <div className="border-t border-slate-800 px-4 py-4">
           <div className="flex items-center gap-3">
-            {/* Avatar */}
             <div className="w-8 h-8 rounded-full bg-[#026665]/20 border border-[#026665]/30 flex items-center justify-center flex-shrink-0">
               <span className="text-[#026665] text-xs font-bold uppercase">
                 {user.name?.charAt(0) || "U"}
@@ -268,13 +253,12 @@ export default function Sidebar() {
                 {user.role || "Lawyer"}
               </p>
             </div>
-
             <button
               onClick={logout}
               className="text-slate-600 hover:text-red-400 transition-colors"
               title="Logout"
             >
-              <Icon.Logout />
+              <LogOutIcon className="w-5 h-5" />
             </button>
           </div>
         </div>

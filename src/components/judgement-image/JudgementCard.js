@@ -10,16 +10,15 @@ const JudgementCard = ({ data, onImageGenerated }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const safeData = data || {};
 
-  // Formal legal brand colors
   const brandColors = {
-    primary: "#171a2a", // Dark navy - authoritative
-    secondary: "#026665", // Teal - trustworthy
-    accent: "#0a4d4c", // Darker teal for accents
+    primary: "#171a2a",
+    secondary: "#026665",
+    accent: "#0a4d4c",
     textDark: "#1e1e1e",
     textLight: "#ffffff",
     background: "#f5f5f5",
     border: "#d4d4d4",
-    gold: "#9b7b3c", // Subtle gold for hierarchy
+    gold: "#9b7b3c",
   };
 
   const generateImage = async (format = "png") => {
