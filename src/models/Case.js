@@ -150,7 +150,9 @@ const caseSchema = new mongoose.Schema(
     documents: [documentSchema],
     notes: [noteSchema],
     fee: { type: feeSchema, default: () => ({}) },
+    isFavourite: { type: Boolean, default: false },
   },
+
   { timestamps: true },
 );
 

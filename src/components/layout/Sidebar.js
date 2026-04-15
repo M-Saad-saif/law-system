@@ -11,7 +11,6 @@ import {
   Settings,
   Library,
   FileText,
-  Microscope,
   Image,
 } from "lucide-react";
 
@@ -45,7 +44,6 @@ const Icon = {
   Scale,
   Library,
   Applications: FileText,
-  Extractor: Microscope,
   ImageGen: Image,
   Logout: LogOutIcon,
   ChevronDown: () => (
@@ -96,11 +94,6 @@ const NAV_SECTIONS = [
         label: "Judgement Library",
         href: "/library",
         icon: Icon.Library,
-      },
-      {
-        label: "Extractor & Summary",
-        href: "/judgement-extractor",
-        icon: Icon.Extractor,
       },
       {
         label: "Image Generator",

@@ -12,10 +12,12 @@ export const GET = withAuth(async (request, context, user) => {
     const search = searchParams.get("search") || "";
     const status = searchParams.get("status") || "";
     const caseType = searchParams.get("caseType") || "";
+    const isFavourite = searchParams.get("isFavourite");
 
     const query = { userId: user.id };
     if (status) query.status = status;
     if (caseType) query.caseType = caseType;
+    if (isFavourite === "true") query.isFavourite = true;
     if (search) {
       query.$or = [
         { caseTitle: { $regex: search, $options: "i" } },

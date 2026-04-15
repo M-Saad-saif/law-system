@@ -22,6 +22,7 @@ import {
   Eye,
   ChevronLeft,
   ChevronRight,
+  Star,
 } from "lucide-react";
 
 const STATUSES = ["", "Active", "Closed", "Pending", "Adjourned", "Disposed"];
@@ -90,6 +91,23 @@ export default function CasesPage() {
       toast.error(err.message);
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const toggleFavourite = async (e, c) => {
+    e.stopPropagation();
+    try {
+      const data = await api.patch(`/api/cases/${c._id}/favourite`);
+      setCases((prev) =>
+        prev.map((x) =>
+          x._id === c._id ? { ...x, isFavourite: data.data.isFavourite } : x,
+        ),
+      );
+      toast.success(
+        data.data.isFavourite ? "Saved to Library" : "Removed from Library",
+      );
+    } catch {
+      toast.error("Failed to update.");
     }
   };
 
@@ -229,6 +247,18 @@ export default function CasesPage() {
                             title="View"
                           >
                             <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => toggleFavourite(e, c)}
+                            title={
+                              c.isFavourite
+                                ? "Remove from Library"
+                                : "Save to Library"
+                            }
+                          >
+                            <Star
+                              className={`w-4 h-4 ${c.isFavourite ? "fill-yellow-400 text-yellow-500" : "text-slate-400"}`}
+                            />
                           </button>
                           <button
                             onClick={() => setDeleteTarget(c)}

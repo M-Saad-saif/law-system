@@ -36,6 +36,7 @@ import {
   StickyNote,
   BookMarked,
   Banknote,
+  Star,
 } from "lucide-react";
 
 const TABS = [
@@ -85,6 +86,18 @@ export default function CaseDetailPage() {
     }
   };
 
+  const toggleFavourite = async () => {
+    try {
+      const res = await api.patch(`/api/cases/${id}/favourite`);
+      setCaseData((prev) => ({ ...prev, isFavourite: res.data.isFavourite }));
+      toast.success(
+        res.data.isFavourite ? "Saved to Library ⭐" : "Removed from Library",
+      );
+    } catch {
+      toast.error("Failed to update.");
+    }
+  };
+
   const toggleStatus = async () => {
     const newStatus = caseData.status === "Closed" ? "Active" : "Closed";
     setStatusLoading(true);
@@ -131,6 +144,20 @@ export default function CaseDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          <button
+            onClick={toggleFavourite}
+            title={caseData.isFavourite ? "Remove from Library" : "Save to Library"}
+            className={`btn-secondary gap-1.5 ${
+              caseData.isFavourite
+                ? "text-yellow-600 border-yellow-300 bg-yellow-50 hover:bg-yellow-100"
+                : ""
+            }`}
+          >
+            <Star
+              className={`w-3.5 h-3.5 ${caseData.isFavourite ? "fill-yellow-400 text-yellow-500" : ""}`}
+            />
+            {caseData.isFavourite ? "Saved" : "Save to Library"}
+          </button>
           <button
             onClick={toggleStatus}
             disabled={statusLoading}
