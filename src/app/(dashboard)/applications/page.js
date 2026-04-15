@@ -79,7 +79,7 @@ export default function LibraryPage() {
   useEffect(() => {
     const t = setTimeout(fetchEntries, search ? 400 : 0);
     return () => clearTimeout(t);
-  }, [fetchEntries]);
+  }, [fetchEntries, search]);
 
   useEffect(() => {
     setPage(1);
@@ -305,7 +305,7 @@ export default function LibraryPage() {
   );
 }
 
-// ── Library Card ─────────────────────────────────────────────────────────────
+// ---- Library Card ----
 
 function LibraryCard({
   entry,
@@ -410,7 +410,7 @@ function LibraryCard({
   );
 }
 
-// ── Entry Detail Modal ────────────────────────────────────────────────────────
+// ---- Entry Detail Modal ----
 
 function EntryDetailModal({ entry, onClose, onUpdated }) {
   const [data, setData] = useState(entry);
@@ -605,7 +605,7 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
   );
 }
 
-// ── Add Entry Modal ───────────────────────────────────────────────────────────
+// ---- Add Entry Modal ----
 
 function AddEntryModal({ onClose, onAdded }) {
   const [form, setForm] = useState({
