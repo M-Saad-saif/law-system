@@ -60,8 +60,14 @@ export default function CaseDetailPage() {
 
   const fetchCase = useCallback(async () => {
     try {
-      const data = await api.get(`/api/cases/${id}`);
-      setCaseData(data.data.case);
+      const response = await api.get(`/api/cases/${id}`);
+      const caseData = response?.data?.case;
+      
+      if (!caseData) {
+        throw new Error("Case not found");
+      }
+      
+      setCaseData(caseData);
     } catch {
       toast.error("Failed to load case.");
       router.push("/cases");

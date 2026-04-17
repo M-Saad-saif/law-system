@@ -18,13 +18,12 @@
 // To switch providers, update AI_CONFIG and the callAI function below.
 
 const AI_CONFIG = {
-  provider: "gemini", // "openai" | "anthropic" | "gemini"
-  model: "gemini-2.0-flash", // Gemini 2.0 Flash for fast legal reasoning
+  provider: "openai", // Groq is OpenAI-compatible
+  model: "llama-3.3-70b-versatile",
   maxTokens: 2000,
-  temperature: 0.3, // Low temperature = more consistent, formal outputs
-  apiKeyEnvVar: "GEMINI_API_KEY",
+  temperature: 0.3,
+  apiKeyEnvVar: "GROQ_API_KEY",
 };
-
 // ─── Core API Caller ─────────────────────────────────────────────────────────
 
 /**
@@ -47,22 +46,25 @@ async function callAI(systemPrompt, userContent) {
 
   // ── OpenAI ──────────────────────────────────────────────────────────────
   if (AI_CONFIG.provider === "openai") {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: AI_CONFIG.model,
+          max_tokens: AI_CONFIG.maxTokens,
+          temperature: AI_CONFIG.temperature,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userContent },
+          ],
+        }),
       },
-      body: JSON.stringify({
-        model: AI_CONFIG.model,
-        max_tokens: AI_CONFIG.maxTokens,
-        temperature: AI_CONFIG.temperature,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userContent },
-        ],
-      }),
-    });
+    );
 
     if (!response.ok) {
       const errBody = await response.json().catch(() => ({}));
@@ -139,8 +141,7 @@ async function callAI(systemPrompt, userContent) {
     if (!response.ok) {
       const errBody = await response.json().catch(() => ({}));
       throw new Error(
-        errBody?.error?.message ||
-          `Gemini API error: HTTP ${response.status}`,
+        errBody?.error?.message || `Gemini API error: HTTP ${response.status}`,
       );
     }
 

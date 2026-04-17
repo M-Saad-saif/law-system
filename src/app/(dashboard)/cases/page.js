@@ -60,10 +60,10 @@ export default function CasesPage() {
       if (search) params.set("search", search);
       if (status) params.set("status", status);
       if (caseType) params.set("caseType", caseType);
-      const data = await api.get(`/api/cases?${params}`);
-      setCases(data.data.cases);
-      setTotal(data.data.total);
-      setTotalPages(data.data.totalPages);
+      const response = await api.get(`/api/cases?${params}`);
+      setCases(response?.data?.cases || []);
+      setTotal(response?.data?.total || 0);
+      setTotalPages(response?.data?.totalPages || 1);
     } catch {
       toast.error("Failed to load cases.");
     } finally {
@@ -97,14 +97,16 @@ export default function CasesPage() {
   const toggleFavourite = async (e, c) => {
     e.stopPropagation();
     try {
-      const data = await api.patch(`/api/cases/${c._id}/favourite`);
+      const response = await api.patch(`/api/cases/${c._id}/favourite`);
+      const isFav = response?.data?.isFavourite;
+      
       setCases((prev) =>
         prev.map((x) =>
-          x._id === c._id ? { ...x, isFavourite: data.data.isFavourite } : x,
+          x._id === c._id ? { ...x, isFavourite: isFav } : x,
         ),
       );
       toast.success(
-        data.data.isFavourite ? "Saved to Library" : "Removed from Library",
+        isFav ? "Saved to Library" : "Removed from Library",
       );
     } catch {
       toast.error("Failed to update.");

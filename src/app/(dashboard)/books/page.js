@@ -39,10 +39,10 @@ export default function BooksPage() {
 
   const fetchBooks = useCallback(async () => {
     try {
-      const data = await api.get(
+      const response = await api.get(
         `/api/books${search ? `?search=${encodeURIComponent(search)}` : ""}`,
       );
-      setBooks(data.data.books);
+      setBooks(response?.data?.books || []);
     } catch {
       toast.error("Failed to load books.");
     } finally {

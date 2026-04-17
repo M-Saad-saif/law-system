@@ -74,8 +74,8 @@ export default function RemindersPage() {
   const fetchReminders = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get(`/api/reminders?filter=${filter}`);
-      setReminders(data.data.reminders);
+      const response = await api.get(`/api/reminders?filter=${filter}`);
+      setReminders(response?.data?.reminders || []);
     } catch {
       toast.error("Failed to load reminders.");
     } finally {

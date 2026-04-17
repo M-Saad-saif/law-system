@@ -42,8 +42,8 @@ export default function CalendarPage() {
     try {
       const year = currentMonth.getFullYear();
       const month = currentMonth.getMonth() + 1;
-      const data = await api.get(`/api/hearings?year=${year}&month=${month}`);
-      setEvents(data.data.events);
+      const response = await api.get(`/api/hearings?year=${year}&month=${month}`);
+      setEvents(response?.data?.events || []);
     } catch {
       toast.error("Failed to load calendar.");
     } finally {

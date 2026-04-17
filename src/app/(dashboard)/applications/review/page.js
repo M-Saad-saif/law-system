@@ -61,7 +61,9 @@ export default function ReviewDashboardPage() {
 
   const handleUpdated = (updated) => {
     // Remove from list once approved/changed
-    setApplications((prev) => prev.filter((a) => a._id !== updated._id));
+    if (updated?._id) {
+      setApplications((prev) => prev.filter((a) => a._id !== updated._id));
+    }
     setViewTarget(null);
   };
 
@@ -130,6 +132,11 @@ function ReviewCard({ app, onView, onUpdated }) {
       const res = await api.put(`/api/applications/${app._id}`, {
         action: "approve",
       });
+      
+      if (!res?.data?.application) {
+        throw new Error("Invalid response from server");
+      }
+      
       toast.success("Application approved!");
       onUpdated(res.data.application);
     } catch (err) {
@@ -150,6 +157,11 @@ function ReviewCard({ app, onView, onUpdated }) {
         action: "requestChanges",
         reviewNote: reviewNote.trim(),
       });
+      
+      if (!res?.data?.application) {
+        throw new Error("Invalid response from server");
+      }
+      
       toast.success("Changes requested. Junior lawyer notified.");
       onUpdated(res.data.application);
     } catch (err) {
@@ -276,6 +288,11 @@ function ReviewDetailModal({ app, onClose, onUpdated }) {
       const res = await api.put(`/api/applications/${app._id}`, {
         action: "approve",
       });
+      
+      if (!res?.data?.application) {
+        throw new Error("Invalid response from server");
+      }
+      
       toast.success("Application approved!");
       onUpdated(res.data.application);
     } catch (err) {
@@ -296,10 +313,15 @@ function ReviewDetailModal({ app, onClose, onUpdated }) {
         action: "requestChanges",
         reviewNote: reviewNote.trim(),
       });
+      
+      if (!res?.data?.application) {
+        throw new Error("Invalid response from server");
+      }
+      
       toast.success("Changes requested.");
       onUpdated(res.data.application);
     } catch (err) {
-      toast.error(err.message || "Failed.");
+      toast.error(err.message || "Failed to request changes.");
     } finally {
       setProcessing(null);
     }

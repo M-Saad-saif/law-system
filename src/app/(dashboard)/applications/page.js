@@ -2,20 +2,6 @@
 
 export const dynamic = "force-dynamic";
 
-/**
- * /app/(dashboard)/applications/page.js  (UPGRADED)
- * ─────────────────────────────────────────────────────────────────────────────
- * Key additions vs original:
- *  - ApplicationForm modal: full form with type dropdown, autoGenerate toggle,
- *    AI improve button, and content editor.
- *  - Application detail modal: view content, submit for review, improve with AI.
- *  - Status badges with colour coding (draft / generated / review / approved / filed).
- *  - Filter by status + type.
- *  - "Improve with AI" button per card (non-destructive; shows diff modal).
- *  - All state handled with clean React hooks (no global state).
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { api } from "@/utils/api";
@@ -37,7 +23,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ---─ Constants ------------------
 
 const APPLICATION_TYPES = [
   { value: "post_arrest_bail", label: "Post-Arrest Bail" },
@@ -58,7 +44,7 @@ const STATUS_CONFIG = {
   filed: { label: "Filed", color: "bg-purple-100 text-purple-700" },
 };
 
-// ─── Main Page Component ──────────────────────────────────────────────────────
+// ---─ Main Page Component ---
 
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState([]);
@@ -77,7 +63,7 @@ export default function ApplicationsPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  // ── Fetch ──────────────────────────────────────────────────────────────────
+  // --- Fetch ------
   const fetchApplications = useCallback(async () => {
     setLoading(true);
     try {
@@ -85,10 +71,10 @@ export default function ApplicationsPage() {
       if (filterType) params.set("type", filterType);
       if (filterStatus) params.set("status", filterStatus);
 
-      const data = await api.get(`/api/applications?${params}`);
-      setApplications(data.data.applications);
-      setTotal(data.data.total);
-      setTotalPages(data.data.totalPages);
+      const response = await api.get(`/api/applications?${params}`);
+      setApplications(response?.data?.applications || []);
+      setTotal(response?.data?.total || 0);
+      setTotalPages(response?.data?.totalPages || 1);
     } catch {
       toast.error("Failed to load applications.");
     } finally {
@@ -104,7 +90,7 @@ export default function ApplicationsPage() {
     setPage(1);
   }, [filterType, filterStatus]);
 
-  // ── Delete ─────────────────────────────────────────────────────────────────
+  // --- Delete ------------------─
   const handleDelete = async () => {
     setDeleting(true);
     try {
@@ -123,7 +109,7 @@ export default function ApplicationsPage() {
 
   return (
     <div className="space-y-5 max-w-7xl mx-auto">
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {/* --- Header ---─ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 font-display">
@@ -142,7 +128,7 @@ export default function ApplicationsPage() {
         </button>
       </div>
 
-      {/* ── Filters ────────────────────────────────────────────────────── */}
+      {/* --- Filters --- */}
       <div className="flex flex-col sm:flex-row gap-3">
         <select
           value={filterType}
@@ -183,7 +169,7 @@ export default function ApplicationsPage() {
         )}
       </div>
 
-      {/* ── Content ────────────────────────────────────────────────────── */}
+      {/* --- Content --- */}
       {loading ? (
         <PageLoader />
       ) : applications.length === 0 ? (
@@ -235,7 +221,7 @@ export default function ApplicationsPage() {
         </>
       )}
 
-      {/* ── Modals ─────────────────────────────────────────────────────── */}
+      {/* --- Modals ---─ */}
       {createOpen && (
         <CreateApplicationModal
           onClose={() => setCreateOpen(false)}
@@ -272,7 +258,7 @@ export default function ApplicationsPage() {
   );
 }
 
-// ─── Application Card ─────────────────────────────────────────────────────────
+// ---─ Application Card ------─
 
 function ApplicationCard({ app, onView, onDelete, onUpdated }) {
   const [improving, setImproving] = useState(false);
@@ -290,11 +276,17 @@ function ApplicationCard({ app, onView, onDelete, onUpdated }) {
     }
     setImproving(true);
     try {
-      const data = await api.post("/api/applications/improve", {
+      const response = await api.post("/api/applications/improve", {
         applicationId: app._id,
       });
+
+      const updatedApp = response?.data?.application;
+      if (!updatedApp) {
+        throw new Error("Invalid response from server");
+      }
+
       toast.success("Draft improved with AI!");
-      onUpdated(data.data.application);
+      onUpdated(updatedApp);
     } catch (err) {
       toast.error(err.message || "AI improvement failed.");
     } finally {
@@ -388,7 +380,7 @@ function ApplicationCard({ app, onView, onDelete, onUpdated }) {
   );
 }
 
-// ─── Status Badge ─────────────────────────────────────────────────────────────
+// ---─ Status Badge ------------─
 
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
@@ -401,7 +393,7 @@ function StatusBadge({ status }) {
   );
 }
 
-// ─── Create Application Modal ─────────────────────────────────────────────────
+// ---─ Create Application Modal ------------─
 
 function CreateApplicationModal({ onClose, onCreated }) {
   const [cases, setCases] = useState([]);
@@ -494,8 +486,14 @@ function CreateApplicationModal({ onClose, onCreated }) {
     setGenerating(true);
     try {
       const payload = buildPayload();
-      const data = await api.post("/api/applications", payload);
-      setGeneratedContent(data.data.application.content || "");
+      const response = await api.post("/api/applications", payload);
+      const application = response?.data?.application;
+
+      if (!application) {
+        throw new Error("Invalid response from server");
+      }
+
+      setGeneratedContent(application.content || "");
       setStep("preview");
       toast.success(
         useAI ? "Draft generated and AI-improved!" : "Draft generated!",
@@ -516,11 +514,16 @@ function CreateApplicationModal({ onClose, onCreated }) {
     }
     setSaving(true);
     try {
-      await api.post("/api/applications", {
+      const response = await api.post("/api/applications", {
         ...buildPayload(),
         autoGenerate: false,
         useAI: false,
       });
+
+      if (!response?.data?.application) {
+        throw new Error("Invalid response from server");
+      }
+
       toast.success("Draft saved.");
       onCreated();
       onClose();
@@ -534,7 +537,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
   return (
     <Modal isOpen onClose={onClose} title="New Legal Application" size="xl">
       <div className="space-y-5 max-h-[75vh] overflow-y-auto pr-1">
-        {/* ── Type ─────────────────────────────────────────────────── */}
+        {/* --- Type ---------------─ */}
         <div>
           <label className="label">Application Type *</label>
           <select
@@ -550,7 +553,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
           </select>
         </div>
 
-        {/* ── Linked Case ──────────────────────────────────────────── */}
+        {/* --- Linked Case --------------------- */}
         <div>
           <label className="label">
             Link to Case{" "}
@@ -573,7 +576,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
           </select>
         </div>
 
-        {/* ── Case Details ─────────────────────────────────────────── */}
+        {/* --- Case Details ------------------─ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
             <label className="label">Case Title</label>
@@ -669,7 +672,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
           </div>
         </div>
 
-        {/* ── Grounds ──────────────────────────────────────────────── */}
+        {/* --- Grounds ------------ */}
         <div>
           <label className="label">
             Grounds{" "}
@@ -687,7 +690,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
           />
         </div>
 
-        {/* ── Prayer ───────────────────────────────────────────────── */}
+        {/* --- Prayer ------------─ */}
         <div>
           <label className="label">Prayer / Relief Sought</label>
           <textarea
@@ -698,7 +701,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
           />
         </div>
 
-        {/* ── Additional Notes ─────────────────────────────────────── */}
+        {/* --- Additional Notes ------------─ */}
         <div>
           <label className="label">Additional Notes / Submissions</label>
           <textarea
@@ -709,7 +712,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
           />
         </div>
 
-        {/* ── Control Flags ─────────────────────────────────────────── */}
+        {/* --- Control Flags ------------------─ */}
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
           <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">
             Generation Options
@@ -759,7 +762,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
           </label>
         </div>
 
-        {/* ── Actions ──────────────────────────────────────────────── */}
+        {/* --- Actions ------------ */}
         <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
           <button onClick={onClose} className="btn-secondary">
             Cancel
@@ -799,7 +802,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
   );
 }
 
-// ─── Application Detail Modal ─────────────────────────────────────────────────
+// ---─ Application Detail Modal ------------─
 
 function ApplicationDetailModal({ app, onClose, onUpdated }) {
   const [data, setData] = useState(app);
@@ -815,14 +818,19 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
     APPLICATION_TYPES.find((t) => t.value === data.applicationType)?.label ||
     data.applicationType;
 
-  // ── AI Improve ────────────────────────────────────────────────────────────
+  // --- AI Improve ------------
   const handleImprove = async () => {
     setImproving(true);
     try {
       const res = await api.post("/api/applications/improve", {
         applicationId: data._id,
       });
-      const updated = res.data.application;
+      const updated = res?.data?.application;
+
+      if (!updated) {
+        throw new Error("Invalid response from server");
+      }
+
       setData(updated);
       setContentDraft(updated.content || "");
       onUpdated(updated);
@@ -834,14 +842,19 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
     }
   };
 
-  // ── Submit for Review ─────────────────────────────────────────────────────
+  // --- Submit for Review ------------------─
   const handleSubmitForReview = async () => {
     setSubmitting(true);
     try {
       const res = await api.put(`/api/applications/${data._id}`, {
         action: "submitForReview",
       });
-      const updated = res.data.application;
+      const updated = res?.data?.application;
+
+      if (!updated) {
+        throw new Error("Invalid response from server");
+      }
+
       setData(updated);
       onUpdated(updated);
       toast.success("Submitted for senior review!");
@@ -852,14 +865,19 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
     }
   };
 
-  // ── Save Edited Content ───────────────────────────────────────────────────
+  // --- Save Edited Content ---------------─
   const handleSaveContent = async () => {
     setSavingContent(true);
     try {
       const res = await api.put(`/api/applications/${data._id}`, {
         content: contentDraft,
       });
-      const updated = res.data.application;
+      const updated = res?.data?.application;
+
+      if (!updated) {
+        throw new Error("Invalid response from server");
+      }
+
       setData(updated);
       onUpdated(updated);
       setEditingContent(false);
@@ -878,7 +896,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
   return (
     <Modal isOpen onClose={onClose} title={typeLabel} size="xl">
       <div className="space-y-5 max-h-[80vh] overflow-y-auto pr-1">
-        {/* ── Status + Meta ─────────────────────────────────────────── */}
+        {/* --- Status + Meta ------------------─ */}
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={data.status} />
           {data.autoGenerated && (
@@ -896,7 +914,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
           )}
         </div>
 
-        {/* ── Key Fields ────────────────────────────────────────────── */}
+        {/* --- Key Fields ------------------------ */}
         <div className="grid grid-cols-2 gap-3 text-sm">
           {[
             ["Applicant", data.applicantName],
@@ -933,7 +951,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
             ))}
         </div>
 
-        {/* ── Grounds ──────────────────────────────────────────────── */}
+        {/* --- Grounds ------------ */}
         {data.grounds?.length > 0 && (
           <div>
             <p className="label">Grounds</p>
@@ -950,7 +968,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
           </div>
         )}
 
-        {/* ── Generated Content ─────────────────────────────────────── */}
+        {/* --- Generated Content ------------─ */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="label mb-0">Application Text</p>
@@ -1012,7 +1030,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
           )}
         </div>
 
-        {/* ── Review Note ──────────────────────────────────────────── */}
+        {/* --- Review Note --------------------- */}
         {data.reviewNote && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
             <p className="text-xs font-semibold text-amber-700 mb-1">
@@ -1022,7 +1040,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
           </div>
         )}
 
-        {/* ── Action Bar ────────────────────────────────────────────── */}
+        {/* --- Action Bar ------------------------ */}
         <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
           {/* AI Improve */}
           {canEdit && hasContent && (

@@ -72,8 +72,8 @@ export default function LibraryPage() {
     try {
       const params = new URLSearchParams({ isFavourite: "true", limit: 100 });
       if (caseSearch) params.set("search", caseSearch);
-      const data = await api.get(`/api/cases?${params}`);
-      setSavedCases(data.data.cases);
+      const response = await api.get(`/api/cases?${params}`);
+      setSavedCases(response?.data?.cases || []);
     } catch {
       toast.error("Failed to load saved cases.");
     } finally {
@@ -106,11 +106,11 @@ export default function LibraryPage() {
       if (filterTag) params.set("tag", filterTag);
       if (filterCourt) params.set("courtName", filterCourt);
       if (filterImportant) params.set("isMostImportant", "true");
-      const data = await api.get(`/api/library?${params}`);
-      setEntries(data.data.entries);
-      setTotal(data.data.total);
-      setTotalPages(data.data.totalPages);
-      setTags(data.data.tags || []);
+      const response = await api.get(`/api/library?${params}`);
+      setEntries(response?.data?.entries || []);
+      setTotal(response?.data?.total || 0);
+      setTotalPages(response?.data?.totalPages || 1);
+      setTags(response?.data?.tags || []);
     } catch {
       toast.error("Failed to load library.");
     } finally {
