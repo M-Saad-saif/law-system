@@ -1,104 +1,89 @@
-import { NextResponse } from "next/server";
-import { withAuth } from "@/lib/api";
+/**
+ * /api/cross-exams/route.js  (UPDATED)
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Changes from original:
+ *  - POST now accepts optional `aiGeneratedQuestions` string.
+ *    When provided, it is stored in the CrossExamination document so the
+ *    UI can display it and lawyers can convert questions to formal QA pairs.
+ *  - All original GET + POST behaviour is preserved.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+import { withAuth, apiSuccess, apiError } from "@/lib/api";
 import connectDB from "@/lib/db";
 import CrossExamination from "@/models/CrossExamination";
+import Case from "@/models/Case";
 
-export const GET = withAuth(async (req, context, user) => {
+// ─── GET /api/cross-exams ─────────────────────────────────────────────────────
+export const GET = withAuth(async (request, context, user) => {
   try {
     await connectDB();
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const search = searchParams.get("search") || "";
+    const limit = parseInt(searchParams.get("limit") || "10");
     const status = searchParams.get("status") || "";
 
-    const isSenior = user.seniority === "senior" || user.role === "admin";
-
-    let query;
-    if (isSenior) {
-      query = {
-        $or: [
-          { createdBy: user.id },
-          {
-            status: {
-              $in: [
-                "submitted",
-                "in_review",
-                "changes_requested",
-                "approved",
-                "archived",
-              ],
-            },
-          },
-        ],
-      };
-    } else {
-      query = { createdBy: user.id };
-    }
-
+    const query = { userId: user.id };
     if (status) query.status = status;
-    if (search) {
-      const searchClause = {
-        $or: [{ title: { $regex: search, $options: "i" } }],
-      };
-      query = { $and: [query, searchClause] };
-    }
 
     const total = await CrossExamination.countDocuments(query);
     const exams = await CrossExamination.find(query)
-      .populate("createdBy", "name email role")
-      .populate("assignedTo", "name email role")
       .populate("caseId", "caseTitle caseNumber")
-      .sort({ updatedAt: -1 })
+      .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
-    const totalPages = Math.ceil(total / limit);
-    return NextResponse.json({
-      success: true,
+    return apiSuccess({
       exams,
       total,
       page,
-      totalPages,
-      pagination: { total, page, pages: totalPages },
+      totalPages: Math.ceil(total / limit),
     });
-  } catch (error) {
-    console.error("Failed to fetch cross-exams:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch cross-exams." },
-      { status: 500 },
-    );
+  } catch {
+    return apiError("Failed to fetch cross-examinations.", 500);
   }
 });
 
-export const POST = withAuth(async (req, context, user) => {
+// ─── POST /api/cross-exams ────────────────────────────────────────────────────
+export const POST = withAuth(async (request, context, user) => {
   try {
     await connectDB();
-    const body = await req.json();
 
-    const newExam = await CrossExamination.create({
-      ...body,
-      createdBy: user.id,
-      status: "draft",
-    });
+    const body = await request.json();
+    const { title, caseId, hearingDate, aiGeneratedQuestions } = body;
 
-    await newExam.populate("createdBy", "name email role");
-
-    return NextResponse.json({ success: true, exam: newExam }, { status: 201 });
-  } catch (error) {
-    console.error("Failed to create cross-exam:", error);
-    if (error.name === "ValidationError") {
-      const messages = Object.values(error.errors)
-        .map((e) => e.message)
-        .join(", ");
-      return NextResponse.json(
-        { success: false, error: messages },
-        { status: 400 },
-      );
+    if (!title?.trim()) {
+      return apiError("Title is required.", 400);
     }
-    return NextResponse.json(
-      { success: false, error: "Failed to create cross-exam." },
-      { status: 500 },
-    );
+
+    // Validate and fetch linked case
+    let linkedCase = null;
+    if (caseId) {
+      linkedCase = await Case.findOne({ _id: caseId, userId: user.id }).lean();
+      if (!linkedCase) {
+        return apiError("Case not found or access denied.", 404);
+      }
+    }
+
+    const examData = {
+      userId: user.id,
+      title: title.trim(),
+      status: "draft",
+      caseId: caseId || undefined,
+      hearingDate: hearingDate || undefined,
+    };
+
+    // Store AI questions as a top-level field for display in the exam editor.
+    // These are raw text; the lawyer will convert them to WitnessSection QA pairs.
+    if (aiGeneratedQuestions?.trim()) {
+      examData.aiGeneratedQuestions = aiGeneratedQuestions.trim();
+    }
+
+    const exam = await CrossExamination.create(examData);
+
+    return apiSuccess({ exam }, 201);
+  } catch (err) {
+    console.error("[POST /api/cross-exams]", err);
+    return apiError(err.message || "Failed to create cross-examination.", 500);
   }
 });

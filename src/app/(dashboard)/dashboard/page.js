@@ -48,7 +48,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 font-display">
-            {greeting}, {user?.name}, to your dashboard
+            {greeting}, {user?.name}
             
           </h2>
           <p className="text-sm text-slate-500 mt-1">
