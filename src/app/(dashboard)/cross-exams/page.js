@@ -155,14 +155,30 @@ export default function CrossExamsPage() {
     setLoading(true);
     try {
       const qs = new URLSearchParams({
-        search: filters.search,
         status: filters.status,
         page: String(filters.page),
         limit: "20",
       }).toString();
       const data = await apiFetch(`/api/cross-exams?${qs}`);
-      setExams(data.exams || []);
-      setPagination(data.pagination || { total: 0, pages: 1, page: 1 });
+      let fetchedExams = data.exams || [];
+      // Client-side title/case search filter
+      if (filters.search) {
+        const q = filters.search.toLowerCase();
+        fetchedExams = fetchedExams.filter(
+          (e) =>
+            e.title?.toLowerCase().includes(q) ||
+            e.caseId?.caseTitle?.toLowerCase().includes(q) ||
+            e.caseId?.caseNumber?.toLowerCase().includes(q),
+        );
+      }
+      setExams(fetchedExams);
+      setPagination(
+        data.pagination || {
+          total: data.total || 0,
+          pages: data.totalPages || 1,
+          page: data.page || 1,
+        },
+      );
     } catch {
       toast.error("Failed to load cross-examinations.");
     } finally {

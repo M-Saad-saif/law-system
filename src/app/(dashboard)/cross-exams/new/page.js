@@ -122,7 +122,8 @@ export default function NewCrossExamPage() {
         body: JSON.stringify(body),
       });
       toast.success("Draft created!");
-      router.push(`/cross-exams/${data?.data?.exam?._id}`);
+      const examId = data?.exam?._id || data?.data?.exam?._id;
+      router.push(`/cross-exams/${examId}`);
     } catch (err) {
       toast.error(err.message || "Failed to create.");
       setLoading(false);

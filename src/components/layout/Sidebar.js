@@ -12,6 +12,7 @@ import {
   Library,
   FileText,
   Image,
+  ClipboardList,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -46,6 +47,7 @@ const Icon = {
   Applications: FileText,
   ImageGen: Image,
   Logout: LogOutIcon,
+  ReviewQueue: ClipboardList,
   ChevronDown: () => (
     <svg
       className="w-4 h-4"
@@ -59,61 +61,78 @@ const Icon = {
   ),
 };
 
-const NAV_SECTIONS = [
-  {
-    label: "Main",
-    items: [
-      { label: "Dashboard", href: "/dashboard", icon: Icon.Dashboard },
-      { label: "Cases", href: "/cases", icon: Icon.Cases },
-      { label: "Calendar", href: "/calendar", icon: Icon.Calendar },
-    ],
-  },
-  {
-    label: "Litigation",
-    items: [
-      {
-        label: "Cross-Examinations",
-        href: "/cross-exams",
-        icon: Icon.CrossExam,
-        subLinks: [
-          { label: "All Cross-Exams", href: "/cross-exams" },
-          { label: "+ New Draft", href: "/cross-exams/new" },
-        ],
-      },
-      {
-        label: "Application Generator",
-        href: "/applications",
-        icon: Icon.Applications,
-      },
-    ],
-  },
-  {
-    label: "Judgements",
-    items: [
-      {
-        label: "Judgement Library",
-        href: "/library",
-        icon: Icon.Library,
-      },
-      {
-        label: "Image Generator",
-        href: "/judgement-image-generator",
-        icon: Icon.ImageGen,
-      },
-    ],
-  },
-  {
-    label: "Resources",
-    items: [
-      { label: "Law Books", href: "/books", icon: Icon.Books },
-      { label: "Reminders", href: "/reminders", icon: Icon.Reminders },
-    ],
-  },
-  {
-    label: "Account",
-    items: [{ label: "Settings", href: "/settings", icon: Icon.Settings }],
-  },
-];
+function buildNavSections(isSenior) {
+  return [
+    {
+      label: "Main",
+      items: [
+        { label: "Dashboard", href: "/dashboard", icon: Icon.Dashboard },
+        { label: "Cases", href: "/cases", icon: Icon.Cases },
+        { label: "Calendar", href: "/calendar", icon: Icon.Calendar },
+      ],
+    },
+    {
+      label: "Litigation",
+      items: [
+        {
+          label: "Cross-Examinations",
+          href: "/cross-exams",
+          icon: Icon.CrossExam,
+          subLinks: isSenior
+            ? [
+                { label: "All Drafts", href: "/cross-exams" },
+                {
+                  label: "Review Queue",
+                  href: "/cross-exams?status=submitted",
+                },
+                { label: "+ New Draft", href: "/cross-exams/new" },
+              ]
+            : [
+                { label: "All Cross-Exams", href: "/cross-exams" },
+                { label: "+ New Draft", href: "/cross-exams/new" },
+              ],
+        },
+        {
+          label: "Application Generator",
+          href: "/applications",
+          icon: Icon.Applications,
+          subLinks: isSenior
+            ? [
+                { label: "My Applications", href: "/applications" },
+                { label: "Review Queue", href: "/applications/review" },
+              ]
+            : undefined,
+        },
+      ],
+    },
+    {
+      label: "Judgements",
+      items: [
+        {
+          label: "Judgement Library",
+          href: "/library",
+          icon: Icon.Library,
+        },
+        {
+          label: "Image Generator",
+          href: "/judgement-image-generator",
+          icon: Icon.ImageGen,
+        },
+      ],
+    },
+    {
+      label: "Resources",
+      items: [
+        { label: "Law Books", href: "/books", icon: Icon.Books },
+        { label: "Reminders", href: "/reminders", icon: Icon.Reminders },
+      ],
+    },
+    {
+      label: "Account",
+      items: [{ label: "Settings", href: "/settings", icon: Icon.Settings }],
+    },
+  ];
+}
 
 function NavItem({ item, pathname }) {
   const isActive =
@@ -195,6 +214,8 @@ function NavItem({ item, pathname }) {
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const isSenior = user?.seniority === "senior" || user?.role === "admin";
+  const NAV_SECTIONS = buildNavSections(isSenior);
 
   return (
     <aside className="h-screen w-60 flex flex-col bg-[#0f172a] border-r border-slate-800 z-40 select-none">
@@ -243,7 +264,9 @@ export default function Sidebar() {
                 {user.name}
               </p>
               <p className="text-[10px] text-slate-500 truncate capitalize">
-                {user.role || "Lawyer"}
+                {user.seniority
+                  ? `${user.seniority} ${user.role || "Lawyer"}`
+                  : user.role || "Lawyer"}
               </p>
             </div>
             <button

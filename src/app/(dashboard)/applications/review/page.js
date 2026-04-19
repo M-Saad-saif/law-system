@@ -132,11 +132,11 @@ function ReviewCard({ app, onView, onUpdated }) {
       const res = await api.put(`/api/applications/${app._id}`, {
         action: "approve",
       });
-      
+
       if (!res?.data?.application) {
         throw new Error("Invalid response from server");
       }
-      
+
       toast.success("Application approved!");
       onUpdated(res.data.application);
     } catch (err) {
@@ -157,11 +157,11 @@ function ReviewCard({ app, onView, onUpdated }) {
         action: "requestChanges",
         reviewNote: reviewNote.trim(),
       });
-      
+
       if (!res?.data?.application) {
         throw new Error("Invalid response from server");
       }
-      
+
       toast.success("Changes requested. Junior lawyer notified.");
       onUpdated(res.data.application);
     } catch (err) {
@@ -288,11 +288,11 @@ function ReviewDetailModal({ app, onClose, onUpdated }) {
       const res = await api.put(`/api/applications/${app._id}`, {
         action: "approve",
       });
-      
+
       if (!res?.data?.application) {
         throw new Error("Invalid response from server");
       }
-      
+
       toast.success("Application approved!");
       onUpdated(res.data.application);
     } catch (err) {
@@ -313,11 +313,11 @@ function ReviewDetailModal({ app, onClose, onUpdated }) {
         action: "requestChanges",
         reviewNote: reviewNote.trim(),
       });
-      
+
       if (!res?.data?.application) {
         throw new Error("Invalid response from server");
       }
-      
+
       toast.success("Changes requested.");
       onUpdated(res.data.application);
     } catch (err) {
@@ -402,7 +402,7 @@ function ReviewDetailModal({ app, onClose, onUpdated }) {
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
-          <button onClose={onClose} className="btn-secondary">
+          <button onClick={onClose} className="btn-secondary">
             Close
           </button>
           <button

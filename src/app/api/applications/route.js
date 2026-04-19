@@ -1,14 +1,4 @@
-/**
- * /api/applications/route.js  (UPDATED)
- * ─────────────────────────────────────────────────────────────────────────────
- * Changes from original:
- *  - POST now accepts optional `autoGenerate` flag → calls applicationGenerator.
- *  - POST now accepts optional `useAI` flag → calls aiService.improveDraft
- *    after generation (or on existing content if provided directly).
- *  - GET: added `status` filter param for review dashboards.
- *  - All original behaviour preserved when flags are not set.
- * ─────────────────────────────────────────────────────────────────────────────
- */
+
 import { withAuth, apiSuccess, apiError } from "@/lib/api";
 import connectDB from "@/lib/db";
 import Application from "@/models/Application";
@@ -25,11 +15,21 @@ export const GET = withAuth(async (request, context, user) => {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const type = searchParams.get("type") || "";
-    const status = searchParams.get("status") || ""; // ← NEW filter
+    const status = searchParams.get("status") || "";
 
-    const query = { userId: user.id };
+    const isSenior = user.seniority === "senior" || user.role === "admin";
+
+    let query;
+    if (isSenior) {
+      // Seniors see all applications when filtering by status (e.g. review queue),
+      // or their own applications otherwise
+      query = status ? { status } : { userId: user.id };
+    } else {
+      query = { userId: user.id };
+      if (status) query.status = status;
+    }
+
     if (type) query.applicationType = type;
-    if (status) query.status = status;
 
     const total = await Application.countDocuments(query);
     const applications = await Application.find(query)
