@@ -40,7 +40,35 @@ const crossExaminationSchema = new mongoose.Schema(
     },
     hearingDate: { type: Date },
 
-    // ── Original fields (preserved) ────────────────────────────────────────
+    // Witness sections stored as array of ObjectIds
+    witnessSections: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "WitnessSection",
+      default: [],
+    },
+
+    // Version tracking for snapshots
+    version: {
+      type: Number,
+      default: 1,
+    },
+    versionHistory: {
+      type: [
+        {
+          version: Number,
+          snapshot: Object,
+          diffs: Array,
+          insights: Object,
+          createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+          message: String,
+          triggerAction: String,
+          createdAt: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
+
+    // --- Original fields (preserved) ---
     submittedAt: { type: Date },
     reviewedAt: { type: Date },
     approvedAt: { type: Date },
@@ -58,6 +86,24 @@ const crossExaminationSchema = new mongoose.Schema(
       ref: "User",
     },
 
+    // Assigned reviewer for review workflow
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    // Lock status for editing
+    isLocked: {
+      type: Boolean,
+      default: false,
+    },
+
+    // Alias for userId (for backward compatibility)
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     summary: { type: String, trim: true },
     reviewNotes: { type: String, trim: true },
 
@@ -71,6 +117,14 @@ const crossExaminationSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+// Sync createdBy with userId for backward compatibility
+crossExaminationSchema.pre("save", function (next) {
+  if (this.isModified("userId") && this.userId) {
+    this.createdBy = this.userId;
+  }
+  next();
+});
 
 crossExaminationSchema.index({ userId: 1, createdAt: -1 });
 crossExaminationSchema.index({ caseId: 1 });

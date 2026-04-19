@@ -28,7 +28,8 @@ export const PUT = withAuth(async (req, { params }, user) => {
   if (!qaPair)
     return NextResponse.json({ error: "QA pair not found." }, { status: 404 });
 
-  const isCreator = exam.createdBy.toString() === user.id.toString();
+  const creatorId = exam.userId?.toString();
+  const isCreator = creatorId === user.id.toString();
   const isAssignedReviewer =
     exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
   const isAdmin = user.role === "admin";

@@ -15,7 +15,8 @@ async function loadAndCheck(params, user) {
   });
   if (!witness) return { error: "Witness section not found.", status: 404 };
 
-  const isCreator = exam.createdBy.toString() === user.id.toString();
+  const creatorId = exam.userId?.toString();
+  const isCreator = creatorId === user.id.toString();
   const isReviewer =
     exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
   const isAdmin = user.role === "admin";

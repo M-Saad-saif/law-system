@@ -20,7 +20,8 @@ export const GET = withAuth(async (req, { params }, user) => {
       { status: 404 },
     );
 
-  const isOwner = exam.createdBy._id.toString() === user.id.toString();
+  const ownerId = exam.userId?.toString();
+  const isOwner = ownerId === user.id.toString();
   const isAssigned =
     exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
   const isAdmin = user.role === "admin";
@@ -135,7 +136,7 @@ export const GET = withAuth(async (req, { params }, user) => {
     <span><strong>Case</strong>${exam.caseId ? `${exam.caseId.caseTitle} (${exam.caseId.caseNumber})` : "N/A"}</span>
     <span><strong>Status</strong><span class="status-pill">${exam.status}</span></span>
     <span><strong>Version</strong>v${exam.version - 1}</span>
-    <span><strong>Prepared by</strong>${exam.createdBy.name}</span>
+    <span><strong>Prepared by</strong>${exam.userId?.name || 'Unknown'}</span>
     ${exam.assignedTo ? `<span><strong>Reviewed by</strong>${exam.assignedTo.name}</span>` : ""}
     ${exam.hearingDate ? `<span><strong>Hearing Date</strong>${formatDate(exam.hearingDate)}</span>` : ""}
     <span><strong>Generated</strong>${formatDate(new Date())}</span>

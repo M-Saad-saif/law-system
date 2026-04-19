@@ -340,8 +340,9 @@ export async function createVersionSnapshot(
     summary: "",
   };
 
-  if (exam.versionHistory.length > 0) {
-    const lastSnapshot = exam.versionHistory[exam.versionHistory.length - 1];
+  const versionHistory = exam.versionHistory || [];
+  if (versionHistory.length > 0) {
+    const lastSnapshot = versionHistory[versionHistory.length - 1];
     const previousWitnesses = lastSnapshot.snapshot || [];
     diffs = computeDiffs(previousWitnesses, currentWitnesses);
 
@@ -359,6 +360,14 @@ export async function createVersionSnapshot(
     ).length;
     insights.phaseChanges = diffs.filter((d) => d.field === "phase").length;
     insights.summary = buildInsightSummary(diffs);
+  }
+
+  // Initialize versionHistory if it doesn't exist
+  if (!exam.versionHistory) {
+    exam.versionHistory = [];
+  }
+  if (!exam.version) {
+    exam.version = 1;
   }
 
   exam.versionHistory.push({

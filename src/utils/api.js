@@ -5,7 +5,8 @@ export const apiFetch = async (url, options = {}) => {
     ...options,
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || data.error || "Something went wrong");
+  if (!res.ok)
+    throw new Error(data.message || data.error || "Something went wrong");
   return data;
 };
 
@@ -25,7 +26,11 @@ export const api = {
 };
 
 export const uploadFile = async (url, formData) => {
-  const res = await fetch(url, { method: "POST", body: formData, credentials: "include" });
+  const res = await fetch(url, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || "Upload failed");
   return data;

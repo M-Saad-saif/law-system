@@ -1,19 +1,5 @@
 "use client";
 
-/**
- * /app/(dashboard)/cross-exams/new/page.js  (UPGRADED)
- * ─────────────────────────────────────────────────────────────────────────────
- * Changes vs original:
- *  - Added "Generate AI Questions" panel: lawyer provides case facts /
- *    witness info and AI produces structured cross-examination questions.
- *  - AI questions are shown in a preview textarea before the exam is created.
- *  - Questions can be edited, then the exam is created with them pre-loaded
- *    as initial witness section content (stored in additionalNotes for now,
- *    fully integrated with WitnessSection model if needed).
- *  - All original form behaviour preserved (title, case, hearing date).
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -95,7 +81,7 @@ export default function NewCrossExamPage() {
           }),
         },
       );
-      setAiQuestions(data.questions || "");
+      setAiQuestions(data?.data?.questions || "");
       setIncludeQuestions(true);
       toast.success("Cross-examination questions generated!");
     } catch (err) {
@@ -136,7 +122,7 @@ export default function NewCrossExamPage() {
         body: JSON.stringify(body),
       });
       toast.success("Draft created!");
-      router.push(`/cross-exams/${data.exam._id}`);
+      router.push(`/cross-exams/${data?.data?.exam?._id}`);
     } catch (err) {
       toast.error(err.message || "Failed to create.");
       setLoading(false);

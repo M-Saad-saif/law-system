@@ -340,7 +340,7 @@ export default function CrossExamsPage() {
                         {exam.title}
                       </Link>
                       <p className="text-xs text-slate-400 mt-0.5">
-                        by {exam.createdBy?.name}
+                        by {exam.userId?.name}
                       </p>
                     </td>
                     {/* Case */}

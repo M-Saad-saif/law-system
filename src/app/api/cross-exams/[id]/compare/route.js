@@ -65,7 +65,8 @@ export const GET = withAuth(async (req, { params }, user) => {
       { status: 404 },
     );
 
-  const isOwner = exam.createdBy.toString() === user.id.toString();
+  const ownerId = exam.userId?.toString();
+  const isOwner = ownerId === user.id.toString();
   const isAssigned =
     exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
   const isAdmin = user.role === "admin";

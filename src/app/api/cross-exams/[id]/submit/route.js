@@ -16,8 +16,9 @@ export const POST = withAuth(async (req, { params }, user) => {
     );
   }
 
-  // Only  junio can submit
-  if (exam.createdBy.toString() !== user.id.toString()) {
+  // Only junior can submit
+  const creatorId = exam.userId?.toString();
+  if (!creatorId || creatorId !== user.id.toString()) {
     return NextResponse.json(
       { error: "Only the creator can submit this document." },
       { status: 403 },

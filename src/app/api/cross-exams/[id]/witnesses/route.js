@@ -21,19 +21,21 @@ export const GET = withAuth(async (req, { params }, user) => {
 export const POST = withAuth(async (req, { params }, user) => {
   await connectDB();
 
-  const exam = await CrossExamination.findById(params.id);
+  const exam = await CrossExamination.findById(params.id)
+    .populate("userId", "name")
+    .populate("assignedTo", "name");
   if (!exam) return NextResponse.json({ error: "Not found." }, { status: 404 });
 
   if (exam.isLocked) {
     return NextResponse.json({ error: "Document is locked." }, { status: 403 });
   }
 
-  // Both junior  and senior  can add witnesses while in_review
-  const isCreator = exam.createdBy.toString() === user.id.toString();
-  const isReviewer =
-    exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
+  // Both junior and senior can add witnesses while in_review
+  const creatorId = exam.userId?._id?.toString() || exam.userId?.toString();
+  const isCreator = creatorId === user.id.toString();
+  const isAssigned = exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
   const isAdmin = user.role === "admin";
-  if (!isCreator && !isReviewer && !isAdmin) {
+  if (!isCreator && !isAssigned && !isAdmin) {
     return NextResponse.json({ error: "Access denied." }, { status: 403 });
   }
 
@@ -57,6 +59,10 @@ export const POST = withAuth(async (req, { params }, user) => {
     qaPairs: [],
   });
 
+  // Initialize witnessSections if needed
+  if (!exam.witnessSections) {
+    exam.witnessSections = [];
+  }
   exam.witnessSections.push(witness._id);
   await exam.save();
 

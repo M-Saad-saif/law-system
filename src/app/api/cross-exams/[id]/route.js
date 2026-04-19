@@ -9,7 +9,7 @@ export const GET = withAuth(async (req, { params }, user) => {
   await connectDB();
 
   const exam = await CrossExamination.findById(params.id)
-    .populate("createdBy", "name email role")
+    .populate("userId", "name email role")
     .populate("assignedTo", "name email role")
     .populate("caseId", "caseTitle caseNumber")
     .lean();
@@ -21,10 +21,10 @@ export const GET = withAuth(async (req, { params }, user) => {
     );
   }
 
-  // Access check
-  const isOwner = exam.createdBy._id.toString() === user.id.toString();
-  const isAssigned =
-    exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
+  // Access check - handle null userId (for older documents)
+  const ownerId = exam.userId?._id?.toString() || exam.userId?.toString();
+  const isOwner = ownerId === user.id.toString();
+  const isAssigned = exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
   const isAdmin = user.role === "admin";
   const isSenior = user.seniority === "senior";
 
@@ -66,7 +66,8 @@ export const PUT = withAuth(async (req, { params }, user) => {
   }
 
   // Only the creator can edit basic fields
-  if (exam.createdBy.toString() !== user.id.toString()) {
+  const creatorId = exam.userId?.toString();
+  if (!creatorId || creatorId !== user.id.toString()) {
     return NextResponse.json(
       { error: "Only the creator can edit this document." },
       { status: 403 },
@@ -105,7 +106,8 @@ export const DELETE = withAuth(async (req, { params }, user) => {
     );
   }
 
-  if (exam.createdBy.toString() !== user.id.toString()) {
+  const creatorId = exam.userId?.toString();
+  if (!creatorId || creatorId !== user.id.toString()) {
     return NextResponse.json(
       { error: "Only the creator can delete this document." },
       { status: 403 },
