@@ -118,12 +118,13 @@ export default function Topbar() {
               <div className="text-sm font-semibold text-slate-700 leading-none">
                 {user?.name}
               </div>
-              <div className="text-xs text-slate-400 mt-0.5 capitalize">
-                {user?.role}
-              </div>
+              <p className="text-[10px] text-slate-500 truncate capitalize">
+                {user.seniority
+                  ? `${user.seniority} ${user.role || "Lawyer"}`
+                  : user.role || "Lawyer"}
+              </p>
             </div>
           </div>
-          
         </div>
       </header>
 

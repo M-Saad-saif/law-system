@@ -19,10 +19,12 @@ export const POST = withAuth(async (req, { params }, user) => {
   if (exam.isLocked)
     return NextResponse.json({ error: "Document is locked." }, { status: 403 });
 
-  // Only a senior reviewer 
-  const isSenior = user.seniority === "senior" || user.role === "admin";
-  const isAssignedReviewer =
-    exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
+  // Only a senior reviewer or the assigned reviewer
+  const userId = (user.id || user._id || user.userId || "").toString();
+  const userRole = user.role || "";
+  const userSeniority = user.seniority || "";
+  const isSenior = userSeniority === "senior" || userRole === "senior" || userRole === "admin";
+  const isAssignedReviewer = exam.assignedTo && exam.assignedTo.toString() === userId;
   if (!isAssignedReviewer && !isSenior) {
     return NextResponse.json(
       { error: "Only a senior reviewer can flag or approve QA pairs." },
@@ -42,15 +44,57 @@ export const POST = withAuth(async (req, { params }, user) => {
     return NextResponse.json({ error: "QA pair not found." }, { status: 404 });
 
   const body = await req.json();
-  const before = { isFlagged: qaPair.isFlagged, isApproved: qaPair.isApproved };
+  const before = {
+    reviewStatus: qaPair.reviewStatus,
+    isFlagged: qaPair.isFlagged,
+    isApproved: qaPair.isApproved,
+  };
 
-  if (body.isFlagged !== undefined) qaPair.isFlagged = Boolean(body.isFlagged);
-  if (body.isApproved !== undefined)
-    qaPair.isApproved = Boolean(body.isApproved);
+  // `reviewStatus` is the source of truth. Keep supporting legacy boolean
+  // payloads from the current UI so old clients continue to work.
+  const hasLegacyFlag = body.isFlagged !== undefined;
+  const hasLegacyApprove = body.isApproved !== undefined;
+  const hasStatusUpdate = body.reviewStatus !== undefined;
 
-  // Flagged and approved are mutually exclusive
-  if (qaPair.isFlagged) qaPair.isApproved = false;
-  if (qaPair.isApproved) qaPair.isFlagged = false;
+  if (hasLegacyFlag && hasLegacyApprove) {
+    const wantsFlag = Boolean(body.isFlagged);
+    const wantsApprove = Boolean(body.isApproved);
+    if (wantsFlag && wantsApprove) {
+      return NextResponse.json(
+        { error: "QA pair cannot be both flagged and approved." },
+        { status: 400 },
+      );
+    }
+  }
+
+  if (hasStatusUpdate) {
+    const allowed = ["pending", "approved", "needsRevision", "risky", "withdrawn"];
+    if (!allowed.includes(body.reviewStatus)) {
+      return NextResponse.json(
+        { error: "Invalid review status." },
+        { status: 400 },
+      );
+    }
+    qaPair.reviewStatus = body.reviewStatus;
+  }
+
+  if (hasLegacyFlag) {
+    const wantsFlag = Boolean(body.isFlagged);
+    if (wantsFlag) {
+      qaPair.reviewStatus = "risky";
+    } else if (qaPair.reviewStatus === "risky") {
+      qaPair.reviewStatus = "pending";
+    }
+  }
+
+  if (hasLegacyApprove) {
+    const wantsApprove = Boolean(body.isApproved);
+    if (wantsApprove) {
+      qaPair.reviewStatus = "approved";
+    } else if (qaPair.reviewStatus === "approved") {
+      qaPair.reviewStatus = "pending";
+    }
+  }
 
   await witness.save();
 
@@ -65,7 +109,11 @@ export const POST = withAuth(async (req, { params }, user) => {
     action,
     performedBy: user.id,
     before,
-    after: { isFlagged: qaPair.isFlagged, isApproved: qaPair.isApproved },
+    after: {
+      reviewStatus: qaPair.reviewStatus,
+      isFlagged: qaPair.isFlagged,
+      isApproved: qaPair.isApproved,
+    },
     message: `QA pair #${qaPair.sequence} ${action.replace("_", " ")}.`,
   });
 

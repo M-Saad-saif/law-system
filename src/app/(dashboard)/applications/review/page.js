@@ -2,18 +2,6 @@
 
 export const dynamic = "force-dynamic";
 
-/**
- * /app/(dashboard)/applications/review/page.js  (NEW)
- * ─────────────────────────────────────────────────────────────────────────────
- * Senior lawyer review dashboard.
- * Shows all applications with status = "review".
- * Allows: Approve, Request Changes (with a note), and view full content.
- *
- * Access should be restricted to senior lawyers / admins via middleware
- * or a role check (user.seniority === "senior" || user.role === "admin").
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { api } from "@/utils/api";
@@ -116,7 +104,7 @@ export default function ReviewDashboardPage() {
   );
 }
 
-// ─── Review Card ──────────────────────────────────────────────────────────────
+// ----- Review Card -----
 
 function ReviewCard({ app, onView, onUpdated }) {
   const [processing, setProcessing] = useState(null); // "approve" | "changes"
@@ -273,7 +261,7 @@ function ReviewCard({ app, onView, onUpdated }) {
   );
 }
 
-// ─── Review Detail Modal ──────────────────────────────────────────────────────
+// ----- Review Detail Modal -----
 
 function ReviewDetailModal({ app, onClose, onUpdated }) {
   const [processing, setProcessing] = useState(null);

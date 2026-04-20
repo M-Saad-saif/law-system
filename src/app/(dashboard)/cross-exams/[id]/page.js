@@ -203,8 +203,7 @@ function AddQAForm({ witnessId, onAdd, onClose }) {
   );
 }
 
-// ── Read-only comment thread shown to junior ──────────────────────────────
-// ── Read-only comment thread shown to junior (with reply capability) ─────────
+
 function ReviewerComments({
   comments,
   examId,

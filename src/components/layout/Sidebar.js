@@ -242,7 +242,7 @@ export default function Sidebar() {
             <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-3 mb-2">
               {section.label}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-0.5 ">
               {section.items.map((item) => (
                 <NavItem key={item.href} item={item} pathname={pathname} />
               ))}

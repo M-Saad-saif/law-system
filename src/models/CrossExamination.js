@@ -1,12 +1,4 @@
-/**
- * CrossExamination.js  (UPDATED)
- * ─────────────────────────────────────────────────────────────────────────────
- * Changes from original:
- *  - Added `aiGeneratedQuestions` string field to store raw AI output.
- *  - All original fields preserved.
- * ─────────────────────────────────────────────────────────────────────────────
- * Read the original model first to ensure full field parity.
- */
+
 import mongoose from "mongoose";
 
 const crossExaminationSchema = new mongoose.Schema(
@@ -92,13 +84,11 @@ const crossExaminationSchema = new mongoose.Schema(
       ref: "User",
     },
 
-    // Lock status for editing
     isLocked: {
       type: Boolean,
       default: false,
     },
 
-    // Alias for userId (for backward compatibility)
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -107,9 +97,6 @@ const crossExaminationSchema = new mongoose.Schema(
     summary: { type: String, trim: true },
     reviewNotes: { type: String, trim: true },
 
-    // ── NEW: AI-generated cross-examination questions ──────────────────────
-    // Raw text output from aiService.generateCrossQuestions().
-    // Lawyers use this as a reference when building formal WitnessSection QA pairs.
     aiGeneratedQuestions: {
       type: String,
       trim: true,
@@ -118,7 +105,6 @@ const crossExaminationSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Sync createdBy with userId for backward compatibility
 crossExaminationSchema.pre("save", function (next) {
   if (this.isModified("userId") && this.userId) {
     this.createdBy = this.userId;

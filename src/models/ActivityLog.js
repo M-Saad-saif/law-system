@@ -22,6 +22,7 @@ const activityLogSchema = new mongoose.Schema(
         "flagged",
         "unflagged",
         "qa_approved",
+        "qa_reviewed",
         "changes_requested",
         "resubmitted",
         "approved",

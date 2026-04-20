@@ -37,14 +37,14 @@ export default function NewCrossExamPage() {
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ── Step 1: Basic exam info ────────────────────────────────────────────────
+  // ----- Step 1: Basic exam info -----
   const [form, setForm] = useState({
     title: "",
     caseId: "",
     hearingDate: "",
   });
 
-  // ── Step 2: AI Question Generation ────────────────────────────────────────
+  // ----- Step 2: AI Question Generation -----
   const [showAIPanel, setShowAIPanel] = useState(false);
   const [aiFacts, setAiFacts] = useState("");
   const [aiWitnessType, setAiWitnessType] = useState(WITNESS_TYPES[0]);
@@ -62,7 +62,7 @@ export default function NewCrossExamPage() {
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-  // ── AI: Generate questions from facts ─────────────────────────────────────
+  // ---- AI: Generate questions from facts ----
   const handleGenerateQuestions = async () => {
     if (!aiFacts.trim()) {
       toast.error("Please enter case facts or a witness statement first.");
@@ -97,7 +97,7 @@ export default function NewCrossExamPage() {
     }
   };
 
-  // ── Create the cross-examination ──────────────────────────────────────────
+  // --- Create the cross-examination ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title.trim()) {
@@ -133,7 +133,7 @@ export default function NewCrossExamPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-start justify-center px-4 py-12">
       <div className="w-full max-w-2xl space-y-5">
-        {/* ── Breadcrumb ─────────────────────────────────────────────────── */}
+        {/* ------ Breadcrumb ------ */}
         <nav className="flex items-center gap-2 text-sm text-slate-500">
           <Link
             href="/cross-exams"
@@ -157,7 +157,7 @@ export default function NewCrossExamPage() {
           <span className="text-slate-800 font-medium">New Draft</span>
         </nav>
 
-        {/* ── Basic Info Card ────────────────────────────────────────────── */}
+        {/* ---- Basic Info Card ---- */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-8 py-6 border-b border-slate-100 bg-slate-50">
             <h1
@@ -282,7 +282,7 @@ export default function NewCrossExamPage() {
           </form>
         </div>
 
-        {/* ── AI Question Generator Panel ────────────────────────────────── */}
+        {/* ------ AI Question Generator Panel ------ */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <button
             type="button"

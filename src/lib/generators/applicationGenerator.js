@@ -1,23 +1,3 @@
-/**
- * applicationGenerator.js
- * ─────────────────────────────────────────────────────────────────────────────
- * Template-based legal application generator.
- *
- * Design principles:
- *  - Pure functions: no DB access, no side-effects.
- *  - Easily extensible: add a new type by exporting a generator function
- *    and registering it in GENERATORS map.
- *  - All text follows Pakistani court conventions (Urdu-English hybrid titles
- *    are intentionally in English for universal legibility).
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-/**
- * Formats a Date or ISO string into "DD MMMM YYYY" (e.g. "14 April 2025").
- * Falls back to "________________" if no date provided.
- */
 function formatDate(dateStr) {
   if (!dateStr) return "________________";
   const d = new Date(dateStr);
@@ -28,30 +8,15 @@ function formatDate(dateStr) {
   });
 }
 
-/**
- * Joins an array of strings as a numbered list.
- * e.g. ["A", "B"] → "1. A\n2. B"
- */
 function numberedList(items = []) {
   if (!items.length) return "N/A";
   return items.map((item, i) => `${i + 1}. ${item}`).join("\n");
 }
 
-/**
- * Returns a placeholder string if value is empty/undefined.
- */
 function orBlank(value, placeholder = "________________") {
   return value?.trim() || placeholder;
 }
 
-// ─── Individual Generators ────────────────────────────────────────────────────
-
-/**
- * Generates a Post-Arrest Bail Application.
- *
- * @param {Object} data - Application fields from the form/DB.
- * @returns {string} Formatted legal text.
- */
 function generatePostArrestBail(data) {
   const {
     courtName,
@@ -144,12 +109,6 @@ Date: ${formatDate(hearingDate)}
 `.trim();
 }
 
-/**
- * Generates a Pre-Arrest Bail Application.
- *
- * @param {Object} data - Application fields.
- * @returns {string} Formatted legal text.
- */
 function generatePreArrestBail(data) {
   const {
     courtName,
@@ -233,12 +192,6 @@ Date: ${formatDate(hearingDate)}
 `.trim();
 }
 
-/**
- * Generates a Civil Suit Plaint.
- *
- * @param {Object} data - Application fields.
- * @returns {string} Formatted legal text.
- */
 function generateCivilSuit(data) {
   const {
     courtName,
@@ -324,12 +277,6 @@ Date: ${formatDate(hearingDate)}                 Place: ${orBlank(courtName)}
 `.trim();
 }
 
-/**
- * Generates an Adjournment Application.
- *
- * @param {Object} data - Application fields.
- * @returns {string} Formatted legal text.
- */
 function generateAdjournment(data) {
   const {
     courtName,
@@ -390,12 +337,6 @@ Date: ${formatDate(hearingDate)}
 `.trim();
 }
 
-/**
- * Generates an Exemption Application (exemption from personal appearance).
- *
- * @param {Object} data - Application fields.
- * @returns {string} Formatted legal text.
- */
 function generateExemption(data) {
   const {
     courtName,
@@ -457,12 +398,6 @@ Date: ${formatDate(hearingDate)}
 `.trim();
 }
 
-/**
- * Generates a Miscellaneous Application.
- *
- * @param {Object} data - Application fields.
- * @returns {string} Formatted legal text.
- */
 function generateMiscellaneous(data) {
   const {
     courtName,
@@ -533,10 +468,6 @@ Date: ${formatDate(hearingDate)}
 `.trim();
 }
 
-// ─── Generator Registry ───────────────────────────────────────────────────────
-// Maps applicationType (as stored in DB) → generator function.
-// Add new types here without touching any other file.
-
 const GENERATORS = {
   post_arrest_bail: generatePostArrestBail,
   pre_arrest_bail: generatePreArrestBail,
@@ -546,14 +477,6 @@ const GENERATORS = {
   miscellaneous: generateMiscellaneous,
 };
 
-// ─── Public API ───────────────────────────────────────────────────────────────
-
-/**
- * Returns all supported application types with human-readable labels.
- * Used to populate dropdowns in the frontend.
- *
- * @returns {Array<{value: string, label: string}>}
- */
 export function getSupportedTypes() {
   return [
     { value: "post_arrest_bail", label: "Post-Arrest Bail Application" },
@@ -567,18 +490,6 @@ export function getSupportedTypes() {
   ];
 }
 
-/**
- * Main entry point: generates a formatted legal application.
- *
- * @param {Object} options
- * @param {string} options.type - applicationType matching DB enum.
- * @param {Object} options.data - Application data fields.
- * @returns {{ ok: boolean, content?: string, error?: string }}
- *
- * @example
- * const result = generateApplication({ type: "post_arrest_bail", data: appData });
- * if (result.ok) console.log(result.content);
- */
 export function generateApplication({ type, data }) {
   const generator = GENERATORS[type];
 

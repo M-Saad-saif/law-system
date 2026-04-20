@@ -1,20 +1,4 @@
-/**
- * /api/applications/generate-cross-questions/route.js  (NEW)
- * ─────────────────────────────────────────────────────────────────────────────
- * Generates AI-powered cross-examination questions from case facts.
- *
- * POST body:
- *   {
- *     facts:       string,  // required — case facts, FIR text, witness statement
- *     witnessType: string,  // optional — "eyewitness" | "IO" | "medical expert" etc.
- *     caseType:    string,  // optional — "murder" | "drug trafficking" | "theft" etc.
- *     saveToExam:  string,  // optional — CrossExamination._id to append questions to
- *   }
- *
- * Response:
- *   { questions: string }  — formatted question set (plain text with sections)
- * ─────────────────────────────────────────────────────────────────────────────
- */
+
 import { withAuth, apiSuccess, apiError } from "@/lib/api";
 import {
   generateCrossQuestions,
@@ -23,7 +7,6 @@ import {
 
 export const POST = withAuth(async (request, context, user) => {
   try {
-    // ── Check AI availability ───────────────────────────────────────────────
     const availability = await checkAIAvailability();
     if (!availability.available) {
       return apiError(`AI service unavailable: ${availability.reason}`, 503);
