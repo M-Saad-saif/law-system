@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { toPng, toJpeg } from "html-to-image";
 import { saveAs } from "file-saver";
 
@@ -8,11 +8,21 @@ const JudgementCard = ({ data, onImageGenerated }) => {
   const cardRef = useRef(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [tmpl, setTmpl] = useState(null);
   const safeData = data || {};
 
+  useEffect(() => {
+    fetch("/api/judgement-image-template", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.data?.config) setTmpl(d.data.config);
+      })
+      .catch(() => {});
+  }, []);
+
   const brandColors = {
-    primary: "#171a2a",
-    secondary: "#026665",
+    primary: tmpl?.primaryColor || "#171a2a",
+    secondary: tmpl?.secondaryColor || "#026665",
     accent: "#0a4d4c",
     textDark: "#1e1e1e",
     textLight: "#ffffff",
@@ -20,6 +30,17 @@ const JudgementCard = ({ data, onImageGenerated }) => {
     border: "#d4d4d4",
     gold: "#9b7b3c",
   };
+
+  const firmName =
+    safeData.firmName || tmpl?.firmName || "ADV. SANAULLAH LAW ASSOCIATES";
+  const tagline =
+    safeData.tagline || tmpl?.tagline || "Advocates & Legal Consultants";
+  const subTagline =
+    tmpl?.subTagline ||
+    "Supreme Court of Pakistan | High Courts | Sessions Courts";
+  const website = tmpl?.website || "www.sanaullahlaw.com";
+  const email = tmpl?.email || "info@sanaullahlaw.com";
+  const logoUrl = safeData.logoUrl || tmpl?.logoUrl || "";
 
   const generateImage = async (format = "png") => {
     if (!cardRef.current) return;
@@ -96,30 +117,43 @@ const JudgementCard = ({ data, onImageGenerated }) => {
             {/* Court Emblem Placeholder & Header */}
             <div className="text-center mb-8 border-b-2 border-[#171a2a]/20 pb-6">
               <div className="flex justify-center mb-3">
-                <div className="w-12 h-12 rounded-full bg-[#171a2a]/5 flex items-center justify-center">
-                  <svg
-                    className="w-8 h-8 text-[#026665]"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-                      stroke="currentColor"
-                      fill="none"
-                      strokeWidth="1.5"
-                    />
-                  </svg>
-                </div>
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt="Firm Logo"
+                    className="h-14 max-w-[180px] object-contain"
+                    crossOrigin="anonymous"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-[#171a2a]/5 flex items-center justify-center">
+                    <svg
+                      className="w-8 h-8 text-[#026665]"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                        stroke="currentColor"
+                        fill="none"
+                        strokeWidth="1.5"
+                      />
+                    </svg>
+                  </div>
+                )}
               </div>
-              <div className="text-2xl font-bold text-[#171a2a] tracking-wide">
-                ADV. SANAAULLAH LAW ASSOCIATES
+              <div
+                className="text-2xl font-bold tracking-wide"
+                style={{ color: brandColors.primary }}
+              >
+                {firmName}
               </div>
-              <div className="text-xs text-[#026665] uppercase tracking-wider mt-1">
-                Advocates & Legal Consultants
+              <div
+                className="text-xs uppercase tracking-wider mt-1"
+                style={{ color: brandColors.secondary }}
+              >
+                {tagline}
               </div>
-              <div className="text-[10px] text-gray-400 mt-1">
-                Supreme Court of Pakistan | High Courts | Sessions Courts
-              </div>
+              <div className="text-[10px] text-gray-400 mt-1">{subTagline}</div>
             </div>
 
             {/* Document Type */}
@@ -240,8 +274,8 @@ const JudgementCard = ({ data, onImageGenerated }) => {
                 <span>For information purposes only</span>
               </div>
               <div className="text-right">
-                <div>www.sanaullahlaw.com</div>
-                <div>info@sanaullahlaw.com</div>
+                <div>{website}</div>
+                <div>{email}</div>
               </div>
             </div>
           </div>

@@ -8,10 +8,21 @@ export async function POST(request) {
     await connectDB();
     const body = await request.json();
     const { name, email, password, phone, barCouncilNo } = body;
+    const seniority = body.seniority;
 
     if (!name || !email || !password) {
       return NextResponse.json(
         { success: false, message: "Name, email and password are required." },
+        { status: 400 },
+      );
+    }
+
+    if (!["junior", "senior"].includes(seniority)) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Please select either Junior Lawyer or Senior Lawyer.",
+        },
         { status: 400 },
       );
     }
@@ -33,7 +44,8 @@ export async function POST(request) {
       password,
       phone,
       barCouncilNo,
-      seniority: body.seniority || "junior",
+      role: "lawyer",
+      seniority,
     });
     const token = signToken({
       id: user._id,

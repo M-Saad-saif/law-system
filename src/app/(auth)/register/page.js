@@ -139,7 +139,7 @@ export default function RegisterPage() {
                 },
                 {
                   value: "junior",
-                  label: "Junior / Associate",
+                  label: "Junior Lawyer",
                   desc: "Creates & submits drafts",
                 },
               ].map(({ value, label, desc }) => (

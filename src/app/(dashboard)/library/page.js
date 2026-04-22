@@ -30,8 +30,13 @@ import {
   FolderOpen,
   Scale,
   Gavel,
+  Download,
+  Share2,
+  Link as LinkIcon,
+  Copy,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const COURTS = [
   "",
@@ -61,6 +66,23 @@ export default function LibraryPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+const handleExport = async (mode = "all") => {
+  try {
+    const url = mode === "all"
+      ? "/api/library/export?ids=all"
+      : `/api/library/export?ids=${entries.map((e) => e._id).join(",")}`;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "judgement-library.json";
+    a.click();
+    toast.success("Export started.");
+  } catch {
+    toast.error("Export failed.");
+  }
+};
+
+
 
   // ----- Saved Cases state -----
   const [savedCases, setSavedCases] = useState([]);
@@ -186,13 +208,23 @@ export default function LibraryPage() {
           </p>
         </div>
         {mainTab === "judgements" && (
-          <button
-            onClick={() => setAddOpen(true)}
-            className="btn-primary shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            Add Judgement
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handleExport("all")}
+              className="btn-secondary shrink-0"
+              title="Export all judgements as JSON"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </button>
+            <button
+              onClick={() => setAddOpen(true)}
+              className="btn-primary shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              Add Judgement
+            </button>
+          </div>
         )}
         {mainTab === "cases" && (
           <Link href="/cases" className="btn-secondary shrink-0">
@@ -638,6 +670,24 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
     { key: "voiceSummary", label: "Comprehensive Summary" },
   ];
 
+  const [shareUrl, setShareUrl] = useState(null);
+  const [sharing, setSharing] = useState(false);
+
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const res = await api.post(`/api/library/share`, { entryId: data._id });
+      const url = `${window.location.origin}${res?.data?.shareUrl}`;
+      setShareUrl(url);
+      await navigator.clipboard.writeText(url).catch(() => {});
+      toast.success("Share link copied to clipboard!");
+    } catch {
+      toast.error("Failed to create share link.");
+    } finally {
+      setSharing(false);
+    }
+  };
+
   const addNote = async () => {
     if (!noteText.trim()) return;
     setSaving(true);
@@ -691,22 +741,44 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
     <Modal isOpen onClose={onClose} title={data.title} size="xl">
       <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-1">
         {/* Citation + meta */}
-        <div className="flex flex-wrap gap-3 text-sm">
-          {data.citation && (
-            <span className="font-mono text-teal-700 bg-teal-50 px-2 py-0.5 rounded font-semibold">
-              {data.citation}
-            </span>
-          )}
-          {data.judgementDate && (
-            <span className="text-slate-500">
-              {new Date(data.judgementDate).toLocaleDateString("en-PK", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
-          )}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+          <div className="flex flex-wrap gap-3">
+            {data.citation && (
+              <span className="font-mono text-teal-700 bg-teal-50 px-2 py-0.5 rounded font-semibold">
+                {data.citation}
+              </span>
+            )}
+            {data.judgementDate && (
+              <span className="text-slate-500">
+                {new Date(data.judgementDate).toLocaleDateString("en-PK", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={handleShare}
+            disabled={sharing}
+            className="flex items-center gap-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            {sharing ? <span className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> : <Share2 className="w-3 h-3" />}
+            {sharing ? "Sharing..." : "Share"}
+          </button>
         </div>
+        {shareUrl && (
+          <div className="flex items-center gap-2 p-2.5 bg-teal-50 rounded-lg border border-teal-200">
+            <LinkIcon className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+            <span className="text-xs text-teal-700 font-mono flex-1 truncate">{shareUrl}</span>
+            <button
+              onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success("Copied!"); }}
+              className="shrink-0 text-teal-600 hover:text-teal-800"
+            >
+              <Copy className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* 7-section display */}
         <div className="space-y-4">
@@ -721,6 +793,23 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
             ) : null,
           )}
         </div>
+
+        {/* Import cross-exam questions to cross-exam module */}
+        {data.crossExaminationQuestions && (
+          <div className="p-4 rounded-xl bg-violet-50 border border-violet-200">
+            <p className="text-xs font-bold text-violet-700 mb-1 flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              Cross-Examination Questions Extracted
+            </p>
+            <p className="text-xs text-violet-600 mb-2">These questions can be imported into a new Cross-Examination draft.</p>
+            <a
+              href={`/cross-exams/new`}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Create Cross-Exam with these questions →
+            </a>
+          </div>
+        )}
 
         {/* Tags */}
         <div>

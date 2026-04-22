@@ -1,11 +1,40 @@
+/**
+ * aiService.js
+ * ─────────────────────────────────────────────────────────────────────────────
+ * AI enhancement layer for the legal drafting system.
+ *
+ * Design principles:
+ *  - Provider-agnostic: swap OpenAI for Anthropic/Gemini by changing the
+ *    `callAI` function and the config object. No other file needs to change.
+ *  - Strict legal prompts: formal tone, preserve facts, improve clarity only.
+ *  - Graceful failure: every public function returns { ok, data, error } so
+ *    the caller can decide whether to surface the error or fall back silently.
+ *  - Rate-limit aware: all calls go through a single wrapper so throttling /
+ *    retry logic can be added in one place.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+// ─── Provider Configuration ───────────────────────────────────────────────────
+// To switch providers, update AI_CONFIG and the callAI function below.
+
 const AI_CONFIG = {
-  provider: "openai", //compatiable to groq
+  provider: "openai", // Groq is OpenAI-compatible
   model: "llama-3.3-70b-versatile",
   maxTokens: 2000,
   temperature: 0.3,
   apiKeyEnvVar: "GROQ_API_KEY",
 };
+// ─── Core API Caller ─────────────────────────────────────────────────────────
 
+/**
+ * Low-level wrapper that calls the configured AI provider.
+ * All public service functions route through here.
+ *
+ * @param {string} systemPrompt - Instructions for the AI's persona/task.
+ * @param {string} userContent  - The actual content to process.
+ * @returns {Promise<string>} The AI's text response.
+ * @throws {Error} If API key is missing or the API call fails.
+ */
 async function callAI(systemPrompt, userContent) {
   const apiKey = process.env[AI_CONFIG.apiKeyEnvVar];
 
@@ -15,6 +44,7 @@ async function callAI(systemPrompt, userContent) {
     );
   }
 
+  // ── OpenAI ──────────────────────────────────────────────────────────────
   if (AI_CONFIG.provider === "openai") {
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -50,8 +80,82 @@ async function callAI(systemPrompt, userContent) {
     return text.trim();
   }
 
+  // ── Anthropic (Claude) ───────────────────────────────────────────────────
+  // Swap provider to "anthropic" and set ANTHROPIC_API_KEY in .env.local
+  if (AI_CONFIG.provider === "anthropic") {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-opus-4-5",
+        max_tokens: AI_CONFIG.maxTokens,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userContent }],
+      }),
+    });
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}));
+      throw new Error(
+        errBody?.error?.message ||
+          `Anthropic API error: HTTP ${response.status}`,
+      );
+    }
+
+    const json = await response.json();
+    const text = json?.content?.[0]?.text;
+    if (!text) throw new Error("Anthropic returned an empty response.");
+    return text.trim();
+  }
+
+  // ── Google Gemini ───────────────────────────────────────────────────────
+  // Set GEMINI_API_KEY in .env.local
+  if (AI_CONFIG.provider === "gemini") {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.model}:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: `System: ${systemPrompt}\n\nUser: ${userContent}` },
+              ],
+            },
+          ],
+          generationConfig: {
+            maxOutputTokens: AI_CONFIG.maxTokens,
+            temperature: AI_CONFIG.temperature,
+          },
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}));
+      throw new Error(
+        errBody?.error?.message || `Gemini API error: HTTP ${response.status}`,
+      );
+    }
+
+    const json = await response.json();
+    const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("Gemini returned an empty response.");
+    return text.trim();
+  }
+
   throw new Error(`Unsupported AI provider: ${AI_CONFIG.provider}`);
 }
+
+// ─── System Prompts ───────────────────────────────────────────────────────────
+// Stored as constants so they can be tuned independently.
 
 const SYSTEM_PROMPTS = {
   improveDraft: `You are a senior advocate with 20+ years of experience in Pakistani courts (Supreme Court, High Courts, Sessions Courts). You specialise in criminal and civil litigation under Pakistani law (PPC, CrPC, Civil Procedure Code).
@@ -86,6 +190,19 @@ Rules:
   summarise: `You are a legal assistant at a Pakistani law firm. Summarise the following legal document in plain English in 3-5 sentences. Identify: the type of application, the parties, the key grounds, and the relief sought. Keep it factual and neutral.`,
 };
 
+// ─── Public Service Functions ─────────────────────────────────────────────────
+
+/**
+ * Improves an existing application draft using AI.
+ * Facts are preserved; language, structure, and legal argumentation are enhanced.
+ *
+ * @param {string} content - The raw draft text to improve.
+ * @returns {Promise<{ ok: boolean, improvedContent?: string, error?: string }>}
+ *
+ * @example
+ * const result = await improveDraft(application.generatedText);
+ * if (result.ok) updateDoc({ generatedText: result.improvedContent });
+ */
 export async function improveDraft(content) {
   if (!content?.trim()) {
     return { ok: false, error: "No content provided to improve." };
@@ -104,6 +221,20 @@ export async function improveDraft(content) {
   }
 }
 
+/**
+ * Generates strategic cross-examination questions from case facts.
+ *
+ * @param {string} facts - A text summary of the case facts, FIR contents,
+ *                         witness statement, or relevant context.
+ * @param {Object} [options]
+ * @param {string} [options.witnessType] - e.g. "eyewitness", "IO", "medical expert"
+ * @param {string} [options.caseType]   - e.g. "murder", "drug trafficking", "theft"
+ * @returns {Promise<{ ok: boolean, questions?: string, error?: string }>}
+ *
+ * @example
+ * const result = await generateCrossQuestions(facts, { witnessType: "IO" });
+ * if (result.ok) console.log(result.questions);
+ */
 export async function generateCrossQuestions(facts, options = {}) {
   if (!facts?.trim()) {
     return {
@@ -136,6 +267,13 @@ ${facts}
   }
 }
 
+/**
+ * Generates a plain-English summary of a legal document.
+ * Useful for the review dashboard to show senior lawyers a quick snapshot.
+ *
+ * @param {string} content - The full application text.
+ * @returns {Promise<{ ok: boolean, summary?: string, error?: string }>}
+ */
 export async function summariseApplication(content) {
   if (!content?.trim()) {
     return { ok: false, error: "No content to summarise." };
@@ -151,6 +289,12 @@ export async function summariseApplication(content) {
   }
 }
 
+/**
+ * Checks whether the AI service is available (API key set + reachable).
+ * Call this on page load to conditionally show/hide AI buttons.
+ *
+ * @returns {Promise<{ available: boolean, reason?: string }>}
+ */
 export async function checkAIAvailability() {
   const apiKey = process.env[AI_CONFIG.apiKeyEnvVar];
 
@@ -162,4 +306,50 @@ export async function checkAIAvailability() {
   }
 
   return { available: true };
+}
+
+/**
+ * Extracts structured 7-section summary from raw judgement text.
+ * Follows the exact PRD schema for the AI Judgement Extractor module.
+ *
+ * @param {string} rawText - Raw pasted or extracted judgement text.
+ * @returns {Promise<{ ok: boolean, extracted?: object, error?: string }>}
+ */
+export async function extractJudgement(rawText) {
+  if (!rawText?.trim()) {
+    return { ok: false, error: "No text provided to extract from." };
+  }
+
+  const systemPrompt = `You are a senior legal analyst specialising in Pakistani court judgements (Supreme Court, High Courts, Sessions Courts).
+
+Your task is to read a raw court judgement and extract exactly 7 structured sections. Return ONLY valid JSON with these exact keys (no markdown, no preamble):
+
+{
+  "citation": "Case citation e.g. 2015 SCMR 1002",
+  "title": "Case title e.g. State vs Ahmed Ali",
+  "offenceName": "The specific charge(s), applicable statute, and a brief description of the alleged act",
+  "courtName": "All courts involved — Trial Court, Appellate Court, and Final Court",
+  "lawsDiscussed": "All statutes, sections, articles, and legal principles cited or interpreted",
+  "crossExaminationQuestions": "Defence questions posed to prosecution witnesses and their stated purpose",
+  "courtExaminationOfEvidence": "The court's own findings and analysis — weaknesses, contradictions, or evidentiary failures",
+  "finalDecision": "The ultimate verdict: conviction/acquittal, sentence if any, and the stated legal reason",
+  "voiceSummary": "A plain-language narrative paragraph summarising the entire judgement for quick understanding"
+}
+
+Rules:
+- Extract only what is actually in the text. Use null for sections not found.
+- For crossExaminationQuestions: list each question and its purpose, one per line.
+- For lawsDiscussed: list each statute/section/principle, comma-separated.
+- voiceSummary must be 3-5 sentences in simple English, suitable for a client briefing.
+- Return ONLY the JSON object. No markdown code blocks. No explanation.`;
+
+  try {
+    const raw = await callAI(systemPrompt, `Extract from this judgement:\n\n${rawText.slice(0, 12000)}`);
+    const clean = raw.replace(/```json|```/g, "").trim();
+    const extracted = JSON.parse(clean);
+    return { ok: true, extracted };
+  } catch (err) {
+    console.error("[aiService] extractJudgement error:", err.message);
+    return { ok: false, error: err.message };
+  }
 }

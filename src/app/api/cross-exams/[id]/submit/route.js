@@ -3,6 +3,7 @@ import { withAuth } from "@/lib/api";
 import connectDB from "@/lib/db";
 import CrossExamination from "@/models/CrossExamination";
 import WitnessSection from "@/models/WitnessSection";
+import User from "@/models/User";
 import { applyTransition } from "@/lib/crossExamWorkflow";
 
 export const POST = withAuth(async (req, { params }, user) => {
@@ -37,6 +38,28 @@ export const POST = withAuth(async (req, { params }, user) => {
   }
 
   const body = await req.json().catch(() => ({}));
+  const assignedTo = body.assignedTo;
+
+  if (assignedTo !== undefined) {
+    if (!assignedTo) {
+      exam.assignedTo = undefined;
+    } else {
+      const reviewer = await User.findOne({
+        _id: assignedTo,
+        isActive: true,
+        $or: [{ seniority: "senior" }, { role: "admin" }],
+      }).select("_id");
+
+      if (!reviewer) {
+        return NextResponse.json(
+          { error: "Selected reviewer must be an active senior lawyer." },
+          { status: 400 },
+        );
+      }
+
+      exam.assignedTo = reviewer._id;
+    }
+  }
 
   const result = await applyTransition({
     exam,

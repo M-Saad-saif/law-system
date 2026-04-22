@@ -138,6 +138,94 @@ function AddWitnessModal({ onAdd, onClose }) {
   );
 }
 
+function SubmitReviewModal({
+  mode,
+  reviewers,
+  selectedReviewer,
+  onReviewerChange,
+  onClose,
+  onConfirm,
+  loadingReviewers,
+  submitting,
+}) {
+  const isResubmit = mode === "resubmit";
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+          <h2 className="text-base font-bold text-slate-900">
+            {isResubmit ? "Resubmit For Review" : "Submit For Review"}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-700 text-xl leading-none"
+          >
+            x
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-4">
+          <p className="text-sm text-slate-600">
+            You can optionally assign a senior lawyer now, or leave it
+            unassigned.
+          </p>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+              Senior Lawyer (Optional)
+            </label>
+            <select
+              value={selectedReviewer}
+              onChange={(e) => onReviewerChange(e.target.value)}
+              disabled={loadingReviewers || submitting}
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 bg-white disabled:opacity-60"
+            >
+              <option value="">No preference (auto-assign later)</option>
+              {reviewers.map((reviewer) => (
+                <option key={reviewer._id} value={reviewer._id}>
+                  {reviewer.name} ({reviewer.email})
+                </option>
+              ))}
+            </select>
+            {loadingReviewers && (
+              <p className="mt-2 text-xs text-slate-500">
+                Loading senior lawyers...
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex gap-3 px-6 pb-6">
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={submitting}
+            className="flex-1 bg-slate-900 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60"
+          >
+            {submitting
+              ? isResubmit
+                ? "Resubmitting..."
+                : "Submitting..."
+              : isResubmit
+                ? "Confirm Resubmit"
+                : "Confirm Submit"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={submitting}
+            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // --- Add QA inline form ---
 function AddQAForm({ witnessId, onAdd, onClose }) {
   const [q, setQ] = useState("");
@@ -710,6 +798,11 @@ export default function CrossExamEditPage() {
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [submitMode, setSubmitMode] = useState("submit");
+  const [reviewers, setReviewers] = useState([]);
+  const [loadingReviewers, setLoadingReviewers] = useState(false);
+  const [selectedReviewer, setSelectedReviewer] = useState("");
   const [showWitnessModal, setShowWitnessModal] = useState(false);
   const [showActivity, setShowActivity] = useState(false);
   const [showAIQuestions, setShowAIQuestions] = useState(true);
@@ -824,40 +917,68 @@ export default function CrossExamEditPage() {
     }));
   };
 
-  const handleSubmit = async () => {
-    if (!confirm("Submit for senior review?")) return;
+  const openSubmitModal = async (mode) => {
+    setSubmitMode(mode);
+    setSelectedReviewer(exam?.assignedTo?._id || "");
+    setShowSubmitModal(true);
+
+    setLoadingReviewers(true);
+    try {
+      const data = await apiFetch("/api/user?seniority=senior&role=lawyer,admin");
+      setReviewers(data.users || []);
+    } catch {
+      setReviewers([]);
+      toast.error("Could not load senior lawyers.");
+    } finally {
+      setLoadingReviewers(false);
+    }
+  };
+
+  const closeSubmitModal = () => {
+    if (submitting) return;
+    setShowSubmitModal(false);
+  };
+
+  const confirmSubmission = async () => {
+    const endpoint =
+      submitMode === "resubmit"
+        ? `/api/cross-exams/${id}/resubmit`
+        : `/api/cross-exams/${id}/submit`;
+
+    const successMessage =
+      submitMode === "resubmit" ? "Resubmitted!" : "Submitted for review!";
+    const failureMessage =
+      submitMode === "resubmit" ? "Resubmit failed." : "Submit failed.";
+
     setSubmitting(true);
     try {
-      const data = await apiFetch(`/api/cross-exams/${id}/submit`, {
+      const data = await apiFetch(endpoint, {
         method: "POST",
-        body: "{}",
+        body: JSON.stringify({
+          assignedTo: selectedReviewer || null,
+        }),
       });
-      setExam((p) => ({ ...p, status: data.exam.status }));
-      toast.success("Submitted for review!");
+      setExam((p) => ({
+        ...p,
+        status: data.exam.status,
+        assignedTo: data.exam.assignedTo || null,
+      }));
+      toast.success(successMessage);
+      setShowSubmitModal(false);
       fetchExam();
     } catch (err) {
-      toast.error(err.message || "Submit failed.");
+      toast.error(err.message || failureMessage);
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleSubmit = async () => {
+    await openSubmitModal("submit");
+  };
+
   const handleResubmit = async () => {
-    if (!confirm("Resubmit for review?")) return;
-    setSubmitting(true);
-    try {
-      const data = await apiFetch(`/api/cross-exams/${id}/resubmit`, {
-        method: "POST",
-        body: "{}",
-      });
-      setExam((p) => ({ ...p, status: data.exam.status }));
-      toast.success("Resubmitted!");
-      fetchExam();
-    } catch (err) {
-      toast.error(err.message || "Resubmit failed.");
-    } finally {
-      setSubmitting(false);
-    }
+    await openSubmitModal("resubmit");
   };
 
   if (loading)
@@ -1245,6 +1366,19 @@ export default function CrossExamEditPage() {
         <AddWitnessModal
           onAdd={handleAddWitness}
           onClose={() => setShowWitnessModal(false)}
+        />
+      )}
+
+      {showSubmitModal && (
+        <SubmitReviewModal
+          mode={submitMode}
+          reviewers={reviewers}
+          selectedReviewer={selectedReviewer}
+          onReviewerChange={setSelectedReviewer}
+          onClose={closeSubmitModal}
+          onConfirm={confirmSubmission}
+          loadingReviewers={loadingReviewers}
+          submitting={submitting}
         />
       )}
     </div>

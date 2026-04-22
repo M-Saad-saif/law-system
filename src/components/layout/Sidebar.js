@@ -12,7 +12,10 @@ import {
   Library,
   FileText,
   Image,
-  ClipboardList,
+  Search,
+  Cpu,
+  ShieldCheck,
+  Layout,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -46,8 +49,11 @@ const Icon = {
   Library,
   Applications: FileText,
   ImageGen: Image,
+  Search,
+  Extractor: Cpu,
+  Admin: ShieldCheck,
+  Template: Layout,
   Logout: LogOutIcon,
-  ReviewQueue: ClipboardList,
   ChevronDown: () => (
     <svg
       className="w-4 h-4"
@@ -61,8 +67,10 @@ const Icon = {
   ),
 };
 
-function buildNavSections(isSenior) {
-  return [
+function buildNavSections(user) {
+  const isAdmin = user?.role === "admin";
+
+  const sections = [
     {
       label: "Main",
       items: [
@@ -78,30 +86,15 @@ function buildNavSections(isSenior) {
           label: "Cross-Examinations",
           href: "/cross-exams",
           icon: Icon.CrossExam,
-          subLinks: isSenior
-            ? [
-                { label: "All Drafts", href: "/cross-exams" },
-                {
-                  label: "Review Queue",
-                  href: "/cross-exams?status=submitted",
-                },
-                { label: "+ New Draft", href: "/cross-exams/new" },
-              ]
-            : [
-                { label: "All Cross-Exams", href: "/cross-exams" },
-                { label: "+ New Draft", href: "/cross-exams/new" },
-              ],
+          subLinks: [
+            { label: "All Cross-Exams", href: "/cross-exams" },
+            { label: "+ New Draft", href: "/cross-exams/new" },
+          ],
         },
         {
           label: "Application Generator",
           href: "/applications",
           icon: Icon.Applications,
-          subLinks: isSenior
-            ? [
-                { label: "My Applications", href: "/applications" },
-                { label: "Review Queue", href: "/applications/review" },
-              ]
-            : undefined,
         },
       ],
     },
@@ -109,15 +102,30 @@ function buildNavSections(isSenior) {
       label: "Judgements",
       items: [
         {
-          label: "Judgement Library",
-          href: "/library",
-          icon: Icon.Library,
+          label: "Search & Intelligence",
+          href: "/judgement-search",
+          icon: Icon.Search,
         },
+        {
+          label: "AI Extractor",
+          href: "/judgement-extractor",
+          icon: Icon.Extractor,
+        },
+        { label: "Library", href: "/library", icon: Icon.Library },
         {
           label: "Image Generator",
           href: "/judgement-image-generator",
           icon: Icon.ImageGen,
         },
+        ...(isAdmin
+          ? [
+              {
+                label: "Template Editor",
+                href: "/judgement-image-template",
+                icon: Icon.Template,
+              },
+            ]
+          : []),
       ],
     },
     {
@@ -129,9 +137,16 @@ function buildNavSections(isSenior) {
     },
     {
       label: "Account",
-      items: [{ label: "Settings", href: "/settings", icon: Icon.Settings }],
+      items: [
+        { label: "Settings", href: "/settings", icon: Icon.Settings },
+        ...(isAdmin
+          ? [{ label: "User Management", href: "/admin", icon: Icon.Admin }]
+          : []),
+      ],
     },
   ];
+
+  return sections;
 }
 
 function NavItem({ item, pathname }) {
@@ -192,14 +207,11 @@ function NavItem({ item, pathname }) {
               <Link
                 key={sub.href}
                 href={sub.href}
-                className={`
-                  block py-1.5 px-2 rounded text-xs font-medium transition-colors
-                  ${
-                    subActive
-                      ? "text-teal-400"
-                      : "text-slate-500 hover:text-slate-300"
-                  }
-                `}
+                className={`block py-1.5 px-2 rounded text-xs font-medium transition-colors ${
+                  subActive
+                    ? "text-teal-400"
+                    : "text-slate-500 hover:text-slate-300"
+                }`}
               >
                 {sub.label}
               </Link>
@@ -214,8 +226,7 @@ function NavItem({ item, pathname }) {
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const isSenior = user?.seniority === "senior" || user?.role === "admin";
-  const NAV_SECTIONS = buildNavSections(isSenior);
+  const NAV_SECTIONS = buildNavSections(user);
 
   return (
     <aside className="h-screen w-60 flex flex-col bg-[#0f172a] border-r border-slate-800 z-40 select-none">
@@ -242,7 +253,7 @@ export default function Sidebar() {
             <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-3 mb-2">
               {section.label}
             </p>
-            <div className="space-y-0.5 ">
+            <div className="space-y-0.5">
               {section.items.map((item) => (
                 <NavItem key={item.href} item={item} pathname={pathname} />
               ))}
@@ -264,9 +275,8 @@ export default function Sidebar() {
                 {user.name}
               </p>
               <p className="text-[10px] text-slate-500 truncate capitalize">
-                {user.seniority
-                  ? `${user.seniority} ${user.role || "Lawyer"}`
-                  : user.role || "Lawyer"}
+                {user.role}
+                {user.seniority ? ` · ${user.seniority}` : ""}
               </p>
             </div>
             <button

@@ -7,6 +7,7 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
     judgementTitle: initialData.judgementTitle || "",
     caseNumber: initialData.caseNumber || "",
     courtName: initialData.courtName || "",
+    logoUrl: initialData.logoUrl || "",
     judgementDate: initialData.judgementDate || "",
     judgeName: initialData.judgeName || "",
     keyFindings: initialData.keyFindings || "",
@@ -141,6 +142,34 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
             Load Case
           </button>
         </div>
+      </div>
+
+      {/* Firm Logo URL */}
+      <div className="card p-5 border border-[#026665]/20">
+        <label className="block text-sm font-semibold text-[#171a2a] mb-2">
+          Firm Logo URL{" "}
+          <span className="text-gray-400 font-normal text-xs">
+            (optional — appears on generated image)
+          </span>
+        </label>
+        <input
+          type="url"
+          name="logoUrl"
+          value={formData.logoUrl}
+          onChange={handleChange}
+          placeholder="https://yourdomain.com/logo.png"
+          className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all"
+        />
+        {formData.logoUrl && (
+          <div className="mt-2 flex items-center gap-2">
+            <img
+              src={formData.logoUrl}
+              alt="Logo preview"
+              className="h-10 max-w-[160px] object-contain border border-gray-200 rounded p-1 bg-white"
+            />
+            <span className="text-xs text-gray-400">Preview</span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
