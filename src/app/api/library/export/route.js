@@ -8,7 +8,7 @@ export const GET = withAuth(async (request, context, user) => {
   try {
     await connectDB();
     const { searchParams } = new URL(request.url);
-    const ids = searchParams.get("ids"); // comma-separated IDs or "all"
+    const ids = searchParams.get("ids");
 
     let query = { userId: user.id };
     if (ids && ids !== "all") {
