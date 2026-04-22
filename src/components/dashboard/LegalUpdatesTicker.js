@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { apiFetch } from "@/utils/api";
 
-// --─ Court metadata ---
 const COURTS = {
   ALL: { label: "All Courts", color: "#6366f1", bg: "#eef2ff" },
   SCP: { label: "Supreme Court", color: "#7c3aed", bg: "#f5f3ff" },
@@ -14,7 +13,6 @@ const COURTS = {
   BHC: { label: "Balochistan HC", color: "#7c2d12", bg: "#ffedd5" },
 };
 
-// Matter badge colours (same palette as before, extended)
 const MATTER_COLORS = {
   default: { bg: "#f1f5f9", text: "#475569" },
   SERVICE: { bg: "#e0f2fe", text: "#0369a1" },

@@ -69,6 +69,7 @@ const Icon = {
 
 function buildNavSections(user) {
   const isAdmin = user?.role === "admin";
+  const isSenior = user?.seniority === "senior";
 
   const sections = [
     {
@@ -95,6 +96,17 @@ function buildNavSections(user) {
           label: "Application Generator",
           href: "/applications",
           icon: Icon.Applications,
+          subLinks: [
+            { label: "All Applications", href: "/applications" },
+            ...(isSenior || isAdmin
+              ? [
+                  {
+                    label: "Review Applications",
+                    href: "/applications/review",
+                  },
+                ]
+              : []),
+          ],
         },
       ],
     },
