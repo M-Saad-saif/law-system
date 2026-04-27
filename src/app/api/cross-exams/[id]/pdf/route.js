@@ -136,7 +136,7 @@ export const GET = withAuth(async (req, { params }, user) => {
     <span><strong>Case</strong>${exam.caseId ? `${exam.caseId.caseTitle} (${exam.caseId.caseNumber})` : "N/A"}</span>
     <span><strong>Status</strong><span class="status-pill">${exam.status}</span></span>
     <span><strong>Version</strong>v${exam.version - 1}</span>
-    <span><strong>Prepared by</strong>${exam.userId?.name || 'Unknown'}</span>
+    <span><strong>Prepared by</strong>${exam.userId?.name || "Unknown"}</span>
     ${exam.assignedTo ? `<span><strong>Reviewed by</strong>${exam.assignedTo.name}</span>` : ""}
     ${exam.hearingDate ? `<span><strong>Hearing Date</strong>${formatDate(exam.hearingDate)}</span>` : ""}
     <span><strong>Generated</strong>${formatDate(new Date())}</span>
