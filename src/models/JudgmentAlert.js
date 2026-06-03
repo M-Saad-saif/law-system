@@ -17,7 +17,7 @@ const JudgmentAlertSchema = new mongoose.Schema(
       ],
       required: true,
     },
-    ppcSections: [{ type: String }], // e.g. ["302", "34"]
+    ppcSections: [{ type: String }],
     caseType: {
       type: String,
       enum: [
@@ -46,8 +46,8 @@ const JudgmentAlertSchema = new mongoose.Schema(
     },
     judgeName: { type: String },
     decisionDate: { type: Date, required: true },
-    summary: { type: String, required: true }, // 2-3 line plain-English summary
-    headnote: { type: String }, // Key legal principle
+    summary: { type: String, required: true },
+    headnote: { type: String },
     importance: {
       type: String,
       enum: ["High", "Medium", "Low"],

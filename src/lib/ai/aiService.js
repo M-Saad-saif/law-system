@@ -1,5 +1,5 @@
 const AI_CONFIG = {
-  provider: "openai", // Groq is OpenAI-compatible
+  provider: "openai", 
   model: "llama-3.3-70b-versatile",
   maxTokens: 2000,
   temperature: 0.3,
@@ -15,7 +15,7 @@ async function callAI(systemPrompt, userContent) {
     );
   }
 
-  // ── OpenAI ──────────────────────────────────────────────────────────────
+  // --- OpenAI ---
   if (AI_CONFIG.provider === "openai") {
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",

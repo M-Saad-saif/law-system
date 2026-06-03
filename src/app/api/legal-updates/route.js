@@ -23,7 +23,7 @@ const COURT_META = {
   LHC: {
     courtFull: "Lahore High Court",
     province: "Punjab",
-    website: "https://lhc.gov.pk/reported_judgments",
+    website: "https://data.lhc.gov.pk/reported_judgments/judgments_approved_for_reporting",
   },
   SCP: {
     courtFull: "Supreme Court of Pakistan",

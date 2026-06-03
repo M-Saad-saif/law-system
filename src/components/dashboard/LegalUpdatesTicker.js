@@ -41,7 +41,7 @@ function formatDate(iso) {
   });
 }
 
-// --─ Court badge pill --------------------------------------------------------─
+// --─ Court badge pill --------
 function CourtBadge({ abbr, small = false }) {
   const meta = COURTS[abbr] || COURTS.ALL;
   return (
@@ -54,7 +54,7 @@ function CourtBadge({ abbr, small = false }) {
   );
 }
 
-// --─ Single item in the scrolling ticker strip --------------------------------
+// --─ Single item in the scrolling ticker strip -----
 function TickerItem({ j }) {
   const mc = matterColor(j.matter);
   return (
@@ -97,7 +97,7 @@ function TickerItem({ j }) {
   );
 }
 
-// --─ Expanded row ------------------------------------------------------------─
+// --─ Expanded row --------
 function JudgmentRow({ j, idx }) {
   const mc = matterColor(j.matter);
   return (
@@ -161,7 +161,7 @@ function JudgmentRow({ j, idx }) {
   );
 }
 
-// --─ Court filter tabs --------------------------------------------------------
+// --─ Court filter tabs ----------
 function CourtTabs({ active, onChange, counts }) {
   return (
     <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">

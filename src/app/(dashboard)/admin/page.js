@@ -211,7 +211,6 @@ function UserFormModal({ open, onClose, onSaved, editUser }) {
           <div>
             <label className="label">Email *</label>
             <input
-              className="input"
               type="email"
               value={form.email}
               disabled={isEdit}

@@ -437,8 +437,9 @@ export default function ReviewPage() {
     try {
       const data = await apiFetch(`/api/cross-exams/${id}`);
       setExam(data.exam);
-      if (data.exam.witnesses?.length > 0 && !activeWitness)
-        setActiveWitness(data.exam.witnesses[0]._id);
+      if (data.exam.witnesses?.length > 0) {
+        setActiveWitness((current) => current || data.exam.witnesses[0]._id);
+      }
     } catch {
       toast.error("Failed to load.");
     } finally {
