@@ -101,6 +101,7 @@ const caseSchema = new mongoose.Schema(
     caseType: {
       type: String,
       enum: [
+        "Bail",
         "Civil",
         "Criminal",
         "Family",

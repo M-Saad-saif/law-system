@@ -6,7 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Scale, ArrowRight } from "lucide-react";
+import { Scale, ArrowRight, ShieldCheck } from "lucide-react";
 import { api } from "@/utils/api";
 
 function Field({
@@ -42,7 +42,6 @@ export default function RegisterPage() {
     password: "",
     phone: "",
     barCouncilNo: "",
-    seniority: "junior",
   });
   const [loading, setLoading] = useState(false);
 
@@ -54,8 +53,8 @@ export default function RegisterPage() {
       return toast.error("Password must be at least 6 characters.");
     setLoading(true);
     try {
-      await api.post("/api/auth/register", form);
-      toast.success("Account created! Welcome to LawPortal.");
+      await api.post("/api/auth/register", { ...form, seniority: "senior" });
+      toast.success("Senior Lawyer account created! Welcome to LawPortal.");
       router.push("/dashboard");
     } catch (err) {
       toast.error(err.message);
@@ -74,7 +73,7 @@ export default function RegisterPage() {
           LawPortal
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Create your practice account
+          Senior Lawyer registration
         </p>
       </div>
 
@@ -82,9 +81,18 @@ export default function RegisterPage() {
         <h2 className="text-xl font-semibold text-white mb-1">
           Create Account
         </h2>
-        <p className="text-slate-400 text-sm mb-6">
+        <p className="text-slate-400 text-sm mb-4">
           Start managing your cases professionally
         </p>
+
+        <div className="flex items-start gap-2.5 bg-primary-600/10 border border-primary-400/20 rounded-lg px-3.5 py-3 mb-6">
+          <ShieldCheck className="w-4 h-4 text-primary-400 mt-0.5 shrink-0" />
+          <p className="text-xs text-primary-300">
+            This form creates a{" "}
+            <span className="font-semibold">Senior Lawyer</span> account. Junior
+            lawyers are added by senior lawyers from their dashboard.
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Field
@@ -125,43 +133,6 @@ export default function RegisterPage() {
             />
           </div>
 
-          {/* Seniority selector */}
-          <div className="form-group">
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
-              Role <span className="text-red-400">*</span>
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                {
-                  value: "senior",
-                  label: "Senior Lawyer",
-                  desc: "Reviews & approves drafts",
-                },
-                {
-                  value: "junior",
-                  label: "Junior Lawyer",
-                  desc: "Creates & submits drafts",
-                },
-              ].map(({ value, label, desc }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, seniority: value }))}
-                  className={`text-left px-3 py-2.5 rounded-lg border transition-all text-sm ${
-                    form.seniority === value
-                      ? "border-primary-400 bg-primary-600/20 text-white"
-                      : "border-white/10 bg-white/5 text-slate-400 hover:border-white/20"
-                  }`}
-                >
-                  <span className="block font-semibold">{label}</span>
-                  <span className="block text-xs opacity-70 mt-0.5">
-                    {desc}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
@@ -171,7 +142,7 @@ export default function RegisterPage() {
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                Create Account <ArrowRight className="w-4 h-4" />
+                Create Senior Account <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>

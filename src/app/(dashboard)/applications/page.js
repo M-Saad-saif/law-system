@@ -1083,7 +1083,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
           {/* Approved indicator */}
           {data.status === "approved" && (
             <span className="flex items-center gap-1.5 text-sm text-emerald-700 font-medium">
-              <CheckCircle className="w-4 h-4" /> Approved by Senior Lawyer
+              <CheckCircle className="w-4 h-4" /> Approved by Senior Lawyer {data.reviewedBy?.name || "Senior Lawyer"}
             </span>
           )}
         </div>

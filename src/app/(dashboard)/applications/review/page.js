@@ -105,14 +105,16 @@ export default function ReviewDashboardPage() {
 }
 
 // ----- Review Card -----
-
 function ReviewCard({ app, onView, onUpdated }) {
-  const [processing, setProcessing] = useState(null); // "approve" | "changes"
+  const [processing, setProcessing] = useState(null);
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [reviewNote, setReviewNote] = useState("");
 
   const typeLabel =
     APPLICATION_TYPES[app.applicationType] || app.applicationType;
+
+  const juniorName = app.userId?.name || "Unknown Junior";
+
 
   const handleApprove = async () => {
     setProcessing("approve");
@@ -165,6 +167,9 @@ function ReviewCard({ app, onView, onUpdated }) {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
+          <p className="text-[13px] font-semibold text-primary-800   mb-0.5">
+            Applicant: {app.userId?.name}  <span className="text-xs ml-4 text-slate-500">Email: {app.userId?.email}</span>
+          </p>
           <p className="text-xs font-semibold text-primary-600 mb-0.5">
             {typeLabel}
           </p>
@@ -260,7 +265,6 @@ function ReviewCard({ app, onView, onUpdated }) {
     </div>
   );
 }
-
 // ----- Review Detail Modal -----
 
 function ReviewDetailModal({ app, onClose, onUpdated }) {

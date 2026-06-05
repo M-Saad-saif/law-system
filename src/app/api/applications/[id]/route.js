@@ -12,10 +12,9 @@ export const GET = withAuth(async (request, { params }, user) => {
       ? { _id: params.id }
       : { _id: params.id, userId: user.id };
 
-    const app = await Application.findOne(query).populate(
-      "caseId",
-      "caseTitle caseNumber courtName clientName",
-    );
+    const app = await Application.findOne(query)
+      .populate("caseId", "caseTitle caseNumber courtName clientName")
+      .populate("reviewedBy", "name email");
 
     if (!app) return apiError("Application not found.", 404);
     return apiSuccess({ application: app });

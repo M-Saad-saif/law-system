@@ -358,6 +358,9 @@ export default function CrossExamsPage() {
                       <p className="text-xs text-slate-400 mt-0.5">
                         by {exam.userId?.name}
                       </p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {exam.userId.email}
+                      </p>
                     </td>
                     {/* Case */}
                     <td className="px-4 py-4 text-slate-600">
@@ -440,7 +443,7 @@ export default function CrossExamsPage() {
                         {exam.status === "draft" && !isSenior && (
                           <button
                             onClick={() => handleDelete(exam._id, exam.title)}
-                            className="px-2 py-1.5 text-red-400 hover:text-red-600 text-xs transition-colors"
+                             className="px-3 py-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 text-xs font-medium rounded-lg transition-colors border border-red-200"
                           >
                             Delete
                           </button>

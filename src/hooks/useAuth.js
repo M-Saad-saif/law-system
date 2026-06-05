@@ -57,7 +57,19 @@ export function useAuth() {
   return ctx;
 }
 
-// if user is not loged in, redirect to login page, else show the children components.
+export function RoleGate({ children, required, fallback = null }) {
+  const { user, loading } = useAuth();
+
+  if (loading) return null;
+
+  const isAdmin = user?.role === "admin";
+  const hasSeniority = user?.seniority === required;
+
+  if (!isAdmin && !hasSeniority) return fallback;
+
+  return children;
+}
+
 export function AuthGate({ children, redirectTo = "/" }) {
   const { user, loading } = useAuth();
   const router = useRouter();

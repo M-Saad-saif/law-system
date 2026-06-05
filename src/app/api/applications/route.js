@@ -33,6 +33,8 @@ export const GET = withAuth(async (request, context, user) => {
     const total = await Application.countDocuments(query);
     const applications = await Application.find(query)
       .populate("caseId", "caseTitle caseNumber courtName")
+      .populate("userId", "name email")
+      .populate("reviewedBy", "name email")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);

@@ -120,7 +120,7 @@ body {
   }
 
   .stat-card {
-    @apply card p-5 flex items-start gap-4;
+    @apply card p-5 text-center justify-items-center gap-4;
   }
 
   .page-header {

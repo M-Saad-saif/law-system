@@ -33,8 +33,7 @@ export const PUT = withAuth(async (req, { params }, user) => {
   const isAssignedReviewer =
     exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
   const isAdmin = user.role === "admin";
-  const isSenior = user.seniority === "senior";
-  const isReviewer = isAssignedReviewer || isSenior || isAdmin;
+  const isReviewer = isAssignedReviewer || isAdmin;
   if (!isCreator && !isReviewer) {
     return NextResponse.json({ error: "Access denied." }, { status: 403 });
   }
@@ -42,7 +41,7 @@ export const PUT = withAuth(async (req, { params }, user) => {
   const body = await req.json();
   const before = qaPair.toObject();
 
-  // Senior reviewer edits
+  // Assigned reviewer or admin can edit
   if (isReviewer) {
     if (body.editedQuestion !== undefined)
       qaPair.editedQuestion = body.editedQuestion;

@@ -19,15 +19,14 @@ export const POST = withAuth(async (req, { params }, user) => {
   if (exam.isLocked)
     return NextResponse.json({ error: "Document is locked." }, { status: 403 });
 
-  // Only a senior reviewer or the assigned reviewer
+  // Only the assigned reviewer or admin can flag/approve QA pairs
   const userId = (user.id || user._id || user.userId || "").toString();
   const userRole = user.role || "";
-  const userSeniority = user.seniority || "";
-  const isSenior = userSeniority === "senior" || userRole === "senior" || userRole === "admin";
+  const isAdmin = userRole === "admin";
   const isAssignedReviewer = exam.assignedTo && exam.assignedTo.toString() === userId;
-  if (!isAssignedReviewer && !isSenior) {
+  if (!isAssignedReviewer && !isAdmin) {
     return NextResponse.json(
-      { error: "Only a senior reviewer can flag or approve QA pairs." },
+      { error: "Only the assigned reviewer can flag or approve QA pairs." },
       { status: 403 },
     );
   }

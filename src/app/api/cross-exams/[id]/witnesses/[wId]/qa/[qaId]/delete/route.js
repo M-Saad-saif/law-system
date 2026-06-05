@@ -14,13 +14,13 @@ export const DELETE = withAuth(async (req, { params }, user) => {
       { error: "Cross-examination not found." },
       { status: 404 },
     );
-  // Only senior reviewers or admins can delete approved QA pairs
-  const isSenior = user.seniority === "senior" || user.role === "admin";
+  // Only the assigned reviewer or admin can delete approved QA pairs
+  const isAdmin = user.role === "admin";
   const isAssignedReviewer =
     exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
-  if (!isAssignedReviewer && !isSenior) {
+  if (!isAssignedReviewer && !isAdmin) {
     return NextResponse.json(
-      { error: "Only a senior reviewer can delete approved QA pairs." },
+      { error: "Only the assigned reviewer can delete approved QA pairs." },
       { status: 403 },
     );
   }

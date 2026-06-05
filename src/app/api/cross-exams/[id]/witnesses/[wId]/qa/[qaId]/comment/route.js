@@ -30,11 +30,10 @@ export const POST = withAuth(async (req, { params }, user) => {
 
   const creatorId = exam.userId?.toString();
   const isCreator = creatorId === user.id.toString();
-  const isReviewer =
-    (exam.assignedTo && exam.assignedTo.toString() === user.id.toString()) ||
-    user.seniority === "senior" ||
-    user.role === "admin";
-  if (!isCreator && !isReviewer) {
+  const isAssignedReviewer =
+    exam.assignedTo && exam.assignedTo.toString() === user.id.toString();
+  const isAdmin = user.role === "admin";
+  if (!isCreator && !isAssignedReviewer && !isAdmin) {
     return NextResponse.json({ error: "Access denied." }, { status: 403 });
   }
 

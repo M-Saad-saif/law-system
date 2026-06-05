@@ -3,26 +3,16 @@ import connectDB from "@/lib/db";
 import User from "@/models/User";
 import { signToken, setAuthCookie } from "@/lib/authtoken";
 
+// registration only for senior -> junior lawyer will be created by senior
 export async function POST(request) {
   try {
     await connectDB();
     const body = await request.json();
     const { name, email, password, phone, barCouncilNo } = body;
-    const seniority = body.seniority;
 
     if (!name || !email || !password) {
       return NextResponse.json(
         { success: false, message: "Name, email and password are required." },
-        { status: 400 },
-      );
-    }
-
-    if (!["junior", "senior"].includes(seniority)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Please select either Junior Lawyer or Senior Lawyer.",
-        },
         { status: 400 },
       );
     }
@@ -45,8 +35,10 @@ export async function POST(request) {
       phone,
       barCouncilNo,
       role: "lawyer",
-      seniority,
+      seniority: "senior",
+      createdBy: null,
     });
+
     const token = signToken({
       id: user._id,
       email: user.email,
@@ -62,6 +54,7 @@ export async function POST(request) {
     setAuthCookie(token, response);
     return response;
   } catch (error) {
+    console.error("[register] POST:", error);
     return NextResponse.json(
       { success: false, message: "Registration failed. Please try again." },
       { status: 500 },

@@ -179,10 +179,10 @@ export function StatCard({ label, value, icon: Icon, color, sub }) {
     slate: "bg-slate-100 text-slate-600",
   };
   return (
-    <div className="stat-card">
+    <div className="stat-card ">
       <div
         className={cn(
-          "w-11 h-11 rounded-xl flex items-center justify-center shrink-0",
+          "w-11 h-11 rounded-xl flex text-center justify-content items-center justify-center shrink-0",
           colors[color] || colors.blue,
         )}
       >

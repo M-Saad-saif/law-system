@@ -99,15 +99,11 @@ export default function CasesPage() {
     try {
       const response = await api.patch(`/api/cases/${c._id}/favourite`);
       const isFav = response?.data?.isFavourite;
-      
+
       setCases((prev) =>
-        prev.map((x) =>
-          x._id === c._id ? { ...x, isFavourite: isFav } : x,
-        ),
+        prev.map((x) => (x._id === c._id ? { ...x, isFavourite: isFav } : x)),
       );
-      toast.success(
-        isFav ? "Saved to Library" : "Removed from Library",
-      );
+      toast.success(isFav ? "Saved to Library" : "Removed from Library");
     } catch {
       toast.error("Failed to update.");
     }

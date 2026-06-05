@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { verifyToken } from './authtoken';
-import { cookies } from 'next/headers';
+import { NextResponse } from "next/server";
+import { verifyToken } from "./authtoken";
+import { cookies } from "next/headers";
 
 export function apiSuccess(data, status = 200) {
   return NextResponse.json({ success: true, data }, { status });
@@ -13,17 +13,30 @@ export function apiError(message, status = 400) {
 export function withAuth(handler) {
   return async (request, context) => {
     const cookieStore = cookies();
-    const token = cookieStore.get('token')?.value;
+    const token = cookieStore.get("token")?.value;
 
     if (!token) {
-      return apiError('Unauthorized. Please login.', 401);
+      return apiError("Unauthorized. Please login.", 401);
     }
 
     try {
       const user = verifyToken(token);
       return handler(request, context, user);
     } catch {
-      return apiError('Invalid or expired session.', 401);
+      return apiError("Invalid or expired session.", 401);
     }
+  };
+}
+
+export function withRole(requiredSeniority) {
+  return function (handler) {
+    return withAuth(async (request, context, user) => {
+      const isAdmin = user.role === "admin";
+      const hasSeniority = user.seniority === requiredSeniority;
+      if (!isAdmin && !hasSeniority) {
+        return apiError("Forbidden. Insufficient permissions.", 403);
+      }
+      return handler(request, context, user);
+    });
   };
 }

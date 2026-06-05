@@ -21,6 +21,7 @@ const COURT_TYPES = [
   "Other",
 ];
 const CASE_TYPES = [
+  "Bail",
   "Civil",
   "Criminal",
   "Family",

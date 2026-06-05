@@ -68,7 +68,6 @@ const Icon = {
 };
 
 function buildNavSections(user) {
-  const isAdmin = user?.role === "admin";
   const isSenior = user?.seniority === "senior";
 
   const sections = [
@@ -98,7 +97,7 @@ function buildNavSections(user) {
           icon: Icon.Applications,
           subLinks: [
             { label: "All Applications", href: "/applications" },
-            ...(isSenior || isAdmin
+            ...(isSenior
               ? [
                   {
                     label: "Review Applications",
@@ -129,15 +128,6 @@ function buildNavSections(user) {
           href: "/judgement-image-generator",
           icon: Icon.ImageGen,
         },
-        ...(isAdmin
-          ? [
-              {
-                label: "Template Editor",
-                href: "/judgement-image-template",
-                icon: Icon.Template,
-              },
-            ]
-          : []),
       ],
     },
     {
@@ -149,12 +139,7 @@ function buildNavSections(user) {
     },
     {
       label: "Account",
-      items: [
-        { label: "Settings", href: "/settings", icon: Icon.Settings },
-        ...(isAdmin
-          ? [{ label: "User Management", href: "/admin", icon: Icon.Admin }]
-          : []),
-      ],
+      items: [{ label: "Settings", href: "/settings", icon: Icon.Settings }],
     },
   ];
 
@@ -287,8 +272,11 @@ export default function Sidebar() {
                 {user.name}
               </p>
               <p className="text-[10px] text-slate-500 truncate capitalize">
-                {user.role}
-                {user.seniority ? ` · ${user.seniority}` : ""}
+                {user.seniority === "senior"
+                  ? "Senior Lawyer"
+                  : user.seniority === "junior"
+                    ? "Junior Lawyer"
+                    : user.role}
               </p>
             </div>
             <button

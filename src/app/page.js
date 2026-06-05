@@ -338,7 +338,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-2  justify-center">
             <Scale className="w-5 h-5 text-[#027f7e]" />
             <span className="text-sm text-gray-500 ">
-              © 2026 LawPortal — Legal Practice Management
+              © 2026 LawPortal — Legal Management
             </span>
           </div>
         </div>

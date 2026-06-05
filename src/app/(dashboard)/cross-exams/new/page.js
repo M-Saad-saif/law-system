@@ -55,8 +55,11 @@ export default function NewCrossExamPage() {
 
   useEffect(() => {
     apiFetch("/api/cases?limit=100")
-      .then((d) => setCases(d.cases || []))
-      .catch(() => {});
+      .then((d) => setCases(d.data?.cases || []))
+      .catch((err) => {
+        console.error("Failed to fetch cases:", err);
+        toast.error("Failed to load cases");
+      });
   }, []);
 
   const handleChange = (e) =>

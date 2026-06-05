@@ -146,7 +146,7 @@ export const GET = withAuth(async (req, { params }, user) => {
 ${witnessBlocks || '<p style="color:#999;font-style:italic">No witness sections found.</p>'}
 
 <footer>
-  <span>LexisPortal — Cross-Examination Document</span>
+  <span>Law Management — Cross-Examination Document</span>
   <span>Generated ${new Date().toISOString()}</span>
 </footer>
 

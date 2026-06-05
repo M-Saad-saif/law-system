@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import JudgementForm from "@/components/judgement-image/JudgementForm";
@@ -201,6 +202,3 @@ function RecentImagesGallery() {
     </div>
   );
 }
-
-// Add React import at the top if not already there
-import React from "react";

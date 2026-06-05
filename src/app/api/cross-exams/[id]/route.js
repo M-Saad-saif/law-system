@@ -26,9 +26,8 @@ export const GET = withAuth(async (req, { params }, user) => {
   const isOwner = ownerId === user.id.toString();
   const isAssigned = exam.assignedTo && exam.assignedTo._id.toString() === user.id.toString();
   const isAdmin = user.role === "admin";
-  const isSenior = user.seniority === "senior";
 
-  if (!isOwner && !isAssigned && !isAdmin && !isSenior) {
+  if (!isOwner && !isAssigned && !isAdmin) {
     return NextResponse.json({ error: "Access denied." }, { status: 403 });
   }
 
@@ -107,16 +106,21 @@ export const DELETE = withAuth(async (req, { params }, user) => {
   }
 
   const creatorId = exam.userId?.toString();
-  if (!creatorId || creatorId !== user.id.toString()) {
+  const isCreator = creatorId === user.id.toString();
+  const isAdmin = user.role === "admin";
+  
+  // Allow deletion by creator or admin
+  if (!isCreator && !isAdmin) {
     return NextResponse.json(
-      { error: "Only the creator can delete this document." },
+        { error: "Only the creator or admin can delete this cross-examination." },
       { status: 403 },
     );
   }
 
-  if (exam.status !== "draft") {
+  // Non-admin creators can only delete draft, submitted, or changes_requested status
+  if (!isAdmin && !["draft", "submitted", "changes_requested"].includes(exam.status)) {
     return NextResponse.json(
-      { error: "Only draft cross-examinations can be deleted." },
+        { error: "Cannot delete cross-examinations that are in review, approved, or archived." },
       { status: 400 },
     );
   }

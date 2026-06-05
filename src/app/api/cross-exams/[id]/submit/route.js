@@ -38,12 +38,17 @@ export const POST = withAuth(async (req, { params }, user) => {
   }
 
   const body = await req.json().catch(() => ({}));
-  const assignedTo = body.assignedTo;
-
-  if (assignedTo !== undefined) {
-    if (!assignedTo) {
-      exam.assignedTo = undefined;
-    } else {
+  
+  // Get the junior lawyer who created this
+  const juniorUser = await User.findById(exam.userId).select("createdBy");
+  
+  // Auto-assign to the junior's supervisor (senior lawyer who created this junior account)
+  if (juniorUser?.createdBy) {
+    exam.assignedTo = juniorUser.createdBy;
+  } else {
+    // Fallback: use explicitly provided assignedTo, or leave unassigned
+    const assignedTo = body.assignedTo;
+    if (assignedTo) {
       const reviewer = await User.findOne({
         _id: assignedTo,
         isActive: true,
@@ -56,7 +61,6 @@ export const POST = withAuth(async (req, { params }, user) => {
           { status: 400 },
         );
       }
-
       exam.assignedTo = reviewer._id;
     }
   }

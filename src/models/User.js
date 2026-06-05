@@ -17,10 +17,21 @@ const userSchema = new mongoose.Schema(
       enum: ["admin", "lawyer", "associate"],
       default: "lawyer",
     },
-    seniority: { type: String, enum: ["senior", "junior"], default: "junior" },
+    seniority: {
+      type: String,
+      enum: ["senior", "junior"],
+      default: "senior",
+    },
     phone: { type: String, trim: true },
     barCouncilNo: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
+
+    // senior lawyer creates a junior account
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   { timestamps: true },
 );
