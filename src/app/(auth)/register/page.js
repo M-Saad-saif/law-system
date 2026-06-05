@@ -146,6 +146,15 @@ export default function RegisterPage() {
               </>
             )}
           </button>
+
+          <div className="mt-3 bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-600 p-3 rounded-r-lg">
+            <div className="flex items-center gap-2">
+              <span className="text-red-600 text-lg"></span>
+              <p className="text-sm text-red-800">
+                <span className="font-bold">Important:</span> Junior lawyers cannot register directly on the platform. Accounts for junior lawyers may only be created by their respective senior lawyers.
+              </p>
+            </div>
+          </div>
         </form>
       </div>
 

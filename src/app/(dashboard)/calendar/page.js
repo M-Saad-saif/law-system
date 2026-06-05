@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { api } from "@/utils/api";
 import { formatDate } from "@/utils/helpers";
@@ -31,6 +31,7 @@ import {
 
 export default function CalendarPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,14 +56,40 @@ export default function CalendarPage() {
     fetchEvents();
   }, [fetchEvents]);
 
+  const dateParam = searchParams.get("date");
+
+  useEffect(() => {
+    if (!dateParam) return;
+
+    const targetDate =
+      dateParam === "today"
+        ? new Date()
+        : new Date(dateParam.replace(/\+/g, " "));
+
+    if (Number.isNaN(targetDate.getTime())) return;
+
+    setCurrentMonth(startOfMonth(targetDate));
+    setSelectedDate(targetDate);
+  }, [dateParam]);
+
+  const getEventsForDay = useCallback(
+    (day) => events.filter((e) => isSameDay(new Date(e.date), day)),
+    [events],
+  );
+
+  useEffect(() => {
+    if (!selectedDate) {
+      setSelectedEvents([]);
+      return;
+    }
+    setSelectedEvents(getEventsForDay(selectedDate));
+  }, [selectedDate, getEventsForDay]);
+
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const days = eachDayOfInterval({ start: calStart, end: calEnd });
-
-  const getEventsForDay = (day) =>
-    events.filter((e) => isSameDay(new Date(e.date), day));
 
   const handleDayClick = (day) => {
     const dayEvents = getEventsForDay(day);

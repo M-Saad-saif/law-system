@@ -15,6 +15,12 @@ import {
 
 export default function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [stats, setStats] = useState({
+    casesCount: null,
+    hearingsCount: null,
+    firmsCount: null,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -33,6 +39,36 @@ export default function LandingPage() {
     checkAuth();
     return () => {
       isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/stats");
+        const j = await res.json();
+        if (!mounted) return;
+        if (j?.success && j.data) {
+          setStats({
+            casesCount: j.data.casesCount || 0,
+            hearingsCount: j.data.hearingsCount || 0,
+            firmsCount: j.data.firmsCount || 0,
+          });
+        } else {
+          setStats({ casesCount: 0, hearingsCount: 0, firmsCount: 0 });
+        }
+      } catch (err) {
+        if (!mounted) return;
+        setStats({ casesCount: 0, hearingsCount: 0, firmsCount: 0 });
+      } finally {
+        if (mounted) setStatsLoading(false);
+      }
+    };
+
+    fetchStats();
+    return () => {
+      mounted = false;
     };
   }, []);
 
@@ -110,24 +146,6 @@ export default function LandingPage() {
                 See features
                 <ArrowRight className="w-4 h-4  rotate-90 group-hover:translate-y-1 transition-transform " />
               </Link>
-            </div>
-            <div className="flex items-center gap-6 pt-6">
-              <div className="flex -space-x-2">
-                {[
-                  "/api/placeholder/32/32",
-                  "/api/placeholder/32/32",
-                  "/api/placeholder/32/32",
-                ].map((src, i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full border-2 border-black bg-gray-700"
-                  ></div>
-                ))}
-              </div>
-              <div className="text-sm text-gray-400">
-                Trusted by <span className="text-white font-semibold">50+</span>{" "}
-                law firms across Pakistan
-              </div>
             </div>
           </div>
 
@@ -281,17 +299,25 @@ export default function LandingPage() {
       {/* ---- stats banner ---- */}
       <section className="relative z-10 max-w-6xl mx-auto px-6 py-16">
         <div className="bg-gradient-to-r from-[#103168]/20 via-[#027f7e]/10 to-transparent border border-gray-800 rounded-2xl p-8 md:p-12">
-          <div className="grid md:grid-cols-3 gap-8 text-center md:text-left">
-            <div>
-              <p className="text-4xl font-bold text-white">500+</p>
+          <div className="grid md:grid-cols-3 gap-8 text-center md:text-left ">
+            <div className="border-b border-gray-800 pb-6 md:border-b-0 md:pb-0 text-center">
+              <p className="text-4xl font-bold text-white ">
+                {statsLoading ? "—" : (stats.casesCount ?? 0).toLocaleString()}
+              </p>
               <p className="text-sm text-gray-400 mt-1">Cases Managed</p>
             </div>
-            <div>
-              <p className="text-4xl font-bold text-white">1,200+</p>
+            <div className="border-b border-gray-800 pb-6 md:border-b-0 md:pb-0 text-center">
+              <p className="text-4xl font-bold text-white">
+                {statsLoading
+                  ? "—"
+                  : (stats.hearingsCount ?? 0).toLocaleString()}
+              </p>
               <p className="text-sm text-gray-400 mt-1">Hearings Tracked</p>
             </div>
-            <div>
-              <p className="text-4xl font-bold text-white">50+</p>
+            <div className="border-b border-gray-800 pb-6 md:border-b-0 md:pb-0 text-center">
+              <p className="text-4xl font-bold text-white">
+                {statsLoading ? "—" : (stats.firmsCount ?? 0).toLocaleString()}
+              </p>
               <p className="text-sm text-gray-400 mt-1">Law Firms</p>
             </div>
           </div>

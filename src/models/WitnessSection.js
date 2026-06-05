@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// ---- Inline Comment for senior lawyers to annotate QA pairs ----
 const inlineCommentSchema = new mongoose.Schema(
   {
     text: { type: String, required: true, trim: true },
@@ -21,21 +20,8 @@ const inlineCommentSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// ----- Objection Entry -----
 const objectionSchema = new mongoose.Schema(
   {
-    /**
-     * Type of objection (PO = Prosecution / opposing counsel may raise)
-     * Common objections in Pakistani / common-law courts:
-     *   leading      - objection to a leading question during examination-in-chief
-     *   relevance    - question not relevant to the matter in issue
-     *   hearsay      - answer would be based on out-of-court statements
-     *   badCharacter - attacking character without permission
-     *   speculation  - asking the witness to speculate
-     *   compound     - two questions in one
-     *   asked        - question already asked and answered
-     *   argumentative- counsel arguing rather than questioning
-     */
     type: {
       type: String,
       enum: [
@@ -64,7 +50,6 @@ const objectionSchema = new mongoose.Schema(
   { _id: true },
 );
 
-// ---- Scoring Rubric filled by senior reviewer ----
 const scoringSchema = new mongoose.Schema(
   {
     clarity: { type: Number, min: 0, max: 10, default: null },
@@ -82,7 +67,6 @@ const scoringSchema = new mongoose.Schema(
   { _id: false },
 );
 
-// ---- Courtroom Live Tracking used during actual hearing----
 const courtroomUsageSchema = new mongoose.Schema(
   {
     isAsked: { type: Boolean, default: false },
@@ -109,28 +93,16 @@ const courtroomUsageSchema = new mongoose.Schema(
   { _id: false },
 );
 
-// ----- QA Pair (the core unit of cross-examination) -----
 const qaPairSchema = new mongoose.Schema(
   {
     sequence: { type: Number, required: true },
 
-    // ----- Question Content -----
     originalQuestion: { type: String, default: "" },
     originalAnswer: { type: String, default: "" },
     editedQuestion: { type: String, default: "" },
     editedAnswer: { type: String, default: "" },
     useEditedVersion: { type: Boolean, default: false },
 
-    // ----- Legal Classification -----
-    /**
-     * questionType:
-     *   leading      -suggests the answer (preferred in cross-examination)
-     *   open         -"What happened next?" (use sparingly — gives witness control)
-     *   impeachment  -contradicts witness's prior statement or evidence
-     *   fact         -establishes a bare factual point
-     *   credibility  -challenges the witness's truthfulness or bias
-     *   hypothetical -used with expert witnesses
-     */
     questionType: {
       type: String,
       enum: [
@@ -144,15 +116,6 @@ const qaPairSchema = new mongoose.Schema(
       default: "leading",
     },
 
-    /**
-     * phase: strategic position of this question in the overall cross-exam arc
-     *   intro          -establish rapport / lock witness into basic facts
-     *   factEstablish  -build the factual foundation
-     *   contradiction  -expose inconsistencies
-     *   credibilityAttack -challenge motive, bias, prior convictions
-     *   admission      -force a concession
-     *   closing        -seal the contradiction / end on strength
-     */
     phase: {
       type: String,
       enum: [
@@ -166,24 +129,13 @@ const qaPairSchema = new mongoose.Schema(
       default: "factEstablish",
     },
 
-    // ---- Strategic Intent ----
     objective: { type: String, default: "" },
     expectedAnswer: { type: String, default: "" },
     ifWitnessDenies: { type: String, default: "" },
     linkedToEvidence: { type: String, default: "" },
 
-    // ---- Objection Handling ----
     possibleObjections: { type: [objectionSchema], default: [] },
 
-    // ---- Review System (multi-state, replaces simple isApproved) ----
-    /**
-     * reviewStatus:
-     *   pending         -not yet reviewed by senior
-     *   approved        -ready for court as-is
-     *   needsRevision   -junior must revise before it can be used
-     *   risky           -legal risk flagged; use with extreme caution
-     *   withdrawn       -removed from the cross-exam (kept for audit trail)
-     */
     reviewStatus: {
       type: String,
       enum: ["pending", "approved", "needsRevision", "risky", "withdrawn"],
@@ -197,29 +149,23 @@ const qaPairSchema = new mongoose.Schema(
     reviewedAt: { type: Date, default: null },
     seniorNote: { type: String, default: "" },
 
-    // ---- Legacy compatibility (kept to avoid migration issues) ----
     isApproved: { type: Boolean, default: false },
     isFlagged: { type: Boolean, default: false },
 
-    // ---- Notes (restructured for clarity) ----
     strategyNote: { type: String, default: "" },
     evidenceNote: { type: String, default: "" },
     caseLawNote: { type: String, default: "" },
     internalNote: { type: String, default: "" },
 
-    // ---- Inline Comments Thread ----
     comments: { type: [inlineCommentSchema], default: [] },
 
-    // ---- Scoring ----
     scoring: { type: scoringSchema, default: () => ({}) },
 
-    // ----courtroom live---
     courtroomUsage: { type: courtroomUsageSchema, default: () => ({}) },
   },
   { timestamps: true },
 );
 
-// ---- Witness Section ----
 const witnessSectionSchema = new mongoose.Schema(
   {
     crossExamId: {
@@ -238,25 +184,20 @@ const witnessSectionSchema = new mongoose.Schema(
 
     role: { type: String, default: "" },
 
-    // ---- Witness Background (for preparation) ----
     witnessBackground: { type: String, default: "" },
     knownBiases: { type: String, default: "" },
     priorStatements: [{ label: String, text: String }],
 
-    // ---- Strategic Goal for this Witness ----
     primaryObjective: { type: String, default: "" },
     successCriteria: { type: String, default: "" },
 
-    // ---- Sequence / Phase Order ----
     displayOrder: { type: Number, default: 0 },
 
-    // ---- QA Pairs ----
     qaPairs: { type: [qaPairSchema], default: [] },
   },
   { timestamps: true },
 );
 
-// ---- Auto-compute overallScore before save ----
 witnessSectionSchema.pre("save", function (next) {
   this.qaPairs.forEach((pair) => {
     const { clarity, legalStrength, strategicValue } = pair.scoring;
@@ -265,7 +206,6 @@ witnessSectionSchema.pre("save", function (next) {
         ((clarity + legalStrength + strategicValue) / 3).toFixed(1),
       );
     }
-    // Sync legacy fields
     pair.isApproved = pair.reviewStatus === "approved";
     pair.isFlagged = pair.reviewStatus === "risky";
   });

@@ -79,13 +79,15 @@ export default function DashboardPage() {
           color="green"
           sub="Currently active"
         />
-        <StatCard
-          label="Today's Hearings"
-          value={stats?.todayCases ?? 0}
-          icon={CalendarCheck}
-          color="amber"
-          sub="Scheduled today"
-        />
+        <Link href="/calendar?date=today" className="block bg-green-600">
+          <StatCard
+            label="Today's Hearings"
+            value={stats?.todayCases ?? 0}
+            icon={CalendarCheck}
+            color="amber"
+            sub="Scheduled today"
+          />
+        </Link>
         <StatCard
           label="Tomorrow"
           value={stats?.tomorrowCases ?? 0}

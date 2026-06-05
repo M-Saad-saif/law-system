@@ -35,10 +35,6 @@ export default function LoginPage() {
     }
   };
 
-  const fillDemo = () => {
-    setForm({ email: "demo@lexisportal.com", password: "Demo@12345" });
-  };
-
   return (
     <div className="min-h-screen w-full bg-black flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       {/* Background glows */}
@@ -55,7 +51,7 @@ export default function LoginPage() {
             <Scale className="w-7 h-7 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white font-display">
-          LawPortal
+            LawPortal
           </h1>
           <p className="text-white/50 text-sm mt-1">
             Legal Practice Management System
@@ -128,15 +124,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          <div className="mt-4 pt-4 border-t border-white/10">
-            <button
-              onClick={fillDemo}
-              className="w-full text-center text-sm text-[#027f7e] hover:text-[#33adad] transition-colors"
-            >
-              Use demo credentials
-            </button>
-          </div>
         </div>
 
         <p className="text-center text-white/30 text-sm mt-5">
