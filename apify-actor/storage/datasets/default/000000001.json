@@ -1,0 +1,14 @@
+{
+	"title": "Judgement Search",
+	"court": "SCP",
+	"courtFull": "Supreme Court of Pakistan",
+	"courtAbbr": "SCP",
+	"province": "Federal",
+	"citation": null,
+	"judge": null,
+	"matter": null,
+	"orderDate": null,
+	"sourceUrl": "https://scp.gov.pk/JudgmentsSearch",
+	"approved": true,
+	"fetchedAt": "2026-06-06T13:39:22.026Z"
+}

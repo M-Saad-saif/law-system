@@ -11,7 +11,7 @@ export async function middleware(request) {
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   const isApi = pathname.startsWith("/api");
 
-  // Always let API routes through — they do their own auth checks
+  // let api routes through - they do their own auth checks
   if (isApi) return NextResponse.next();
 
   // Public pages: if already logged in, bounce away from login/register
@@ -24,9 +24,7 @@ export async function middleware(request) {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         await jwtVerify(token, secret);
         return NextResponse.redirect(new URL("/dashboard", request.url));
-      } catch {
-        // invalid token — let them through to login/register
-      }
+      } catch {}
     }
     return NextResponse.next();
   }

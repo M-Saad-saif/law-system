@@ -1,0 +1,16 @@
+{
+  "name": "pakistan-court-judgments-actor",
+  "version": "1.0.0",
+  "description": "Apify actor: scrapes judgments from Pakistani high courts and Supreme Court using Puppeteer.",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "start:dev": "APIFY_HEADFUL=true node src/main.js"
+  },
+  "dependencies": {
+    "apify": "^3.2.2",
+    "crawlee": "^3.9.0",
+    "puppeteer": "^22.0.0"
+  }
+}

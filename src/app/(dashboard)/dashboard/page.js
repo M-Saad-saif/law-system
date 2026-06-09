@@ -9,7 +9,6 @@ import { api } from "@/utils/api";
 import { formatDate, relativeDate } from "@/utils/helpers";
 import { StatCard, StatusBadge, PageLoader, EmptyState } from "@/components/ui";
 import WeeklyOutlook from "@/components/dashboard/Weeklyoutlook";
-import IntelligenceFeed from "@/components/dashboard/IntelligenceFeed";
 import LegalUpdatesTicker from "@/components/dashboard/LegalUpdatesTicker";
 import { useRouter } from "next/navigation";
 
@@ -232,10 +231,6 @@ export default function DashboardPage() {
       {/* Weekly Outlook Section - Full Width Below Recent Cases */}
       <div className="w-full">
         <WeeklyOutlook />
-      </div>
-
-      <div className="bg-white w-full rounded-2xl border border-gray-200 p-4">
-        <IntelligenceFeed />
       </div>
 
       {/* Today's schedule banner */}

@@ -113,8 +113,8 @@ function buildNavSections(user) {
       label: "Judgements",
       items: [
         {
-          label: "Search & Intelligence",
-          href: "/judgement-search",
+          label: "Search Judgements",
+          href: "/judgements",
           icon: Icon.Search,
         },
         {

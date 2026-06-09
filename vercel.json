@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/sync",
+      "schedule": "0 3 */3 * *"
+    }
+  ],
+  "functions": {
+    "src/app/api/sync-judgments/route.js": {
+      "maxDuration": 300
+    }
+  }
+}

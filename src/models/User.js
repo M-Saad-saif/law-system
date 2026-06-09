@@ -32,6 +32,24 @@ const userSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+
+    subscription: {
+      isActive: { type: Boolean, default: false },
+      plan: {
+        type: String,
+        enum: ["none", "monthly", "yearly"],
+        default: "none",
+      },
+      status: {
+        type: String,
+        enum: ["none", "pending", "active", "expired"],
+        default: "none",
+      },
+      startDate: { type: Date },
+      endDate: { type: Date },
+      transactionId: { type: String, trim: true },
+      paymentMethod: { type: String, trim: true }, // jazzcash, easypaisa, bank
+    },
   },
   { timestamps: true },
 );
@@ -52,4 +70,6 @@ userSchema.methods.toJSON = function () {
   return obj;
 };
 
-export default mongoose.models.User || mongoose.model("User", userSchema);
+const User = mongoose?.models?.User || mongoose?.model("User", userSchema);
+
+export default User;
