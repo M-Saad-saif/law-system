@@ -62,11 +62,11 @@ export default function CaseDetailPage() {
     try {
       const response = await api.get(`/api/cases/${id}`);
       const caseData = response?.data?.case;
-      
+
       if (!caseData) {
         throw new Error("Case not found");
       }
-      
+
       setCaseData(caseData);
     } catch {
       toast.error("Failed to load case.");
@@ -152,7 +152,9 @@ export default function CaseDetailPage() {
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
           <button
             onClick={toggleFavourite}
-            title={caseData.isFavourite ? "Remove from Library" : "Save to Library"}
+            title={
+              caseData.isFavourite ? "Remove from Library" : "Save to Library"
+            }
             className={`btn-secondary gap-1.5 ${
               caseData.isFavourite
                 ? "text-yellow-600 border-yellow-300 bg-yellow-50 hover:bg-yellow-100"

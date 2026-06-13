@@ -289,7 +289,7 @@ function JuniorLawyersSection({ onJuniorsChange }) {
               <label className="label">Full Name</label>
               <input
                 className="input"
-                placeholder="Adv. Junior Name"
+                placeholder="Junior Lawyer Name"
                 value={form.name}
                 onChange={set("name")}
                 required

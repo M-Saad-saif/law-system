@@ -97,7 +97,7 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <Field
             label="Full Name"
-            placeholder="Adv. Your Name"
+            placeholder="Your Full Name"
             required
             value={form.name}
             onChange={set("name")}

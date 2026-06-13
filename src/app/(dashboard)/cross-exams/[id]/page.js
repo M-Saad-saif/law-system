@@ -6,6 +6,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { apiFetch } from "@/utils/api";
+import { BookMarked, Calendar } from "lucide-react";
 
 // --- Status pill ---
 const STATUS_STYLES = {
@@ -290,7 +291,6 @@ function AddQAForm({ witnessId, onAdd, onClose }) {
     </form>
   );
 }
-
 
 function ReviewerComments({
   comments,
@@ -924,7 +924,9 @@ export default function CrossExamEditPage() {
 
     setLoadingReviewers(true);
     try {
-      const data = await apiFetch("/api/user?seniority=senior&role=lawyer,admin");
+      const data = await apiFetch(
+        "/api/user?seniority=senior&role=lawyer,admin",
+      );
       setReviewers(data.users || []);
     } catch {
       setReviewers([]);
@@ -1151,17 +1153,29 @@ export default function CrossExamEditPage() {
 
         {/* Meta info */}
         <div className="flex flex-wrap gap-5 mb-6 text-xs text-slate-500">
-          {exam.caseId && <span>📁 {exam.caseId.caseTitle}</span>}
+          {exam.caseId && (
+            <span className="flex items-center gap-1">
+              <BookMarked
+                size={15}
+                className="bg-[#a7b6e84d] rounded-[10px] p-1 w-[23px] h-[21px] text-blue-500"
+              />
+              {exam.caseId.caseTitle}
+            </span>
+          )}
           {exam.hearingDate && (
-            <span>
-              📅 Hearing {format(new Date(exam.hearingDate), "dd MMM yyyy")}
+            <span className="flex items-center gap-1">
+              <Calendar
+                size={15}
+                className="bg-[#a7b6e84d] rounded-[10px] p-1 w-[23px] h-[21px] text-blue-500"
+              />
+              Hearing {format(new Date(exam.hearingDate), "dd MMM yyyy")}
             </span>
           )}
           {exam.assignedTo && <span>👤 Reviewer: {exam.assignedTo.name}</span>}
           <span>Version {exam.version - 1}</span>
         </div>
 
-        {/* ── AI Generated Questions Panel ─────────────────────────────── */}
+        {/* ---- AI Generated Questions Panel ---- */}
         {exam.aiGeneratedQuestions && (
           <div className="mb-6 border border-indigo-200 rounded-2xl overflow-hidden bg-white">
             <button

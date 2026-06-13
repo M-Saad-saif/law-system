@@ -2,13 +2,15 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import { signToken, setAuthCookie } from "@/lib/authtoken";
+import { bootstrapChamberForSenior } from "@/lib/subscriptionService";
 
-// registration only for senior -> junior lawyer will be created by senior
+// Registration is for Senior Lawyers only.
+// Junior lawyers are created by their Senior from Settings.
 export async function POST(request) {
   try {
     await connectDB();
     const body = await request.json();
-    const { name, email, password, phone, barCouncilNo } = body;
+    const { name, email, password, phone, barCouncilNo, chamberName } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -38,6 +40,12 @@ export async function POST(request) {
       seniority: "senior",
       createdBy: null,
     });
+
+    // Create the Chamber and 7-day trial Subscription automatically
+    await bootstrapChamberForSenior(
+      user._id,
+      chamberName || `${name}'s Chamber`,
+    );
 
     const token = signToken({
       id: user._id,

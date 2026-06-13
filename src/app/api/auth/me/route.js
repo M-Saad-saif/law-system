@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
-import { withAuth } from "@/lib/api";
+import { withAuth, apiError } from "@/lib/api";
+import { clearAuthCookie } from "@/lib/authtoken";
 
 export const GET = withAuth(async (request, context, user) => {
   try {
@@ -10,10 +11,9 @@ export const GET = withAuth(async (request, context, user) => {
       .populate("createdBy", "name email")
       .lean();
     if (!fullUser) {
-      return NextResponse.json(
-        { success: false, message: "User not found." },
-        { status: 404 },
-      );
+      const response = apiError("Unauthorized. Please login.", 401);
+      clearAuthCookie(response);
+      return response;
     }
     return NextResponse.json({ success: true, data: { user: fullUser } });
   } catch (error) {

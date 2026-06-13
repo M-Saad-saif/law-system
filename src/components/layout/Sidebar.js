@@ -2,6 +2,7 @@
 
 import {
   Bell,
+  CreditCard,
   BookOpenText,
   BookUser,
   Calendar,
@@ -53,6 +54,7 @@ const Icon = {
   Extractor: Cpu,
   Admin: ShieldCheck,
   Template: Layout,
+  Billing: CreditCard,
   Logout: LogOutIcon,
   ChevronDown: () => (
     <svg
@@ -139,7 +141,19 @@ function buildNavSections(user) {
     },
     {
       label: "Account",
-      items: [{ label: "Settings", href: "/settings", icon: Icon.Settings }],
+      items: [
+        { label: "Settings", href: "/settings", icon: Icon.Settings },
+        { label: "Billing", href: "/billing", icon: Icon.Billing },
+        ...(user?.role === "admin"
+          ? [
+              {
+                label: "Payment Verification",
+                href: "/admin/payments",
+                icon: Icon.Admin,
+              },
+            ]
+          : []),
+      ],
     },
   ];
 
