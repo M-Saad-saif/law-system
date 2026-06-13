@@ -14,7 +14,6 @@ import {
   RefreshCw,
   ExternalLink,
   Search,
-  ChevronDown,
   Building2,
   User,
   Calendar,
@@ -23,23 +22,10 @@ import {
   AlertCircle,
   Shield,
   Banknote,
-  Filter,
   ArrowUpDown,
   DollarSign,
+  Filter,
 } from "lucide-react";
-
-const TABS = [
-  { value: "all", label: "All", icon: FileText },
-  { value: "pending", label: "Pending", icon: Clock },
-  { value: "approved", label: "Approved", icon: CheckCircle },
-  { value: "rejected", label: "Rejected", icon: XCircle },
-  { value: "trialing", label: "Trialing", icon: Clock },
-  { value: "active", label: "Active", icon: CheckCircle },
-  { value: "temporary_active", label: "Temp Access", icon: Clock },
-  { value: "expired", label: "Expired", icon: XCircle },
-  { value: "blocked", label: "Blocked", icon: AlertCircle },
-  { value: "cancelled", label: "Cancelled", icon: XCircle },
-];
 
 const STATUS_STYLES = {
   pending: "bg-amber-50  text-amber-700  border-amber-200",
@@ -85,7 +71,7 @@ function ActionModal({ payment, onClose, onDone }) {
       });
       toast.success(
         action === "approve"
-          ? "Payment approved — subscription activated."
+          ? "Payment approved ... subscription activated."
           : "Payment rejected.",
       );
       onDone();
@@ -511,11 +497,11 @@ export default function AdminPaymentsPage() {
 
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [tempTarget, setTempTarget] = useState(null);
   const [sortOrder, setSortOrder] = useState("newest");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   // Admin-only guard
   useEffect(() => {
@@ -527,15 +513,14 @@ export default function AdminPaymentsPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const qs = activeTab ? `?status=${activeTab}` : "";
-      const res = await api.get(`/api/admin/payments${qs}`);
+      const res = await api.get(`/api/admin/payments?status=all`);
       setPayments(res.data?.payments || []);
     } catch (err) {
       toast.error(err.message || "Failed to load payments.");
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, []);
 
   useEffect(() => {
     load();
@@ -543,6 +528,7 @@ export default function AdminPaymentsPage() {
 
   const filtered = payments
     .filter((p) => {
+      // Search filter
       if (!search.trim()) return true;
       const q = search.toLowerCase();
       return (
@@ -553,11 +539,99 @@ export default function AdminPaymentsPage() {
         p.reference_id?.toLowerCase().includes(q)
       );
     })
+    .filter((p) => {
+      // Status filter
+      if (statusFilter === "all") return true;
+      return p.status === statusFilter;
+    })
     .sort((a, b) => {
       const dateA = new Date(a.submitted_at || a.createdAt);
       const dateB = new Date(b.submitted_at || b.createdAt);
       return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
     });
+
+  const stats = [
+    { 
+      label: "All Payments", 
+      value: payments.length, 
+      icon: FileText, 
+      color: "text-slate-600", 
+      bg: "bg-slate-100",
+      status: "all"
+    },
+    { 
+      label: "Pending", 
+      value: payments.filter(p => p.status === "pending").length, 
+      icon: Clock, 
+      color: "text-amber-600", 
+      bg: "bg-amber-100",
+      status: "pending"
+    },
+    { 
+      label: "Approved", 
+      value: payments.filter(p => p.status === "approved").length, 
+      icon: CheckCircle, 
+      color: "text-green-600", 
+      bg: "bg-green-100",
+      status: "approved"
+    },
+    { 
+      label: "Rejected", 
+      value: payments.filter(p => p.status === "rejected").length, 
+      icon: XCircle, 
+      color: "text-red-600", 
+      bg: "bg-red-100",
+      status: "rejected"
+    },
+    { 
+      label: "Trialing", 
+      value: payments.filter(p => p.status === "trialing").length, 
+      icon: Clock, 
+      color: "text-blue-600", 
+      bg: "bg-blue-100",
+      status: "trialing"
+    },
+    { 
+      label: "Active", 
+      value: payments.filter(p => p.status === "active").length, 
+      icon: CheckCircle, 
+      color: "text-green-600", 
+      bg: "bg-green-100",
+      status: "active"
+    },
+    { 
+      label: "Temp Access", 
+      value: payments.filter(p => p.status === "temporary_active").length, 
+      icon: Clock, 
+      color: "text-amber-600", 
+      bg: "bg-amber-100",
+      status: "temporary_active"
+    },
+    { 
+      label: "Expired", 
+      value: payments.filter(p => p.status === "expired").length, 
+      icon: XCircle, 
+      color: "text-red-600", 
+      bg: "bg-red-100",
+      status: "expired"
+    },
+    { 
+      label: "Blocked", 
+      value: payments.filter(p => p.status === "blocked").length, 
+      icon: AlertCircle, 
+      color: "text-red-600", 
+      bg: "bg-red-100",
+      status: "blocked"
+    },
+    { 
+      label: "Cancelled", 
+      value: payments.filter(p => p.status === "cancelled").length, 
+      icon: XCircle, 
+      color: "text-slate-600", 
+      bg: "bg-slate-100",
+      status: "cancelled"
+    },
+  ];
 
   const pendingCount = payments.filter((p) => p.status === "pending").length;
 
@@ -614,76 +688,20 @@ export default function AdminPaymentsPage() {
         </div>
       )}
 
-      {/* Tabs + Search */}
-      <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-        <div className="flex gap-1.5 bg-slate-100 rounded-xl p-1.5 overflow-x-auto w-full lg:w-auto">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  activeTab === tab.value
-                    ? "bg-white text-slate-900 shadow-sm"
-                    : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="relative w-full lg:w-72">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
-            placeholder="Search payments..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          {
-            label: "Total",
-            value: payments.length,
-            icon: FileText,
-            color: "text-slate-600",
-            bg: "bg-slate-100",
-          },
-          {
-            label: "Pending",
-            value: pendingCount,
-            icon: Clock,
-            color: "text-amber-600",
-            bg: "bg-amber-100",
-          },
-          {
-            label: "Approved",
-            value: payments.filter((p) => p.status === "approved").length,
-            icon: CheckCircle,
-            color: "text-green-600",
-            bg: "bg-green-100",
-          },
-          {
-            label: "Rejected",
-            value: payments.filter((p) => p.status === "rejected").length,
-            icon: XCircle,
-            color: "text-red-600",
-            bg: "bg-red-100",
-          },
-        ].map((stat) => {
+      {/* Stats Cards with Filter Functionality */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {stats.map((stat) => {
           const Icon = stat.icon;
+          const isActive = statusFilter === stat.status;
           return (
-            <div
+            <button
               key={stat.label}
-              className="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-sm transition-all"
+              onClick={() => setStatusFilter(stat.status)}
+              className={`bg-white border rounded-xl p-4 hover:shadow-md transition-all text-left ${
+                isActive 
+                  ? "border-primary-500 ring-2 ring-primary-500/20 shadow-md" 
+                  : "border-slate-200 hover:border-slate-300"
+              }`}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
@@ -696,9 +714,30 @@ export default function AdminPaymentsPage() {
               <span className="text-2xl font-bold text-slate-900">
                 {stat.value}
               </span>
-            </div>
+            </button>
           );
         })}
+      </div>
+
+      {/* Search Bar */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            className="w-full rounded-xl border border-slate-200 pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+            placeholder="Search by invoice, company, email, or reference..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        {statusFilter !== "all" && (
+          <button
+            onClick={() => setStatusFilter("all")}
+            className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+          >
+            <XCircle className="w-4 h-4" /> Clear filter
+          </button>
+        )}
       </div>
 
       {/* Payment list */}
@@ -710,33 +749,45 @@ export default function AdminPaymentsPage() {
       ) : filtered.length === 0 ? (
         <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
           <div className="bg-slate-100 rounded-full p-4 w-fit mx-auto mb-4">
-            <FileText className="w-8 h-8 text-slate-400" />
+            <Filter className="w-8 h-8 text-slate-400" />
           </div>
           <h3 className="text-lg font-semibold text-slate-800 mb-1">
             No payments found
           </h3>
           <p className="text-sm text-slate-500">
-            {search
-              ? "Try adjusting your search terms"
-              : "No payment requests match the selected filter"}
+            {search || statusFilter !== "all"
+              ? "Try adjusting your search or filters"
+              : "No payment requests available"}
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((p, index) => (
-            <div
-              key={p._id}
-              className="animate-in fade-in slide-in-from-bottom-2 duration-300"
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <PaymentCard
-                payment={p}
-                onAction={setSelected}
-                onTempAccess={setTempTarget}
-              />
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-slate-500">
+              Showing <span className="font-semibold text-slate-700">{filtered.length}</span> payment{filtered.length !== 1 ? "s" : ""}
+              {statusFilter !== "all" && (
+                <span className="ml-1">
+                  with status <span className="font-semibold capitalize">{statusFilter.replace("_", " ")}</span>
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="space-y-3">
+            {filtered.map((p, index) => (
+              <div
+                key={p._id}
+                className="animate-in fade-in slide-in-from-bottom-2 duration-300"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <PaymentCard
+                  payment={p}
+                  onAction={setSelected}
+                  onTempAccess={setTempTarget}
+                />
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Action modal */}

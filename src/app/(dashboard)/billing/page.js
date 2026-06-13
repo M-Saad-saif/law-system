@@ -105,7 +105,7 @@ function formatDate(d) {
 // --- Payment submission form ---
 function PaymentForm({ chamber, onSuccess }) {
   const [form, setForm] = useState({
-    payment_method: "raast",
+    payment_method: "easypaisa",
     reference_id: "",
   });
   const [file, setFile] = useState(null);

@@ -1,6 +1,7 @@
 import { withAuth, apiSuccess, apiError } from "@/lib/api";
 import connectDB from "@/lib/db";
 import Application from "@/models/Application";
+import User from "@/models/User";
 
 // ---- GET /api/applications/[id] ----
 export const GET = withAuth(async (request, { params }, user) => {
@@ -8,13 +9,25 @@ export const GET = withAuth(async (request, { params }, user) => {
     await connectDB();
     const isSenior = user.seniority === "senior" || user.role === "admin";
 
+    const juniorIds = isSenior
+      ? await User.find({ seniority: "junior", createdBy: user.id }).distinct("_id")
+      : [];
+
     const query = isSenior
-      ? { _id: params.id }
+      ? {
+          _id: params.id,
+          $or: [
+            { assignedTo: user.id },
+            { userId: user.id },
+            { userId: { $in: juniorIds } },
+          ],
+        }
       : { _id: params.id, userId: user.id };
 
     const app = await Application.findOne(query)
       .populate("caseId", "caseTitle caseNumber courtName clientName")
-      .populate("reviewedBy", "name email");
+      .populate("reviewedBy", "name email")
+      .populate("assignedTo", "name email");
 
     if (!app) return apiError("Application not found.", 404);
     return apiSuccess({ application: app });
@@ -33,11 +46,25 @@ export const PUT = withAuth(async (request, { params }, user) => {
 
     const isSenior = user.seniority === "senior" || user.role === "admin";
 
-    const query = isSenior
-      ? { _id: params.id }
-      : { _id: params.id, userId: user.id };
+    let existing;
+    if (action === "submitForReview") {
+      // Junior submitting their own draft
+      existing = await Application.findOne({ _id: params.id, userId: user.id });
+    } else if (isSenior) {
+      const juniorIds = await User.find({ seniority: "junior", createdBy: user.id }).distinct("_id");
+      existing = await Application.findOne({
+        _id: params.id,
+        $or: [
+          { assignedTo: user.id },
+          { userId: user.id },
+          { userId: { $in: juniorIds } },
+        ],
+      });
+    } else {
+      // Junior editing their own draft
+      existing = await Application.findOne({ _id: params.id, userId: user.id });
+    }
 
-    const existing = await Application.findOne(query);
     if (!existing) return apiError("Application not found.", 404);
 
     if ((action === "approve" || action === "requestChanges") && !isSenior) {
@@ -54,10 +81,23 @@ export const PUT = withAuth(async (request, { params }, user) => {
           409,
         );
       }
+      
+      if (!existing.assignedTo) {
+        const juniorRecord = await User.findById(user.id).select("createdBy").lean();
+        if (juniorRecord?.createdBy) {
+          patch.assignedTo = juniorRecord.createdBy;
+        } else {
+          return apiError(
+            "Your account is not linked to a senior lawyer. Please contact your administrator.",
+            422,
+          );
+        }
+      }
+
       patch.status = "review";
     }
 
-    // ---- Status action: approve (senior lawyer) ──------
+    // ---- Status action: approve (senior lawyer) ----
     if (action === "approve") {
       if (existing.status !== "review") {
         return apiError(
@@ -65,11 +105,12 @@ export const PUT = withAuth(async (request, { params }, user) => {
           409,
         );
       }
-      patch.status = "approved";
+      patch.status     = "approved";
       patch.reviewedBy = user.id;
       patch.reviewedAt = new Date();
     }
 
+    // ---- Status action: requestChanges (senior lawyer) ----
     if (action === "requestChanges") {
       if (existing.status !== "review") {
         return apiError(
@@ -83,7 +124,7 @@ export const PUT = withAuth(async (request, { params }, user) => {
 
     if (patch.content !== undefined) {
       patch.generatedText = patch.content;
-      patch.version = (existing.version || 1) + 1;
+      patch.version       = (existing.version || 1) + 1;
     } else if (patch.generatedText !== undefined) {
       patch.content = patch.generatedText;
       patch.version = (existing.version || 1) + 1;
@@ -107,7 +148,7 @@ export const DELETE = withAuth(async (request, { params }, user) => {
   try {
     await connectDB();
     const app = await Application.findOneAndDelete({
-      _id: params.id,
+      _id:    params.id,
       userId: user.id,
     });
     if (!app) return apiError("Application not found.", 404);

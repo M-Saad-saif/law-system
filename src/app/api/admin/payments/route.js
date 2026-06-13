@@ -1,6 +1,5 @@
 // GET /api/admin/payments
 // // Lists all PaymentRequests.  Admin only.
-
 import { withAuth, apiSuccess, apiError } from "@/lib/api";
 import connectDB from "@/lib/db";
 import PaymentRequest from "@/models/PaymentRequest";
@@ -19,10 +18,16 @@ export const GET = withAuth(async (request, context, user) => {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
-    const statusFilter = searchParams.get("status");
+    let statusFilter = searchParams.get("status");
+
+    if (!statusFilter || statusFilter === "all") {
+      statusFilter = null;
+    }
+
     const subscriptionStatuses = Object.values(SUBSCRIPTION_STATUS);
 
     let payments;
+
     if (statusFilter && subscriptionStatuses.includes(statusFilter)) {
       const subscriptions = await Subscription.find({ status: statusFilter })
         .sort({
@@ -54,6 +59,7 @@ export const GET = withAuth(async (request, context, user) => {
       );
     } else {
       const query = statusFilter ? { status: statusFilter } : {};
+
       const paymentRequests = await PaymentRequest.find(query)
         .sort({ createdAt: -1 })
         .lean();
@@ -66,9 +72,11 @@ export const GET = withAuth(async (request, context, user) => {
                 .select("name email phone")
                 .lean()
             : null;
+
           const subscription = chamber
             ? await Subscription.findOne({ chamber: chamber._id }).lean()
             : null;
+
           return {
             ...pr,
             source: "paymentRequest",
@@ -80,7 +88,10 @@ export const GET = withAuth(async (request, context, user) => {
       );
     }
 
-    return apiSuccess({ payments, total: payments.length });
+    return apiSuccess({
+      payments,
+      total: payments.length,
+    });
   } catch (err) {
     console.error("[admin/payments] GET:", err);
     return apiError("Failed to load payment requests.", 500);

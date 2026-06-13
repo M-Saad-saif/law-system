@@ -12,6 +12,12 @@ const applicationSchema = new mongoose.Schema(
       ref: "Case",
     },
 
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
     applicationType: {
       type: String,
       required: true,
@@ -87,7 +93,19 @@ const applicationSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+applicationSchema.pre("save", function (next) {
+  if (this.status === "review" && !this.assignedTo) {
+    return next(
+      new Error(
+        "Application cannot enter review status without an assignedTo senior lawyer.",
+      ),
+    );
+  }
+  next();
+});
+
 applicationSchema.index({ userId: 1, createdAt: -1 });
+applicationSchema.index({ assignedTo: 1 });          
 applicationSchema.index({ caseId: 1 });
 applicationSchema.index({ status: 1 });
 applicationSchema.index({ applicationType: 1 });

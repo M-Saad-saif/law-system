@@ -13,7 +13,9 @@ export const PATCH = withAuth(async (request, context, user) => {
   try {
     await connectDB();
 
+    // FIXED HERE ✅
     const { chamberId } = context.params;
+
     const body = await request.json().catch(() => ({}));
     const { action, days } = body;
 
@@ -26,6 +28,7 @@ export const PATCH = withAuth(async (request, context, user) => {
       case "grant_temp": {
         const numDays = parseInt(days, 10) || 3;
         const updated = await grantTemporaryAccess(chamberId, numDays);
+
         return apiSuccess({
           subscription: updated,
           message: `Temporary access granted for ${numDays} days.`,
@@ -52,7 +55,9 @@ export const PATCH = withAuth(async (request, context, user) => {
         subscription.status = SUBSCRIPTION_STATUS.ACTIVE;
         subscription.subscription_starts_at = now;
         subscription.subscription_ends_at = end;
+
         await subscription.save();
+
         return apiSuccess({
           subscription,
           message: "Subscription reactivated for 30 days.",

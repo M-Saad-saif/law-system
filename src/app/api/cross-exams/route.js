@@ -9,7 +9,7 @@ export const GET = withAuth(async (request, context, user) => {
   try {
     await connectDB();
     const { searchParams } = new URL(request.url);
-    const page  = parseInt(searchParams.get("page")  || "1");
+    const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "20");
     const status = searchParams.get("status") || "";
 
@@ -17,48 +17,28 @@ export const GET = withAuth(async (request, context, user) => {
 
     let query;
     if (isSenior) {
-      // Senior lawyers see: their own drafts, anything submitted/in-review/etc,
-      // and anything explicitly assigned to them.
       if (status) {
-        query = { status };
+        query = { status, assignedTo: user.id };
       } else {
         query = {
-          $or: [
-            { userId: user.id },
-            { assignedTo: user.id },
-            {
-              status: {
-                $in: [
-                  "submitted",
-                  "in_review",
-                  "changes_requested",
-                  "approved",
-                  "courtroom_active",
-                  "archived",
-                ],
-              },
-            },
-          ],
+          $or: [{ userId: user.id }, { assignedTo: user.id }],
         };
       }
     } else {
-      // Junior lawyers only see their own exams
       query = { userId: user.id };
       if (status) query.status = status;
     }
 
     const total = await CrossExamination.countDocuments(query);
     const exams = await CrossExamination.find(query)
-      .populate("caseId",    "caseTitle caseNumber")
-      .populate("userId",    "name email")
-      .populate("assignedTo","name email")
+      .populate("caseId", "caseTitle caseNumber")
+      .populate("userId", "name email")
+      .populate("assignedTo", "name email")
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean();
 
-    // Return plain JSON (no apiSuccess wrapper) so the page can read
-    // data.exams / data.total / data.pagination directly.
     return NextResponse.json({
       exams,
       total,
@@ -75,7 +55,9 @@ export const GET = withAuth(async (request, context, user) => {
   }
 });
 
-// ─── POST /api/cross-exams ────────────────────────────────────────────────────
+// --- POST /api/cross-exams ---
+// No changes needed here — POST creates a draft for the current user,
+// assignedTo is set later at submit time by the submit route.
 export const POST = withAuth(async (request, context, user) => {
   try {
     await connectDB();
@@ -84,11 +66,17 @@ export const POST = withAuth(async (request, context, user) => {
     const { title, caseId, hearingDate, aiGeneratedQuestions } = body;
 
     if (!title?.trim()) {
-      return NextResponse.json({ error: "Title is required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Title is required." },
+        { status: 400 },
+      );
     }
 
     if (caseId) {
-      const linkedCase = await Case.findOne({ _id: caseId, userId: user.id }).lean();
+      const linkedCase = await Case.findOne({
+        _id: caseId,
+        userId: user.id,
+      }).lean();
       if (!linkedCase) {
         return NextResponse.json(
           { error: "Case not found or access denied." },
@@ -98,10 +86,10 @@ export const POST = withAuth(async (request, context, user) => {
     }
 
     const examData = {
-      userId:      user.id,
-      title:       title.trim(),
-      status:      "draft",
-      caseId:      caseId      || undefined,
+      userId: user.id,
+      title: title.trim(),
+      status: "draft",
+      caseId: caseId || undefined,
       hearingDate: hearingDate || undefined,
     };
 
