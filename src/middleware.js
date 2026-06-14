@@ -1,10 +1,19 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const PUBLIC_PATHS = ["/", "/login", "/register"];
-const SENIOR_PATHS = ["/admin"];
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/register",
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/logout",
+  "/api/internal/subscription-status",
+];
 
-const ADMIN_RESTRICTED_PATHS = [
+const ADMIN_ONLY_PATHS = ["/admin/payments", "/api/admin"];
+
+const NON_ADMIN_PATHS = [
   "/dashboard",
   "/cases",
   "/calendar",
@@ -19,11 +28,9 @@ const ADMIN_RESTRICTED_PATHS = [
   "/reminders",
   "/books",
   "/billing",
+  // "/settings",
 ];
 
-const ADMIN_ALLOWED_PATHS = ["/settings", "/admin/payments", "/api"];
-
-// paths that require an active subscription (excluding /billing)
 const SUBSCRIPTION_GUARDED_PATHS = [
   "/dashboard",
   "/cases",
@@ -38,70 +45,122 @@ const SUBSCRIPTION_GUARDED_PATHS = [
   "/library",
   "/reminders",
   "/books",
-  "/settings",
+  "/api/cases",
+  "/api/cross-exams",
+  "/api/applications",
+  "/api/hearings",
+  "/api/library",
+  "/api/reminders",
+  "/api/books",
+  "/api/stats",
 ];
+
+async function getSubscriptionStatus(userId, request) {
+  try {
+    const url = new URL("/api/internal/subscription-status", request.url);
+    const res = await fetch(url.toString(), {
+      headers: { "x-user-id": userId },
+    });
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { allowed: false, status: null };
+  }
+}
 
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
 
+  // ---- Public paths ----
   const isPublic = PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(p + "/")
+    (p) => pathname === p || pathname.startsWith(p + "/"),
   );
 
-  // Redirect authenticated users away from auth pages
   if (isPublic) {
-    if (token && (pathname.startsWith("/login") || pathname.startsWith("/register"))) {
+    if (
+      token &&
+      (pathname.startsWith("/login") || pathname.startsWith("/register"))
+    ) {
       try {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         await jwtVerify(token, secret);
         return NextResponse.redirect(new URL("/dashboard", request.url));
-      } catch {
-      }
+      } catch {}
     }
     return NextResponse.next();
   }
 
+  // ---- Token required ----
   if (!token) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized. Please login." },
+        { status: 401 },
+      );
+    }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  // ----Verify token ----
   let payload;
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const result = await jwtVerify(token, secret);
     payload = result.payload;
   } catch {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired session." },
+        { status: 401 },
+      );
+    }
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (payload.role === "admin") {
-    const isRestrictedPath = ADMIN_RESTRICTED_PATHS.some((p) =>
-      pathname.startsWith(p)
-    );
-    const isAllowedPath = ADMIN_ALLOWED_PATHS.some((p) =>
-      pathname.startsWith(p)
-    );
+  const isAdmin = payload.role === "admin";
 
-    if (isRestrictedPath && !isAllowedPath) {
-      return NextResponse.redirect(new URL("/settings", request.url));
+  // ---- Admin-only paths ----
+  const isAdminOnlyPath = ADMIN_ONLY_PATHS.some((p) => pathname.startsWith(p));
+  if (isAdminOnlyPath && !isAdmin) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden. Admin access required." },
+        { status: 403 },
+      );
+    }
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  // ----  Block admins from non-admin pages ----
+  const isNonAdminPath = NON_ADMIN_PATHS.some((p) => pathname.startsWith(p));
+  if (isNonAdminPath && isAdmin) {
+    if (!pathname.startsWith("/api/")) {
+      return NextResponse.redirect(new URL("/admin/payments", request.url));
     }
   }
 
-  // Senior-only admin pages
-  const isSeniorRoute = SENIOR_PATHS.some((p) => pathname.startsWith(p));
-  if (isSeniorRoute) {
-    if (payload.seniority !== "senior") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
-  }
-
+  // ---- Subscription guard ----
   const isGuarded = SUBSCRIPTION_GUARDED_PATHS.some((p) =>
-    pathname.startsWith(p)
+    pathname.startsWith(p),
   );
-  if (isGuarded && payload.role !== "admin") {
-    const expiredFlag = request.cookies.get("sub_status")?.value;
-    if (expiredFlag && expiredFlag !== "ok") {
+  if (isGuarded && !isAdmin) {
+    const { allowed, status } = await getSubscriptionStatus(
+      payload.id,
+      request,
+    );
+
+    if (!allowed) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Subscription required.",
+            subscriptionStatus: status,
+          },
+          { status: 403 },
+        );
+      }
       return NextResponse.redirect(new URL("/billing", request.url));
     }
   }

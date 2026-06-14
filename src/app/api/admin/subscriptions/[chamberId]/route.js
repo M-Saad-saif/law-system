@@ -13,7 +13,6 @@ export const PATCH = withAuth(async (request, context, user) => {
   try {
     await connectDB();
 
-    // FIXED HERE ✅
     const { chamberId } = context.params;
 
     const body = await request.json().catch(() => ({}));

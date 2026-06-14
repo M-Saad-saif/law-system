@@ -1,5 +1,4 @@
-// GET /api/admin/payments
-// // Lists all PaymentRequests and Subscription-status chambers. Admin only.
+// Lists all PaymentRequests and Subscription-status chambers to Admin only.
 import { withAuth, apiSuccess, apiError } from "@/lib/api";
 import connectDB from "@/lib/db";
 import PaymentRequest, { PAYMENT_STATUS } from "@/models/PaymentRequest";
@@ -9,7 +8,6 @@ import Subscription, { SUBSCRIPTION_STATUS } from "@/models/Subscription";
 
 export const dynamic = "force-dynamic";
 
-// Build a PaymentRequest-shaped item enriched with chamber/owner/subscription
 async function buildPaymentItem(pr) {
   const chamber = await Chamber.findById(pr.chamber).lean();
   const owner = chamber
@@ -29,7 +27,6 @@ async function buildPaymentItem(pr) {
   };
 }
 
-// Build a Subscription-shaped item enriched with chamber/owner
 async function buildSubscriptionItem(subscription) {
   const chamber = await Chamber.findById(subscription.chamber).lean();
   const owner = chamber
@@ -68,27 +65,31 @@ export const GET = withAuth(async (request, context, user) => {
     let payments;
 
     if (statusFilter === null) {
-      // "All" -> merge PaymentRequest items AND Subscription-status items.
-      // Avoid duplicating a chamber that already has its current
-      // subscription status reflected via a payment request entry by
-      // excluding subscriptions whose chamber has a pending PaymentRequest
-      // (the pending request is the more relevant/actionable item there).
-
-      const paymentRequests = await PaymentRequest.find({})
+      const allPaymentRequests = await PaymentRequest.find({})
         .sort({ createdAt: -1 })
         .lean();
+      const latestPRByChamber = new Map();
+      for (const pr of allPaymentRequests) {
+        const key = String(pr.chamber);
+        if (!latestPRByChamber.has(key)) {
+          latestPRByChamber.set(key, pr);
+        }
+      }
 
-      const paymentItems = await Promise.all(
-        paymentRequests.map((pr) => buildPaymentItem(pr)),
+      const pendingChamberIds = new Set();
+      const pendingItems = [];
+      for (const [chamberId, pr] of latestPRByChamber.entries()) {
+        if (pr.status === PAYMENT_STATUS.PENDING) {
+          pendingChamberIds.add(chamberId);
+          pendingItems.push(pr);
+        }
+      }
+
+      const pendingPaymentItems = await Promise.all(
+        pendingItems.map((pr) => buildPaymentItem(pr)),
       );
 
-      const chambersWithPaymentRequest = new Set(
-        paymentRequests
-          .filter((pr) => pr.chamber)
-          .map((pr) => String(pr.chamber)),
-      );
-
-      const subscriptions = await Subscription.find({})
+      const allSubscriptions = await Subscription.find({})
         .sort({
           trial_ends_at: 1,
           subscription_ends_at: 1,
@@ -97,13 +98,14 @@ export const GET = withAuth(async (request, context, user) => {
         .lean();
 
       const subscriptionItems = await Promise.all(
-        subscriptions
-          .filter((s) => !chambersWithPaymentRequest.has(String(s.chamber)))
+        allSubscriptions
+          .filter((s) => !pendingChamberIds.has(String(s.chamber)))
           .map((s) => buildSubscriptionItem(s)),
       );
 
-      payments = [...paymentItems, ...subscriptionItems];
+      payments = [...pendingPaymentItems, ...subscriptionItems];
     } else if (subscriptionStatuses.includes(statusFilter)) {
+      // Filter by subscription status (trialing, active, expired, etc.)
       const subscriptions = await Subscription.find({ status: statusFilter })
         .sort({
           trial_ends_at: 1,
@@ -117,17 +119,28 @@ export const GET = withAuth(async (request, context, user) => {
         ),
       );
     } else if (paymentStatuses.includes(statusFilter)) {
-      const paymentRequests = await PaymentRequest.find({
+      const allMatchingPRs = await PaymentRequest.find({
         status: statusFilter,
       })
         .sort({ createdAt: -1 })
         .lean();
 
+      // Deduplicate: keep only the latest PR per chamber
+      const seenChambers = new Set();
+      const dedupedPRs = [];
+      for (const pr of allMatchingPRs) {
+        const key = String(pr.chamber);
+        if (!seenChambers.has(key)) {
+          seenChambers.add(key);
+          dedupedPRs.push(pr);
+        }
+      }
+
       payments = await Promise.all(
-        paymentRequests.map((pr) => buildPaymentItem(pr)),
+        dedupedPRs.map((pr) => buildPaymentItem(pr)),
       );
     } else {
-      // Unknown status value -> no results, but don't error out.
+      // Unknown status value → no results, but don't error out.
       payments = [];
     }
 

@@ -1,5 +1,4 @@
 // Central place for all subscription-related business logic
-
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import Chamber from "@/models/Chamber";
@@ -106,6 +105,11 @@ export async function createPaymentRequest(
 ) {
   await connectDB();
 
+  await PaymentRequest.deleteMany({
+    chamber: chamberId,
+    status: { $in: [PAYMENT_STATUS.REJECTED, PAYMENT_STATUS.APPROVED] },
+  });
+
   const invoice_id = await generateInvoiceId();
   const payable_amount = await generateUniqueAmount();
 
@@ -143,9 +147,13 @@ export async function approvePaymentRequest(paymentRequestId) {
   await Subscription.findOneAndUpdate(
     { chamber: pr.chamber },
     {
-      status: SUBSCRIPTION_STATUS.ACTIVE,
-      subscription_starts_at: now,
-      subscription_ends_at: end,
+      $set: {
+        status: SUBSCRIPTION_STATUS.ACTIVE,
+        subscription_starts_at: now,
+        subscription_ends_at: end,
+        // Clear temp access field if it was set
+        temp_access_ends_at: null,
+      },
     },
     { new: true },
   );
