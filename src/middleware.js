@@ -11,7 +11,7 @@ const PUBLIC_PATHS = [
   "/api/internal/subscription-status",
 ];
 
-const ADMIN_ONLY_PATHS = ["/admin/payments", "/api/admin"];
+const ADMIN_ONLY_PATHS = ["/admin/payments", "/api/admin", "/admin/users"];
 
 const NON_ADMIN_PATHS = [
   "/dashboard",
@@ -59,7 +59,10 @@ async function getSubscriptionStatus(userId, request) {
   try {
     const url = new URL("/api/internal/subscription-status", request.url);
     const res = await fetch(url.toString(), {
-      headers: { "x-user-id": userId },
+      headers: {
+        "x-user-id": userId,
+        "x-internal-secret": process.env.INTERNAL_SECRET,
+      },
     });
     const data = await res.json();
     return data;

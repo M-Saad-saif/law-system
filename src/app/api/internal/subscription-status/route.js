@@ -5,6 +5,11 @@ import Chamber from "@/models/Chamber";
 import User from "@/models/User";
 
 export async function GET(request) {
+  const secret = request.headers.get("x-internal-secret");
+  if (secret !== process.env.INTERNAL_SECRET) {
+    return NextResponse.json({ allowed: false, status: null }, { status: 401 });
+  }
+
   const userId = request.headers.get("x-user-id");
   if (!userId) return NextResponse.json({ allowed: false, status: null });
 

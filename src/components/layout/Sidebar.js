@@ -17,6 +17,7 @@ import {
   Cpu,
   ShieldCheck,
   Layout,
+  Users,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -54,6 +55,7 @@ const Icon = {
   Extractor: Cpu,
   Admin: ShieldCheck,
   Template: Layout,
+  Users,
   Billing: CreditCard,
   Logout: LogOutIcon,
   ChevronDown: () => (
@@ -76,14 +78,19 @@ function buildNavSections(user) {
   if (isAdmin) {
     return [
       {
-        label: "Account",
+        label: "Account Details",
         items: [
-          { label: "Settings", href: "/settings", icon: Icon.Settings },
+          {
+            label: "Users",
+            href: "/admin/users",
+            icon: Icon.Users,
+          },
           {
             label: "Payment Verification",
             href: "/admin/payments",
             icon: Icon.Admin,
           },
+          { label: "Settings", href: "/settings", icon: Icon.Settings },
         ],
       },
     ];
