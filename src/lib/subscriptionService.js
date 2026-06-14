@@ -81,16 +81,11 @@ export async function checkAccess(userId) {
 }
 
 // --- Invoice & payment helpers ---
-async function generateInvoiceId() {
+async function generateInvoiceId(chamberId) {
   const year = new Date().getFullYear();
-  const prefix = `INV-${year}-`;
-
-  const count = await PaymentRequest.countDocuments({
-    invoice_id: { $regex: `^${prefix}` },
-  });
-
-  const seq = String(count + 1).padStart(5, "0");
-  return `${prefix}${seq}`;
+  const chamberSuffix = chamberId.toString().slice(-6).toUpperCase();
+  const random = String(Math.floor(10000 + Math.random() * 90000));
+  return `INV-${year}-${chamberSuffix}-${random}`;
 }
 
 async function generateUniqueAmount() {
@@ -110,7 +105,7 @@ export async function createPaymentRequest(
     status: { $in: [PAYMENT_STATUS.REJECTED, PAYMENT_STATUS.APPROVED] },
   });
 
-  const invoice_id = await generateInvoiceId();
+  const invoice_id = await generateInvoiceId(chamberId);
   const payable_amount = await generateUniqueAmount();
 
   const pr = await PaymentRequest.create({

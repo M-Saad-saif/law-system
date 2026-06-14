@@ -115,7 +115,7 @@ function ActionModal({ payment, onClose, onDone }) {
       });
       toast.success(
         action === "approve"
-          ? "Payment approved — subscription activated."
+          ? "Payment approved. Subscription activated."
           : "Payment rejected."
       );
       onDone();
