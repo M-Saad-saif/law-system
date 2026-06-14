@@ -20,6 +20,7 @@ import CitationsTab from "@/components/cases/CitationsTab";
 import NotesTab from "@/components/cases/NotesTab";
 import AccusedTab from "@/components/cases/AccusedTab";
 import FeeTab from "@/components/cases/FeeTab";
+import DownloadReportButton from "@/components/cases/Downloadreportbutton";
 import {
   Pencil,
   Trash2,
@@ -191,6 +192,9 @@ export default function CaseDetailPage() {
           )}
           <button onClick={() => setShowDelete(true)} className="btn-danger">
             <Trash2 className="w-3.5 h-3.5" /> Delete
+          </button>
+          <button >
+            <DownloadReportButton caseId={id} caseTitle={caseData.caseTitle} />
           </button>
         </div>
       </div>

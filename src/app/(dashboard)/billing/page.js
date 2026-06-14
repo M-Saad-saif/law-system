@@ -14,9 +14,11 @@ import {
   AlertTriangle,
   Upload,
   RefreshCw,
-  ChevronRight,
   Banknote,
   Info,
+  Shield,
+  FileText,
+  ArrowRight,
 } from "lucide-react";
 
 const STATUS_CONFIG = {
@@ -28,7 +30,7 @@ const STATUS_CONFIG = {
   },
   active: {
     label: "Active",
-    color: "bg-green-50 text-green-700 border-green-200",
+    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
     icon: CheckCircle,
     description: "Your subscription is active.",
   },
@@ -62,7 +64,7 @@ const STATUS_CONFIG = {
 
 const PAYMENT_STATUS_CONFIG = {
   pending: { label: "Under Review", color: "bg-amber-50 text-amber-700" },
-  approved: { label: "Approved", color: "bg-green-50 text-green-700" },
+  approved: { label: "Approved", color: "bg-emerald-50 text-emerald-700" },
   rejected: { label: "Rejected", color: "bg-red-50 text-red-700" },
 };
 
@@ -72,7 +74,7 @@ function StatusBadge({ status }) {
   const Icon = cfg.icon;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold border ${cfg.color}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-semibold border ${cfg.color}`}
     >
       <Icon className="w-3.5 h-3.5" />
       {cfg.label}
@@ -82,10 +84,10 @@ function StatusBadge({ status }) {
 
 function InfoRow({ label, value, highlight }) {
   return (
-    <div className="flex items-start justify-between py-3 border-b border-slate-100 last:border-0">
-      <span className="text-sm text-slate-500">{label}</span>
+    <div className="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0">
+      <span className="text-sm text-gray-500">{label}</span>
       <span
-        className={`text-sm font-semibold ${highlight ? "text-primary-600" : "text-slate-800"}`}
+        className={`text-sm font-semibold ${highlight ? "text-[#027675]" : "text-gray-800"}`}
       >
         {value || "—"}
       </span>
@@ -130,7 +132,6 @@ function PaymentForm({ chamber, onSuccess }) {
     try {
       let screenshot_url = "";
 
-      // Upload screenshot first if provided
       if (file) {
         const fd = new FormData();
         fd.append("file", file);
@@ -162,114 +163,129 @@ function PaymentForm({ chamber, onSuccess }) {
   ];
 
   return (
-    <div className="card p-6">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center">
-          <Banknote className="w-4 h-4 text-primary-600" />
-        </div>
-        <div>
-          <h2 className="font-bold text-slate-800 font-display">
-            Submit Payment
-          </h2>
-          <p className="text-xs text-slate-500">
-            Transfer the exact amount below and fill in your payment details.
-          </p>
-        </div>
-      </div>
-
-      {/* Payment instructions banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-5 text-sm text-blue-800 space-y-1">
-        <p className="font-semibold flex items-center gap-1.5">
-          <Info className="w-4 h-4" /> Payment Instructions
-        </p>
-        <p>
-          Send the <strong>exact amount</strong> shown on your invoice to:
-        </p>
-        <div className="mt-2 space-y-1 font-mono text-xs bg-blue-100 rounded p-3">
-          <p>
-            <strong>Raast ID:</strong>{" "}
-            {process.env.NEXT_PUBLIC_RAAST_ID || "03XX-XXXXXXX"}
-          </p>
-          <p>
-            <strong>EasyPaisa / JazzCash:</strong>{" "}
-            {process.env.NEXT_PUBLIC_MOBILE_WALLET}
-          </p>
-          <p>
-            <strong>Account Name:</strong>{" "}
-            {process.env.NEXT_PUBLIC_ACCOUNT_NAME || "LawPortal"}
-          </p>
-        </div>
-        <p className="text-xs text-blue-600 mt-1">
-          ⚠ Use the <em>unique amount</em> from your invoice — it helps us
-          identify your payment.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="form-group">
-          <label className="label">Payment Method</label>
-          <select
-            className="select"
-            value={form.payment_method}
-            onChange={(e) =>
-              setForm({ ...form, payment_method: e.target.value })
-            }
-          >
-            {paymentMethods.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
+    <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#027675] to-[#019d8e] rounded-t-2xl" />
+      <div className="p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-[#027675]/10 flex items-center justify-center">
+            <Banknote className="w-5 h-5 text-[#027675]" />
+          </div>
+          <div>
+            <h2 className="font-bold text-lg text-gray-900">Submit Payment</h2>
+            <p className="text-xs text-gray-500">
+              Transfer the exact amount and fill in your payment details
+            </p>
+          </div>
         </div>
 
-        <div className="form-group">
-          <label className="label">
-            Transaction / Reference ID <span className="text-red-500">*</span>
-          </label>
-          <input
-            className="input"
-            placeholder="e.g. TXN-123456789"
-            value={form.reference_id}
-            onChange={(e) => setForm({ ...form, reference_id: e.target.value })}
-            required
-          />
+        {/* Payment instructions */}
+        <div className="bg-[#027675]/5 border border-[#027675]/10 rounded-xl p-4 mb-4 text-sm text-gray-700 space-y-1.5">
+          <p className="font-semibold flex items-center gap-1.5 text-[#027675]">
+            <Info className="w-4 h-4" /> Payment Instructions
+          </p>
+          <p className="text-xs">
+            Send the <strong>exact amount</strong> shown on your invoice to:
+          </p>
+          <div className="mt-2 space-y-1.5 font-mono text-xs bg-white rounded-lg p-3 border border-[#027675]/10">
+            <p>
+              <strong>Raast ID:</strong>{" "}
+              {process.env.NEXT_PUBLIC_RAAST_ID || "03XX-XXXXXXX"}
+            </p>
+            <p>
+              <strong>EasyPaisa / JazzCash:</strong>{" "}
+              {process.env.NEXT_PUBLIC_MOBILE_WALLET}
+            </p>
+            <p>
+              <strong>Account Name:</strong>{" "}
+              {process.env.NEXT_PUBLIC_ACCOUNT_NAME || "LawPortal"}
+            </p>
+          </div>
+          <p className="text-xs text-[#027675] mt-1">
+            ⚠ Use the <em>unique amount</em> from your invoice — it helps
+            identify your payment.
+          </p>
         </div>
 
-        <div className="form-group">
-          <label className="label">Payment Screenshot (optional)</label>
-          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-primary-400 transition-colors bg-slate-50">
-            {preview ? (
-              <img
-                src={preview}
-                alt="proof"
-                className="h-full object-contain rounded-lg p-1"
-              />
-            ) : (
-              <div className="flex flex-col items-center text-slate-400">
-                <Upload className="w-6 h-6 mb-1" />
-                <span className="text-xs">Click to upload screenshot</span>
-              </div>
-            )}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+              Payment Method
+            </label>
+            <select
+              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-800 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all text-sm"
+              value={form.payment_method}
+              onChange={(e) =>
+                setForm({ ...form, payment_method: e.target.value })
+              }
+            >
+              {paymentMethods.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+              Transaction / Reference ID <span className="text-red-500">*</span>
+            </label>
             <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFile}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all text-sm"
+              placeholder="e.g. TXN-123456789"
+              value={form.reference_id}
+              onChange={(e) =>
+                setForm({ ...form, reference_id: e.target.value })
+              }
+              required
             />
-          </label>
-        </div>
+          </div>
 
-        <button type="submit" className="btn-primary w-full" disabled={loading}>
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 animate-spin" /> Submitting…
-            </span>
-          ) : (
-            "Submit Payment Request"
-          )}
-        </button>
-      </form>
+          <div>
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+              Payment Screenshot (optional)
+            </label>
+            <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#027675] transition-colors bg-gray-50/50">
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="proof"
+                  className="h-full object-contain rounded-xl p-1"
+                />
+              ) : (
+                <div className="flex flex-col items-center text-gray-400">
+                  <Upload className="w-5 h-5 mb-1" />
+                  <span className="text-xs">Click to upload screenshot</span>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFile}
+              />
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full px-4 py-3 bg-[#027675] text-white font-semibold rounded-xl shadow-lg shadow-[#027675]/20 hover:bg-[#015f5d] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                Submit Payment Request
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
@@ -279,47 +295,51 @@ function PaymentHistory({ payments }) {
   if (!payments?.length) return null;
 
   return (
-    <div className="card p-6">
-      <h2 className="font-bold text-slate-800 font-display mb-4">
-        Payment History
-      </h2>
-      <div className="space-y-3">
-        {payments.map((p) => {
-          const cfg =
-            PAYMENT_STATUS_CONFIG[p.status] || PAYMENT_STATUS_CONFIG.pending;
-          return (
-            <div
-              key={p._id}
-              className="flex items-center justify-between p-3 bg-slate-50 rounded-lg"
-            >
-              <div>
-                <p className="text-sm font-semibold text-slate-800">
-                  {p.invoice_id}
-                </p>
-                <p className="text-xs text-slate-500">
-                  PKR {p.payable_amount?.toLocaleString()} · {p.payment_method}
-                </p>
-                {p.admin_notes && (
-                  <p className="text-xs text-red-600 mt-0.5">
-                    Note: {p.admin_notes}
+    <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10">
+      <div className="p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <FileText className="w-4 h-4 text-[#027675]" />
+          <h2 className="font-bold text-lg text-gray-900">Payment History</h2>
+        </div>
+        <div className="space-y-2">
+          {payments.map((p) => {
+            const cfg =
+              PAYMENT_STATUS_CONFIG[p.status] || PAYMENT_STATUS_CONFIG.pending;
+            return (
+              <div
+                key={p._id}
+                className="flex items-center justify-between p-3.5 bg-gray-50/80 rounded-xl border border-gray-100 hover:border-[#027675]/10 transition-colors"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {p.invoice_id}
                   </p>
-                )}
-              </div>
-              <div className="text-right">
-                <span
-                  className={`text-xs font-bold px-2 py-1 rounded-full ${cfg.color}`}
-                >
-                  {cfg.label}
-                </span>
-                <p className="text-xs text-slate-400 mt-1">
-                  {new Date(p.submitted_at || p.createdAt).toLocaleDateString(
-                    "en-PK",
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    PKR {p.payable_amount?.toLocaleString()} ·{" "}
+                    {p.payment_method}
+                  </p>
+                  {p.admin_notes && (
+                    <p className="text-xs text-red-500 mt-0.5">
+                      Note: {p.admin_notes}
+                    </p>
                   )}
-                </p>
+                </div>
+                <div className="text-right">
+                  <span
+                    className={`text-xs font-bold px-2.5 py-1 rounded-lg ${cfg.color}`}
+                  >
+                    {cfg.label}
+                  </span>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {new Date(p.submitted_at || p.createdAt).toLocaleDateString(
+                      "en-PK",
+                    )}
+                  </p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -350,7 +370,7 @@ export default function BillingPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-6 h-6 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-3 border-[#027675] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -366,128 +386,151 @@ export default function BillingPage() {
   const isSenior = user?.seniority === "senior";
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 font-display">
-          Billing & Subscription
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">{chamber?.name}</p>
-      </div>
-
-      {/* Expired banner */}
-      {isExpired && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-[#027675]/5">
+      <div className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-5">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center shadow-lg shadow-[#027675]/20">
+            <CreditCard className="w-6 h-6 text-white" />
+          </div>
           <div>
-            <p className="font-semibold text-red-800 text-sm">
-              {statusCfg.description}
-            </p>
-            {isSenior && !pendingRequest && (
-              <p className="text-xs text-red-600 mt-1">
-                Complete payment using the form below to restore access for your
-                entire team.
-              </p>
-            )}
-            {pendingRequest && (
-              <p className="text-xs text-red-600 mt-1">
-                Your payment is under review. Access will be restored once
-                approved.
-              </p>
-            )}
+            <h1 className="text-3xl font-bold text-gray-900 font-display tracking-tight">
+              Billing & Subscription
+            </h1>
+            <p className="text-sm text-gray-500 mt-0.5">{chamber?.name}</p>
           </div>
         </div>
-      )}
 
-      {/* Subscription status card */}
-      <div className="card p-6">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center">
-            <CreditCard className="w-4 h-4 text-primary-600" />
+        {/* Expired banner */}
+        {isExpired && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <p className="font-semibold text-red-800 text-sm">
+                {statusCfg.description}
+              </p>
+              {isSenior && !pendingRequest && (
+                <p className="text-xs text-red-600 mt-1">
+                  Complete payment below to restore access for your entire team.
+                </p>
+              )}
+              {pendingRequest && (
+                <p className="text-xs text-red-600 mt-1">
+                  Your payment is under review. Access will be restored once
+                  approved.
+                </p>
+              )}
+            </div>
           </div>
-          <h2 className="font-bold text-slate-800 font-display">
-            Subscription Status
-          </h2>
-        </div>
+        )}
 
-        <div className="mb-4">
-          <StatusBadge status={subStatus} />
-        </div>
+        {/* Subscription status card */}
+        <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10">
+          <div className="p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-[#027675]/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-[#027675]" />
+              </div>
+              <div>
+                <h2 className="font-bold text-lg text-gray-900">
+                  Subscription Status
+                </h2>
+                <p className="text-xs text-gray-500">
+                  Current plan and validity details
+                </p>
+              </div>
+            </div>
 
-        <div className="divide-y divide-slate-100">
-          <InfoRow label="Chamber" value={chamber?.name} />
-          <InfoRow
-            label="Status"
-            value={subStatus.replace("_", " ").toUpperCase()}
-          />
-          {subscription?.trial_ends_at && (
-            <InfoRow
-              label="Trial Expires"
-              value={formatDate(subscription.trial_ends_at)}
-            />
-          )}
-          {subscription?.subscription_ends_at && (
-            <InfoRow
-              label="Subscription Expires"
-              value={formatDate(subscription.subscription_ends_at)}
-              highlight
-            />
-          )}
-          {subscription?.temp_access_ends_at &&
-            subStatus === "temporary_active" && (
+            <div className="mb-4">
+              <StatusBadge status={subStatus} />
+            </div>
+
+            <div className="divide-y divide-gray-100">
+              <InfoRow label="Chamber" value={chamber?.name} />
               <InfoRow
-                label="Temporary Access Until"
-                value={formatDate(subscription.temp_access_ends_at)}
+                label="Status"
+                value={subStatus.replace("_", " ").toUpperCase()}
+              />
+              {subscription?.trial_ends_at && (
+                <InfoRow
+                  label="Trial Expires"
+                  value={formatDate(subscription.trial_ends_at)}
+                />
+              )}
+              {subscription?.subscription_ends_at && (
+                <InfoRow
+                  label="Subscription Expires"
+                  value={formatDate(subscription.subscription_ends_at)}
+                  highlight
+                />
+              )}
+              {subscription?.temp_access_ends_at &&
+                subStatus === "temporary_active" && (
+                  <InfoRow
+                    label="Temporary Access Until"
+                    value={formatDate(subscription.temp_access_ends_at)}
+                    highlight
+                  />
+                )}
+            </div>
+          </div>
+        </div>
+
+        {/* Latest pending request info */}
+        {pendingRequest && (
+          <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-amber-200">
+            <div className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Clock className="w-4 h-4 text-amber-600" />
+                <h2 className="font-bold text-lg text-gray-900">
+                  Payment Under Review
+                </h2>
+              </div>
+              <InfoRow
+                label="Invoice ID"
+                value={pendingRequest.invoice_id}
                 highlight
               />
-            )}
-        </div>
+              <InfoRow
+                label="Amount"
+                value={`PKR ${pendingRequest.payable_amount?.toLocaleString()}`}
+              />
+              <InfoRow label="Method" value={pendingRequest.payment_method} />
+              <InfoRow
+                label="Submitted"
+                value={formatDate(pendingRequest.submitted_at)}
+              />
+              <InfoRow
+                label="Reference ID"
+                value={pendingRequest.reference_id || "—"}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Payment submission — only for senior lawyers when expired and no pending request */}
+        {isSenior && isExpired && !pendingRequest && (
+          <PaymentForm chamber={chamber} onSuccess={load} />
+        )}
+
+        {/* Junior lawyer message */}
+        {!isSenior && isExpired && (
+          <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10 p-5 text-center">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#027675]/5 flex items-center justify-center">
+              <Info className="w-7 h-7 text-[#027675]/40" />
+            </div>
+            <p className="text-sm text-gray-500">
+              Please ask your Senior Lawyer to submit a payment to restore
+              access.
+            </p>
+          </div>
+        )}
+
+        {/* Payment history */}
+        <PaymentHistory payments={payments} />
       </div>
-
-      {/* Latest pending request info */}
-      {pendingRequest && (
-        <div className="card p-6 border-amber-200 bg-amber-50/30">
-          <h2 className="font-bold text-slate-800 font-display mb-4 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-amber-500" />
-            Payment Under Review
-          </h2>
-          <InfoRow
-            label="Invoice ID"
-            value={pendingRequest.invoice_id}
-            highlight
-          />
-          <InfoRow
-            label="Amount"
-            value={`PKR ${pendingRequest.payable_amount?.toLocaleString()}`}
-          />
-          <InfoRow label="Method" value={pendingRequest.payment_method} />
-          <InfoRow
-            label="Submitted"
-            value={formatDate(pendingRequest.submitted_at)}
-          />
-          <InfoRow
-            label="Reference ID"
-            value={pendingRequest.reference_id || "—"}
-          />
-        </div>
-      )}
-
-      {/* Payment submission — only for senior lawyers when expired and no pending request */}
-      {isSenior && isExpired && !pendingRequest && (
-        <PaymentForm chamber={chamber} onSuccess={load} />
-      )}
-
-      {/* Junior lawyer message */}
-      {!isSenior && isExpired && (
-        <div className="card p-6 text-center text-slate-500 text-sm">
-          <p>
-            Please ask your Senior Lawyer to submit a payment to restore access.
-          </p>
-        </div>
-      )}
-
-      {/* Payment history */}
-      <PaymentHistory payments={payments} />
     </div>
   );
 }

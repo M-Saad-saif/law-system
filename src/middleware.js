@@ -4,8 +4,26 @@ import { jwtVerify } from "jose";
 const PUBLIC_PATHS = ["/", "/login", "/register"];
 const SENIOR_PATHS = ["/admin"];
 
-// Protected dashboard routes that require an active subscription.
-// /billing is intentionally excluded so expired users can still pay.
+const ADMIN_RESTRICTED_PATHS = [
+  "/dashboard",
+  "/cases",
+  "/calendar",
+  "/cross-exams",
+  "/applications",
+  "/judgements",
+  "/judgement-search",
+  "/judgement-extractor",
+  "/judgement-image-generator",
+  "/intelligencefeed",
+  "/library",
+  "/reminders",
+  "/books",
+  "/billing",
+];
+
+const ADMIN_ALLOWED_PATHS = ["/settings", "/admin/payments", "/api"];
+
+// paths that require an active subscription (excluding /billing)
 const SUBSCRIPTION_GUARDED_PATHS = [
   "/dashboard",
   "/cases",
@@ -28,22 +46,18 @@ export async function middleware(request) {
   const token = request.cookies.get("token")?.value;
 
   const isPublic = PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(p + "/"),
+    (p) => pathname === p || pathname.startsWith(p + "/")
   );
-  const isApi = pathname.startsWith("/api");
 
-  if (isApi) return NextResponse.next();
-
+  // Redirect authenticated users away from auth pages
   if (isPublic) {
-    if (
-      token &&
-      (pathname.startsWith("/login") || pathname.startsWith("/register"))
-    ) {
+    if (token && (pathname.startsWith("/login") || pathname.startsWith("/register"))) {
       try {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         await jwtVerify(token, secret);
         return NextResponse.redirect(new URL("/dashboard", request.url));
-      } catch {}
+      } catch {
+      }
     }
     return NextResponse.next();
   }
@@ -52,7 +66,6 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Verify token
   let payload;
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
@@ -62,24 +75,34 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  if (payload.role === "admin") {
+    const isRestrictedPath = ADMIN_RESTRICTED_PATHS.some((p) =>
+      pathname.startsWith(p)
+    );
+    const isAllowedPath = ADMIN_ALLOWED_PATHS.some((p) =>
+      pathname.startsWith(p)
+    );
+
+    if (isRestrictedPath && !isAllowedPath) {
+      return NextResponse.redirect(new URL("/settings", request.url));
+    }
+  }
+
   // Senior-only admin pages
   const isSeniorRoute = SENIOR_PATHS.some((p) => pathname.startsWith(p));
   if (isSeniorRoute) {
-    if (payload.seniority !== "senior" && payload.role !== "admin") {
+    if (payload.seniority !== "senior") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
   const isGuarded = SUBSCRIPTION_GUARDED_PATHS.some((p) =>
-    pathname.startsWith(p),
+    pathname.startsWith(p)
   );
-  if (isGuarded) {
+  if (isGuarded && payload.role !== "admin") {
     const expiredFlag = request.cookies.get("sub_status")?.value;
     if (expiredFlag && expiredFlag !== "ok") {
-      // Only redirect non-admin users
-      if (payload.role !== "admin") {
-        return NextResponse.redirect(new URL("/billing", request.url));
-      }
+      return NextResponse.redirect(new URL("/billing", request.url));
     }
   }
 

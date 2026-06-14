@@ -71,8 +71,32 @@ const Icon = {
 
 function buildNavSections(user) {
   const isSenior = user?.seniority === "senior";
+  const isAdmin = user?.role === "admin";
 
-  const sections = [
+  if (isAdmin) {
+    return [
+      {
+        label: "Account",
+        items: [
+          { label: "Settings", href: "/settings", icon: Icon.Settings },
+          {
+            label: "Payment Verification",
+            href: "/admin/payments",
+            icon: Icon.Admin,
+          },
+        ],
+      },
+    ];
+  }
+
+  return [
+    {
+      label: "Account",
+      items: [
+        { label: "Settings", href: "/settings", icon: Icon.Settings },
+        { label: "Billing", href: "/billing", icon: Icon.Billing },
+      ],
+    },
     {
       label: "Main",
       items: [
@@ -100,12 +124,7 @@ function buildNavSections(user) {
           subLinks: [
             { label: "All Applications", href: "/applications" },
             ...(isSenior
-              ? [
-                  {
-                    label: "Review Applications",
-                    href: "/applications/review",
-                  },
-                ]
+              ? [{ label: "Review Applications", href: "/applications/review" }]
               : []),
           ],
         },
@@ -139,25 +158,7 @@ function buildNavSections(user) {
         { label: "Reminders", href: "/reminders", icon: Icon.Reminders },
       ],
     },
-    {
-      label: "Account",
-      items: [
-        { label: "Settings", href: "/settings", icon: Icon.Settings },
-        { label: "Billing", href: "/billing", icon: Icon.Billing },
-        ...(user?.role === "admin"
-          ? [
-              {
-                label: "Payment Verification",
-                href: "/admin/payments",
-                icon: Icon.Admin,
-              },
-            ]
-          : []),
-      ],
-    },
   ];
-
-  return sections;
 }
 
 function NavItem({ item, pathname }) {
