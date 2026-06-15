@@ -37,13 +37,8 @@ yarn-error.log*
 *.pem
 Thumbs.db
 
-.VSCodeCounter
-
-
 # todos
 /todos.txt
-
-/billing verification.txt
 
 # scripts
 /script

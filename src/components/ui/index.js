@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { X, AlertTriangle, Loader2 } from "lucide-react";
 import { cn } from "@/utils/helpers";
+import { motion } from "framer-motion";
 
 // ----------------- Spinner -----------------
 export function Spinner({ size = "md", className }) {
@@ -17,9 +18,14 @@ export function Spinner({ size = "md", className }) {
 // ----------------- Loading Page -----------------
 export function PageLoader() {
   return (
-    <div className="flex items-center justify-center h-64">
-      <Spinner size="lg" />
-    </div>
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+      className="relative"
+    >
+      <div className="w-16 h-16 border-4 border-slate-200 rounded-2xl" />
+      <div className="absolute top-0 left-0 w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-2xl" />
+    </motion.div>
   );
 }
 
