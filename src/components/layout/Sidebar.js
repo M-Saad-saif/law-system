@@ -91,6 +91,7 @@ function buildNavSections(user) {
             icon: Icon.Admin,
           },
           { label: "Settings", href: "/settings", icon: Icon.Settings },
+          { label: "Reminder", href: "/reminders", icon: Icon.Reminders },
         ],
       },
     ];
@@ -180,27 +181,32 @@ function NavItem({ item, pathname }) {
         <Link
           href={item.href}
           className={`
-            flex items-center gap-3 flex-1 px-3 py-2.5 rounded-lg text-sm font-medium
-            transition-all duration-150
+            flex items-center gap-3 flex-1 px-3 py-2.5 rounded-xl text-sm font-medium
+            transition-all duration-200 relative overflow-hidden
             ${
               isActive
-                ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
-                : "text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent"
+                ? "bg-teal-500/10 text-teal-400 border border-teal-500/20 shadow-lg shadow-teal-500/5"
+                : "text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent hover:shadow-md"
             }
           `}
         >
+          {/* Active indicator bar */}
+          {isActive && (
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-teal-400 rounded-r-full shadow-lg shadow-teal-400/50" />
+          )}
+
           <span
-            className={
+            className={`transition-transform duration-200 group-hover:scale-110 ${
               isActive
-                ? "text-teal-400"
+                ? "text-teal-400 drop-shadow-sm"
                 : "text-slate-500 group-hover:text-slate-300"
-            }
+            }`}
           >
             <item.icon className="w-5 h-5" />
           </span>
           <span className="flex-1 truncate">{item.label}</span>
           {item.badge && (
-            <span className="text-[10px] font-bold bg-teal-500 text-white px-1.5 py-0.5 rounded-full tracking-wide">
+            <span className="text-[10px] font-bold bg-gradient-to-r from-teal-500 to-teal-600 text-white px-2 py-0.5 rounded-full tracking-wide shadow-md shadow-teal-500/20">
               {item.badge}
             </span>
           )}
@@ -208,10 +214,10 @@ function NavItem({ item, pathname }) {
         {hasSubLinks && (
           <button
             onClick={() => setSubOpen((v) => !v)}
-            className="p-1 text-slate-500 hover:text-slate-300 ml-1"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/5 ml-1 transition-all duration-200"
           >
             <span
-              className={`block transition-transform duration-200 ${subOpen ? "rotate-180" : ""}`}
+              className={`block transition-transform duration-300 ${subOpen ? "rotate-180" : ""}`}
             >
               <Icon.ChevronDown />
             </span>
@@ -219,19 +225,22 @@ function NavItem({ item, pathname }) {
         )}
       </div>
       {hasSubLinks && subOpen && (
-        <div className="ml-8 mt-1 space-y-0.5 border-l border-slate-700 pl-3">
+        <div className="ml-8 mt-1.5 space-y-1 border-l-2 border-slate-700/50 pl-4">
           {item.subLinks.map((sub) => {
             const subActive = pathname === sub.href;
             return (
               <Link
                 key={sub.href}
                 href={sub.href}
-                className={`block py-1.5 px-2 rounded text-xs font-medium transition-colors ${
+                className={`block py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200 relative ${
                   subActive
-                    ? "text-teal-400"
-                    : "text-slate-500 hover:text-slate-300"
+                    ? "text-teal-400 bg-teal-500/5 border border-teal-500/10"
+                    : "text-slate-500 hover:text-slate-300 hover:bg-white/5 border border-transparent"
                 }`}
               >
+                {subActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-teal-400 rounded-r-full" />
+                )}
                 {sub.label}
               </Link>
             );
@@ -248,28 +257,31 @@ export default function Sidebar() {
   const NAV_SECTIONS = buildNavSections(user);
 
   return (
-    <aside className="h-screen w-60 flex flex-col bg-[#0f172a] border-r border-slate-800 z-40 select-none">
-      <div className="flex items-center gap-2.5 px-5 py-5 border-b border-slate-800">
-        <div className="w-8 h-8 rounded-lg bg-[#026665] flex items-center justify-center flex-shrink-0 text-white">
-          <Scale className="w-6 h-6" />
+    <aside className="h-screen w-60 flex flex-col bg-[#0f172a] border-r border-slate-800/80 z-40 select-none shadow-2xl shadow-black/20">
+      {/* Logo Section */}
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-800/80 bg-gradient-to-b from-slate-800/50 to-transparent">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#026665] to-[#024947] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#026665]/20 ring-1 ring-[#026665]/30">
+          <Scale className="w-5 h-5 text-white" />
         </div>
         <div>
           <p
-            className="text-sm font-bold text-white tracking-wide"
+            className="text-sm font-bold text-white tracking-wide bg-gradient-to-r from-white to-slate-300 bg-clip-text"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             LawPortal
           </p>
-          <p className="text-[10px] text-slate-500 uppercase tracking-widest">
+          <p className="text-[10px] text-slate-500 uppercase tracking-[0.15em] font-medium">
             Legal Practice
           </p>
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5 scrollbar-thin scrollbar-thumb-slate-700">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
-            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-3 mb-2">
+            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.15em] px-3 mb-2.5 flex items-center gap-2">
+              <span className="w-1 h-1 rounded-full bg-slate-600" />
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -281,19 +293,23 @@ export default function Sidebar() {
         ))}
       </nav>
 
+      {/* User Profile Section */}
       {user && (
-        <div className="border-t border-slate-800 px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#026665]/20 border border-[#026665]/30 flex items-center justify-center flex-shrink-0">
-              <span className="text-[#026665] text-xs font-bold uppercase">
-                {user.name?.charAt(0) || "U"}
-              </span>
+        <div className="border-t border-slate-800/80 px-4 py-4 bg-gradient-to-t from-slate-800/50 to-transparent backdrop-blur-sm">
+          <div className="flex items-center gap-3 group">
+            <div className="relative">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#026665]/20 to-[#026665]/5 border-2 border-[#026665]/30 flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#026665]/10 group-hover:scale-105 transition-transform duration-200">
+                <span className="text-[#026665] text-xs font-bold uppercase tracking-wider">
+                  {user.name?.charAt(0) || "U"}
+                </span>
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#0f172a] shadow-lg shadow-emerald-500/50" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-white truncate">
+              <p className="text-xs font-semibold text-white truncate leading-tight">
                 {user.name}
               </p>
-              <p className="text-[10px] text-slate-500 truncate capitalize">
+              <p className="text-[10px] text-slate-500 truncate capitalize font-medium">
                 {user.seniority === "senior"
                   ? "Senior Lawyer"
                   : user.seniority === "junior"
@@ -303,10 +319,10 @@ export default function Sidebar() {
             </div>
             <button
               onClick={logout}
-              className="text-slate-600 hover:text-red-400 transition-colors"
+              className="p-2 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 group/logout flex-shrink-0"
               title="Logout"
             >
-              <LogOutIcon className="w-5 h-5" />
+              <LogOutIcon className="w-4 h-4 group-hover/logout:scale-110 transition-transform duration-200" />
             </button>
           </div>
         </div>

@@ -6,7 +6,7 @@ export const PAYMENT_STATUS = Object.freeze({
   REJECTED: "rejected",
 });
 
-export const BASE_PLAN_PRICE = 5000; 
+export const BASE_PLAN_PRICE = 5000;
 
 const paymentRequestSchema = new mongoose.Schema(
   {
@@ -17,7 +17,6 @@ const paymentRequestSchema = new mongoose.Schema(
     },
 
     invoice_id: { type: String, required: true, unique: true },
-    payable_amount: { type: Number, required: true }, // unique per request
     payment_method: {
       type: String,
       enum: ["raast", "easypaisa", "jazzcash", "bank_transfer", "other"],

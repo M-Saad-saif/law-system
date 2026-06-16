@@ -25,10 +25,8 @@ const NON_ADMIN_PATHS = [
   "/judgement-image-generator",
   "/intelligencefeed",
   "/library",
-  "/reminders",
   "/books",
   "/billing",
-  // "/settings",
 ];
 
 const SUBSCRIPTION_GUARDED_PATHS = [

@@ -88,12 +88,6 @@ async function generateInvoiceId(chamberId) {
   return `INV-${year}-${chamberSuffix}-${random}`;
 }
 
-async function generateUniqueAmount() {
-  const totalRequests = await PaymentRequest.countDocuments();
-  const offset = (totalRequests % 9999) + 1;
-  return BASE_PLAN_PRICE + offset;
-}
-
 export async function createPaymentRequest(
   chamberId,
   { payment_method = "raast", reference_id, screenshot_url } = {},
@@ -106,7 +100,7 @@ export async function createPaymentRequest(
   });
 
   const invoice_id = await generateInvoiceId(chamberId);
-  const payable_amount = await generateUniqueAmount();
+  const payable_amount = BASE_PLAN_PRICE;
 
   const pr = await PaymentRequest.create({
     chamber: chamberId,

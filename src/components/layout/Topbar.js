@@ -76,49 +76,69 @@ export default function Topbar() {
 
   return (
     <>
-      <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 z-10">
+      <header className="h-14 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-4 md:px-5 shrink-0 z-20 shadow-sm">
         {/* Mobile menu btn */}
         <button
-          className="md:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100"
+          className="md:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all duration-200 active:scale-95"
           onClick={() => setMobileOpen(true)}
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="w-4 h-4" />
         </button>
 
-        <h1 className="hidden md:block text-lg font-bold text-slate-800 font-display">
-          {title}
-        </h1>
+        {/* Page Title */}
+        <div className="hidden md:flex items-center gap-2">
+          <h1 className="text-base font-bold text-slate-800 tracking-tight">
+            {title}
+          </h1>
+          {pathname !== "/dashboard" && (
+            <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full font-medium">
+              Current
+            </span>
+          )}
+        </div>
 
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-1.5 ml-auto">
+          {/* Search Button (Optional - can be activated) */}
+          {/* <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200">
+            <Search className="w-4 h-4" />
+          </button> */}
+
+          {/* Notification Bell */}
           <Link
             href="/reminders"
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors relative"
+            className="relative p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200 group"
           >
-            <Bell className="w-4 h-4" />
+            <Bell className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
             {overdueCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+              <span className="absolute top-0 right-0 min-w-[16px] h-[16px] px-1 rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-white text-[9px] font-bold flex items-center justify-center shadow-md shadow-red-500/20 ring-2 ring-white">
                 {overdueCount > 99 ? "99+" : overdueCount}
               </span>
             )}
-            {upcomingCount > 0 && (
-              <span className="absolute -top-1 right-[15px] min-w-[18px] h-[18px] px-1 rounded-full bg-amber-400 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+            {upcomingCount > 0 && overdueCount === 0 && (
+              <span className="absolute top-0 right-0 min-w-[16px] h-[16px] px-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-white text-[9px] font-bold flex items-center justify-center shadow-md shadow-amber-400/20 ring-2 ring-white">
                 {upcomingCount > 99 ? "99+" : upcomingCount}
               </span>
             )}
           </Link>
 
-          <div className="w-px h-5 bg-slate-200 mx-1" />
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-              <span className="text-primary-600 text-xs font-bold">
-                {user?.name?.charAt(0)?.toUpperCase() || "U"}
-              </span>
+          {/* Divider */}
+          <div className="w-px h-4 bg-slate-200 mx-1.5" />
+
+          {/* User Profile */}
+          <div className="flex items-center gap-2 group cursor-pointer">
+            <div className="relative">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center shadow-md shadow-teal-500/20 group-hover:shadow-lg group-hover:shadow-teal-500/30 transition-all duration-200">
+                <span className="text-white text-[10px] font-bold tracking-wider">
+                  {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                </span>
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
             </div>
             <div className="hidden sm:block">
-              <div className="text-sm font-semibold text-slate-700 leading-none">
+              <div className="text-xs font-semibold text-slate-700 leading-tight">
                 {user?.name}
               </div>
-              <p className="text-[10px] text-slate-500 truncate capitalize">
+              <p className="text-[9px] text-slate-500 leading-tight font-medium capitalize">
                 {user.seniority
                   ? `${user.seniority} ${user.role || "Lawyer"}`
                   : user.role || "Lawyer"}
@@ -128,32 +148,34 @@ export default function Topbar() {
         </div>
       </header>
 
-      {/* Mobile sidebar */}
+      {/* Mobile sidebar overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="sidebar absolute left-0 top-0 bottom-0 w-64 flex flex-col">
-            <div className="flex items-center justify-between px-5 h-16 border-b border-white/5">
+          <aside className="absolute left-0 top-0 bottom-0 w-64 flex flex-col bg-slate-900 shadow-2xl animate-in slide-in-from-left duration-300">
+            {/* Mobile Sidebar Header */}
+            <div className="flex items-center justify-between px-4 h-14 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
-                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary-600">
-                  <Scale className="w-4 h-4 text-white" />
+                <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-teal-600 shadow-lg shadow-teal-500/20">
+                  <Scale className="w-3.5 h-3.5 text-white" />
                 </div>
-                <span className="text-white font-bold text-sm font-display">
+                <span className="text-white font-bold text-sm tracking-tight">
                   LawPortal
                 </span>
               </div>
               <button
                 onClick={() => setMobileOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <nav className="flex-1 px-3 py-4 space-y-0.5">
+            {/* Mobile Navigation */}
+            <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
               {navItems.map(({ href, icon: Icon, label }) => {
                 const active =
                   href === "/dashboard"
@@ -164,21 +186,27 @@ export default function Topbar() {
                     key={href}
                     href={href}
                     onClick={() => setMobileOpen(false)}
-                    className={cn("sidebar-link", active && "active")}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                      active
+                        ? "bg-teal-500/10 text-teal-400 border border-teal-500/20 shadow-lg shadow-teal-500/5"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent",
+                    )}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4 flex-shrink-0" />
                     {label}
                   </Link>
                 );
               })}
             </nav>
 
-            <div className="px-3 pb-4 border-t border-white/5 pt-3">
+            {/* Mobile Sidebar Footer */}
+            <div className="px-2 pb-3 border-t border-slate-800 pt-3">
               <button
                 onClick={logout}
-                className="sidebar-link w-full text-red-400 hover:text-red-300 hover:bg-red-400/5"
+                className="flex items-center gap-3 w-full px-3 py-2 rounded-xl text-sm font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/5 border border-transparent hover:border-rose-500/10 transition-all duration-200"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-4 h-4 flex-shrink-0" />
                 Sign Out
               </button>
             </div>

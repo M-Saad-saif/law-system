@@ -140,13 +140,54 @@ export const GET = withAuth(async (request, context, user) => {
         dedupedPRs.map((pr) => buildPaymentItem(pr)),
       );
     } else {
-      // Unknown status value → no results, but don't error out.
       payments = [];
     }
+
+    const [allTimeAgg, thisMonthAgg] = await Promise.all([
+      PaymentRequest.aggregate([
+        { $match: { status: PAYMENT_STATUS.APPROVED } },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$payable_amount" },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+      PaymentRequest.aggregate([
+        {
+          $match: {
+            status: PAYMENT_STATUS.APPROVED,
+            verified_at: {
+              $gte: new Date(
+                new Date().getFullYear(),
+                new Date().getMonth(),
+                1,
+              ),
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: "$payable_amount" },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    const revenue = {
+      total: allTimeAgg[0]?.total || 0,
+      totalCount: allTimeAgg[0]?.count || 0,
+      thisMonth: thisMonthAgg[0]?.total || 0,
+      thisMonthCount: thisMonthAgg[0]?.count || 0,
+    };
 
     return apiSuccess({
       payments,
       total: payments.length,
+      revenue,
     });
   } catch (err) {
     console.error("[admin/payments] GET:", err);
