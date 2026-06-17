@@ -148,26 +148,6 @@ export default function LandingPage() {
   const ctaHref = isLoggedIn ? "/dashboard" : "/register";
   const ctaLabel = isLoggedIn ? "Dashboard" : "Create account";
 
-  const testimonials = [
-    {
-      name: "Barrister Ahmed Khan",
-      role: "Senior Advocate, Supreme Court",
-      text: "LawPortal transformed how we manage our cases. The calendar integration is seamless.",
-      rating: 5,
-    },
-    {
-      name: "Sara Malik",
-      role: "Managing Partner, Malik & Associates",
-      text: "Best legal practice management tool in Pakistan. Our efficiency has doubled.",
-      rating: 5,
-    },
-    {
-      name: "Muhammad Usman",
-      role: "Junior Lawyer, Lahore High Court",
-      text: "The reminders feature alone is worth it. Never missed a deadline since.",
-      rating: 5,
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-black overflow-x-hidden selection:bg-[#027f7e]/30">
