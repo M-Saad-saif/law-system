@@ -48,11 +48,14 @@ const TABS = [
 
 const STATUS_STYLES = {
   pending: "bg-amber-50 text-amber-700 border-amber-200 ring-amber-500/10",
-  approved: "bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-500/10",
+  approved:
+    "bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-500/10",
   rejected: "bg-rose-50 text-rose-700 border-rose-200 ring-rose-500/10",
   trialing: "bg-blue-50 text-blue-700 border-blue-200 ring-blue-500/10",
-  active: "bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-500/10",
-  temporary_active: "bg-amber-50 text-amber-700 border-amber-200 ring-amber-500/10",
+  active:
+    "bg-emerald-50 text-emerald-700 border-emerald-200 ring-emerald-500/10",
+  temporary_active:
+    "bg-amber-50 text-amber-700 border-amber-200 ring-amber-500/10",
   expired: "bg-rose-50 text-rose-700 border-rose-200 ring-rose-500/10",
   blocked: "bg-red-100 text-red-800 border-red-200 ring-red-500/10",
   cancelled: "bg-slate-100 text-slate-600 border-slate-200 ring-slate-500/10",
@@ -112,7 +115,9 @@ function InfoRow({ label, value, highlight, icon }) {
         {icon}
         {label}
       </span>
-      <span className={`text-sm font-medium ${highlight ? "text-emerald-600" : "text-slate-800"}`}>
+      <span
+        className={`text-sm font-medium ${highlight ? "text-emerald-600" : "text-slate-800"}`}
+      >
         {value || "—"}
       </span>
     </div>
@@ -124,7 +129,9 @@ function DetailItem({ icon, label, value, highlight }) {
     <div className="flex items-center gap-2 text-xs">
       <span className="text-slate-400 shrink-0">{icon}</span>
       <span className="text-slate-500">{label}:</span>
-      <span className={`font-medium truncate ${highlight ? "text-emerald-600" : "text-slate-700"}`}>
+      <span
+        className={`font-medium truncate ${highlight ? "text-emerald-600" : "text-slate-700"}`}
+      >
         {value || "—"}
       </span>
     </div>
@@ -142,7 +149,9 @@ function StatCard({ label, value, icon: Icon, color, bg, onClick, isActive }) {
       }`}
     >
       <div className="flex items-start justify-between mb-3">
-        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</span>
+        <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          {label}
+        </span>
         <div className={`${bg} rounded-lg p-1.5`}>
           <Icon className={`w-4 h-4 ${color}`} />
         </div>
@@ -160,9 +169,14 @@ function ActionModal({ payment, onClose, onDone }) {
   const submit = async () => {
     setLoading(true);
     try {
-      await api.patch(`/api/admin/payments/${payment._id}`, { action, admin_notes: notes });
+      await api.patch(`/api/admin/payments/${payment._id}`, {
+        action,
+        admin_notes: notes,
+      });
       toast.success(
-        action === "approve" ? "Payment approved. Subscription activated." : "Payment rejected."
+        action === "approve"
+          ? "Payment approved. Subscription activated."
+          : "Payment rejected.",
       );
       onDone();
     } catch (err) {
@@ -178,8 +192,12 @@ function ActionModal({ payment, onClose, onDone }) {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Payment Verification</h2>
-            <p className="text-sm text-slate-500 mt-1 font-mono">{payment.invoice_id}</p>
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+              Payment Verification
+            </h2>
+            <p className="text-sm text-slate-500 mt-1 font-mono">
+              {payment.invoice_id}
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -192,19 +210,46 @@ function ActionModal({ payment, onClose, onDone }) {
         {/* Payment details */}
         <div className="bg-slate-50 rounded-xl p-6 space-y-4 border border-slate-200">
           <div className="grid grid-cols-2 gap-4">
-            <InfoRow label="Company" value={payment.chamber?.name || payment.owner?.name} icon={<Building2 className="w-4 h-4" />} />
-            <InfoRow label="Email" value={payment.owner?.email} icon={<User className="w-4 h-4" />} />
-            <InfoRow label="Amount" value={`PKR ${payment.payable_amount?.toLocaleString()}`} highlight icon={<DollarSign className="w-4 h-4" />} />
-            <InfoRow label="Method" value={payment.payment_method} icon={<CreditCard className="w-4 h-4" />} />
-            <InfoRow label="Reference" value={payment.reference_id || "—"} icon={<FileText className="w-4 h-4" />} />
-            <InfoRow label="Submitted" value={fmtDateTime(payment.submitted_at)} icon={<Calendar className="w-4 h-4" />} />
+            <InfoRow
+              label="Company"
+              value={payment.chamber?.name || payment.owner?.name}
+              icon={<Building2 className="w-4 h-4" />}
+            />
+            <InfoRow
+              label="Email"
+              value={payment.owner?.email}
+              icon={<User className="w-4 h-4" />}
+            />
+            <InfoRow
+              label="Amount"
+              value={`PKR ${payment.payable_amount?.toLocaleString()}`}
+              highlight
+              icon={<DollarSign className="w-4 h-4" />}
+            />
+            <InfoRow
+              label="Method"
+              value={payment.payment_method}
+              icon={<CreditCard className="w-4 h-4" />}
+            />
+            <InfoRow
+              label="Reference"
+              value={payment.reference_id || "—"}
+              icon={<FileText className="w-4 h-4" />}
+            />
+            <InfoRow
+              label="Submitted"
+              value={fmtDateTime(payment.submitted_at)}
+              icon={<Calendar className="w-4 h-4" />}
+            />
           </div>
         </div>
 
         {/* Screenshot */}
         {payment.screenshot_url && (
           <div>
-            <label className="text-xs font-semibold text-slate-500 mb-2 block uppercase tracking-wider">Proof of Payment</label>
+            <label className="text-xs font-semibold text-slate-500 mb-2 block uppercase tracking-wider">
+              Proof of Payment
+            </label>
             <a
               href={payment.screenshot_url}
               target="_blank"
@@ -212,7 +257,11 @@ function ActionModal({ payment, onClose, onDone }) {
               className="block rounded-xl overflow-hidden border border-slate-200 hover:ring-2 hover:ring-primary-500/20 transition-all duration-200 group"
             >
               <div className="relative">
-                <img src={payment.screenshot_url} alt="Payment proof" className="w-full object-cover max-h-48" />
+                <img
+                  src={payment.screenshot_url}
+                  alt="Payment proof"
+                  className="w-full object-cover max-h-48"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
               <div className="flex items-center justify-center gap-2 py-3 text-xs text-primary-600 bg-primary-50 group-hover:bg-primary-100 transition-colors font-medium">
@@ -224,7 +273,9 @@ function ActionModal({ payment, onClose, onDone }) {
 
         {/* Decision */}
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-3 block uppercase tracking-wider">Decision</label>
+          <label className="text-xs font-semibold text-slate-500 mb-3 block uppercase tracking-wider">
+            Decision
+          </label>
           <div className="grid grid-cols-2 gap-4">
             <button
               type="button"
@@ -254,7 +305,9 @@ function ActionModal({ payment, onClose, onDone }) {
         {/* Notes for rejection */}
         {action === "reject" && (
           <div className="animate-in slide-in-from-top-2 duration-200">
-            <label className="text-xs font-semibold text-slate-500 mb-2 block uppercase tracking-wider">Rejection Reason</label>
+            <label className="text-xs font-semibold text-slate-500 mb-2 block uppercase tracking-wider">
+              Rejection Reason
+            </label>
             <textarea
               className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm resize-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all"
               rows={3}
@@ -272,7 +325,8 @@ function ActionModal({ payment, onClose, onDone }) {
             <div>
               <p className="font-medium">Confirm Approval</p>
               <p className="text-emerald-600 mt-0.5">
-                This will activate a 30-day subscription and restore access for all users in this chamber.
+                This will activate a 30-day subscription and restore access for
+                all users in this chamber.
               </p>
             </div>
           </div>
@@ -341,8 +395,12 @@ function TempAccessModal({ payment, onClose, onDone }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6 animate-in zoom-in-95 duration-200">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">Grant Temporary Access</h2>
-            <p className="text-sm text-slate-500 mt-1">{payment.chamber?.name || payment.owner?.name}</p>
+            <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+              Grant Temporary Access
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">
+              {payment.chamber?.name || payment.owner?.name}
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -357,13 +415,16 @@ function TempAccessModal({ payment, onClose, onDone }) {
           <div>
             <p className="font-medium">Temporary Access</p>
             <p className="text-amber-600 mt-0.5">
-              Grants platform access for a limited duration while payment verification is pending.
+              Grants platform access for a limited duration while payment
+              verification is pending.
             </p>
           </div>
         </div>
 
         <div>
-          <label className="text-xs font-semibold text-slate-500 mb-2 block uppercase tracking-wider">Duration (Days)</label>
+          <label className="text-xs font-semibold text-slate-500 mb-2 block uppercase tracking-wider">
+            Duration (Days)
+          </label>
           <div className="flex gap-2 mb-4">
             {[1, 3, 7, 14].map((d) => (
               <button
@@ -386,9 +447,13 @@ function TempAccessModal({ payment, onClose, onDone }) {
               max={30}
               className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
               value={days}
-              onChange={(e) => setDays(Math.max(1, Math.min(30, e.target.value)))}
+              onChange={(e) =>
+                setDays(Math.max(1, Math.min(30, e.target.value)))
+              }
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-medium">days</span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400 font-medium">
+              days
+            </span>
           </div>
         </div>
 
@@ -411,7 +476,8 @@ function TempAccessModal({ payment, onClose, onDone }) {
               </>
             ) : (
               <>
-                <Clock className="w-4 h-4" /> Grant {days} Day{days > 1 ? "s" : ""}
+                <Clock className="w-4 h-4" /> Grant {days} Day
+                {days > 1 ? "s" : ""}
               </>
             )}
           </button>
@@ -434,11 +500,14 @@ function PaymentCard({ payment, onAction, onTempAccess }) {
           <div className="flex items-center gap-3 flex-wrap">
             <div className={`w-2 h-2 rounded-full ${statusColor} shrink-0`} />
             <span className="font-semibold text-slate-800 text-sm">
-              {isSubscriptionItem ? `${payment.chamber?.name || "Chamber"} Trial` : payment.invoice_id}
+              {isSubscriptionItem
+                ? `${payment.chamber?.name || "Chamber"} Trial`
+                : payment.invoice_id}
             </span>
             <span
               className={`text-xs font-medium px-3 py-1.5 rounded-full border ring-1 ${
-                STATUS_STYLES[payment.status] || "bg-slate-100 text-slate-600 border-slate-200 ring-slate-500/10"
+                STATUS_STYLES[payment.status] ||
+                "bg-slate-100 text-slate-600 border-slate-200 ring-slate-500/10"
               }`}
             >
               {payment.status?.replace(/_/g, " ")}
@@ -446,7 +515,8 @@ function PaymentCard({ payment, onAction, onTempAccess }) {
             {subStatus && (
               <span
                 className={`text-xs font-medium px-3 py-1.5 rounded-full border ${
-                  SUB_STATUS_STYLES[subStatus] || "bg-slate-100 text-slate-600 border-slate-200"
+                  SUB_STATUS_STYLES[subStatus] ||
+                  "bg-slate-100 text-slate-600 border-slate-200"
                 }`}
               >
                 {subStatus.replace(/_/g, " ")}
@@ -456,12 +526,28 @@ function PaymentCard({ payment, onAction, onTempAccess }) {
 
           {/* Details grid */}
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-            <DetailItem icon={<Building2 className="w-3.5 h-3.5" />} label="Company" value={payment.chamber?.name} />
-            <DetailItem icon={<User className="w-3.5 h-3.5" />} label="Owner" value={payment.owner?.name} />
+            <DetailItem
+              icon={<Building2 className="w-3.5 h-3.5" />}
+              label="Company"
+              value={payment.chamber?.name}
+            />
+            <DetailItem
+              icon={<User className="w-3.5 h-3.5" />}
+              label="Owner"
+              value={payment.owner?.name}
+            />
             {isSubscriptionItem ? (
               <>
-                <DetailItem icon={<Clock className="w-3.5 h-3.5" />} label="Trial Ends" value={fmt(payment.subscription?.trial_ends_at)} />
-                <DetailItem icon={<Calendar className="w-3.5 h-3.5" />} label="Started" value={fmt(payment.subscription?.trial_started_at)} />
+                <DetailItem
+                  icon={<Clock className="w-3.5 h-3.5" />}
+                  label="Trial Ends"
+                  value={fmt(payment.subscription?.trial_ends_at)}
+                />
+                <DetailItem
+                  icon={<Calendar className="w-3.5 h-3.5" />}
+                  label="Started"
+                  value={fmt(payment.subscription?.trial_started_at)}
+                />
               </>
             ) : (
               <>
@@ -471,10 +557,18 @@ function PaymentCard({ payment, onAction, onTempAccess }) {
                   value={`PKR ${payment.payable_amount?.toLocaleString()}`}
                   highlight
                 />
-                <DetailItem icon={<CreditCard className="w-3.5 h-3.5" />} label="Method" value={payment.payment_method} />
+                <DetailItem
+                  icon={<CreditCard className="w-3.5 h-3.5" />}
+                  label="Method"
+                  value={payment.payment_method}
+                />
               </>
             )}
-            <DetailItem icon={<Calendar className="w-3.5 h-3.5" />} label="Submitted" value={fmt(payment.submitted_at || payment.createdAt)} />
+            <DetailItem
+              icon={<Calendar className="w-3.5 h-3.5" />}
+              label="Submitted"
+              value={fmt(payment.submitted_at || payment.createdAt)}
+            />
           </div>
 
           {/* Reference & Notes */}
@@ -538,7 +632,12 @@ export default function AdminPaymentsPage() {
   const router = useRouter();
 
   const [payments, setPayments] = useState([]);
-  const [revenue, setRevenue] = useState({ total: 0, totalCount: 0, thisMonth: 0, thisMonthCount: 0 });
+  const [revenue, setRevenue] = useState({
+    total: 0,
+    totalCount: 0,
+    thisMonth: 0,
+    thisMonthCount: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [search, setSearch] = useState("");
@@ -597,7 +696,10 @@ export default function AdminPaymentsPage() {
   const tabCounts = useMemo(() => {
     const counts = {};
     TABS.forEach((tab) => {
-      counts[tab.value] = tab.value === "all" ? payments.length : payments.filter((p) => p.status === tab.value).length;
+      counts[tab.value] =
+        tab.value === "all"
+          ? payments.length
+          : payments.filter((p) => p.status === tab.value).length;
     });
     return counts;
   }, [payments]);
@@ -605,13 +707,43 @@ export default function AdminPaymentsPage() {
   // Stats
   const stats = useMemo(
     () => [
-      { label: "Total", value: filtered.length, icon: FileText, color: "text-slate-600", bg: "bg-slate-100" },
-      { label: "Pending", value: filtered.filter((p) => p.status === "pending").length, icon: Clock, color: "text-amber-600", bg: "bg-amber-100" },
-      { label: "Approved", value: filtered.filter((p) => p.status === "approved").length, icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-100" },
-      { label: "Rejected", value: filtered.filter((p) => p.status === "rejected").length, icon: XCircle, color: "text-rose-600", bg: "bg-rose-100" },
-      { label: "Active", value: filtered.filter((p) => p.status === "active").length, icon: Shield, color: "text-blue-600", bg: "bg-blue-100" },
+      {
+        label: "Total",
+        value: filtered.length,
+        icon: FileText,
+        color: "text-slate-600",
+        bg: "bg-slate-100",
+      },
+      {
+        label: "Pending",
+        value: filtered.filter((p) => p.status === "pending").length,
+        icon: Clock,
+        color: "text-amber-600",
+        bg: "bg-amber-100",
+      },
+      {
+        label: "Approved",
+        value: filtered.filter((p) => p.status === "approved").length,
+        icon: CheckCircle,
+        color: "text-emerald-600",
+        bg: "bg-emerald-100",
+      },
+      {
+        label: "Rejected",
+        value: filtered.filter((p) => p.status === "rejected").length,
+        icon: XCircle,
+        color: "text-rose-600",
+        bg: "bg-rose-100",
+      },
+      {
+        label: "Active",
+        value: filtered.filter((p) => p.status === "active").length,
+        icon: Shield,
+        color: "text-blue-600",
+        bg: "bg-blue-100",
+      },
     ],
-    [filtered]
+    [filtered],
   );
 
   const pendingCount = payments.filter((p) => p.status === "pending").length;
@@ -625,19 +757,31 @@ export default function AdminPaymentsPage() {
         <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Payment Verification</h1>
-              <p className="text-sm text-slate-500 mt-2">Review and verify manual payment requests from chambers</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                Payment Verification
+              </h1>
+              <p className="text-sm text-slate-500 mt-2">
+                Review and verify manual payment requests from chambers
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setViewMode(viewMode === "list" ? "compact" : "list")}
+                onClick={() =>
+                  setViewMode(viewMode === "list" ? "compact" : "list")
+                }
                 className="border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl p-3 transition-all"
                 title={`Switch to ${viewMode === "list" ? "compact" : "list"} view`}
               >
-                {viewMode === "list" ? <List className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
+                {viewMode === "list" ? (
+                  <List className="w-4 h-4" />
+                ) : (
+                  <LayoutGrid className="w-4 h-4" />
+                )}
               </button>
               <button
-                onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
+                onClick={() =>
+                  setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
+                }
                 className="border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl px-5 py-3 text-sm font-medium flex items-center gap-2 transition-all"
               >
                 <ArrowUpDown className="w-4 h-4" />
@@ -648,7 +792,9 @@ export default function AdminPaymentsPage() {
                 className="border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl px-5 py-3 text-sm font-medium flex items-center gap-2 transition-all"
                 disabled={loading}
               >
-                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                <RefreshCw
+                  className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+                />
                 Refresh
               </button>
             </div>
@@ -659,23 +805,37 @@ export default function AdminPaymentsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-8 shadow-sm text-white">
             <div className="flex items-start justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-100">Total Revenue</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-emerald-100">
+                Total Revenue
+              </span>
               <div className="bg-white/15 rounded-lg p-2">
                 <Banknote className="w-4 h-4" />
               </div>
             </div>
-            <span className="text-3xl font-bold tracking-tight">{fmtPKR(revenue.total)}</span>
-            <p className="text-xs text-emerald-100 mt-2">From {revenue.totalCount} approved payment{revenue.totalCount !== 1 ? "s" : ""}</p>
+            <span className="text-3xl font-bold tracking-tight">
+              {fmtPKR(revenue.total)}
+            </span>
+            <p className="text-xs text-emerald-100 mt-2">
+              From {revenue.totalCount} approved payment
+              {revenue.totalCount !== 1 ? "s" : ""}
+            </p>
           </div>
           <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
             <div className="flex items-start justify-between mb-3">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">This Month</span>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                This Month
+              </span>
               <div className="bg-emerald-100 rounded-lg p-2">
                 <DollarSign className="w-4 h-4 text-emerald-600" />
               </div>
             </div>
-            <span className="text-3xl font-bold tracking-tight text-slate-900">{fmtPKR(revenue.thisMonth)}</span>
-            <p className="text-xs text-slate-500 mt-2">From {revenue.thisMonthCount} approved payment{revenue.thisMonthCount !== 1 ? "s" : ""}</p>
+            <span className="text-3xl font-bold tracking-tight text-slate-900">
+              {fmtPKR(revenue.thisMonth)}
+            </span>
+            <p className="text-xs text-slate-500 mt-2">
+              From {revenue.thisMonthCount} approved payment
+              {revenue.thisMonthCount !== 1 ? "s" : ""}
+            </p>
           </div>
         </div>
 
@@ -686,8 +846,13 @@ export default function AdminPaymentsPage() {
               <AlertCircle className="w-5 h-5 text-amber-600" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-amber-800">{pendingCount} Payment{pendingCount > 1 ? "s" : ""} Awaiting Verification</p>
-              <p className="text-xs text-amber-600 mt-1">Prompt review ensures uninterrupted service for chambers</p>
+              <p className="text-sm font-semibold text-amber-800">
+                {pendingCount} Payment{pendingCount > 1 ? "s" : ""} Awaiting
+                Verification
+              </p>
+              <p className="text-xs text-amber-600 mt-1">
+                Prompt review ensures uninterrupted service for chambers
+              </p>
             </div>
             <button
               onClick={() => setActiveTab("pending")}
@@ -710,13 +875,17 @@ export default function AdminPaymentsPage() {
                   key={tab.value}
                   onClick={() => setActiveTab(tab.value)}
                   className={`flex items-center gap-2.5 px-5 py-3 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                    isActive ? "bg-slate-100 text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                    isActive
+                      ? "bg-slate-100 text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
                   {count > 0 && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isActive ? "bg-slate-200 text-slate-700" : "bg-slate-100 text-slate-500"}`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${isActive ? "bg-slate-200 text-slate-700" : "bg-slate-100 text-slate-500"}`}
+                    >
                       {count}
                     </span>
                   )}
@@ -753,10 +922,17 @@ export default function AdminPaymentsPage() {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-8 py-5 border-b border-slate-200 flex items-center justify-between">
             <p className="text-sm text-slate-500">
-              Showing <span className="font-semibold text-slate-700">{filtered.length}</span> payment{filtered.length !== 1 ? "s" : ""}
+              Showing{" "}
+              <span className="font-semibold text-slate-700">
+                {filtered.length}
+              </span>{" "}
+              payment{filtered.length !== 1 ? "s" : ""}
               {activeTab !== "all" && (
                 <span className="ml-1">
-                  with status <span className="font-medium capitalize">{activeTab.replace(/_/g, " ")}</span>
+                  with status{" "}
+                  <span className="font-medium capitalize">
+                    {activeTab.replace(/_/g, " ")}
+                  </span>
                 </span>
               )}
             </p>
@@ -776,31 +952,41 @@ export default function AdminPaymentsPage() {
                 <div className="w-12 h-12 border-3 border-slate-200 rounded-full" />
                 <div className="absolute top-0 left-0 w-12 h-12 border-3 border-primary-600 border-t-transparent rounded-full animate-spin" />
               </div>
-              <p className="text-sm text-slate-500 font-medium">Loading payments...</p>
+              <p className="text-sm text-slate-500 font-medium">
+                Loading payments...
+              </p>
             </div>
           ) : filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 px-6">
               <div className="bg-slate-100 rounded-2xl p-6 mb-6">
                 <FileText className="w-12 h-12 text-slate-400" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">No payments found</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                No payments found
+              </h3>
               <p className="text-sm text-slate-500 text-center max-w-sm">
                 {search
                   ? "No results match your search criteria. Try different keywords."
                   : activeTab !== "all"
-                  ? `No payments with "${activeTab.replace(/_/g, " ")}" status.`
-                  : "No payment requests available at this time."}
+                    ? `No payments with "${activeTab.replace(/_/g, " ")}" status.`
+                    : "No payment requests available at this time."}
               </p>
             </div>
           ) : (
-            <div className={`p-6 ${viewMode === "compact" ? "grid grid-cols-1 lg:grid-cols-2 gap-4" : "space-y-4"}`}>
+            <div
+              className={`p-6 ${viewMode === "compact" ? "grid grid-cols-1 lg:grid-cols-2 gap-4" : "space-y-4"}`}
+            >
               {filtered.map((p, index) => (
                 <div
                   key={p._id}
                   className="animate-in fade-in slide-in-from-bottom-2 duration-300"
                   style={{ animationDelay: `${index * 40}ms` }}
                 >
-                  <PaymentCard payment={p} onAction={setSelected} onTempAccess={setTempTarget} />
+                  <PaymentCard
+                    payment={p}
+                    onAction={setSelected}
+                    onTempAccess={setTempTarget}
+                  />
                 </div>
               ))}
             </div>
@@ -809,8 +995,26 @@ export default function AdminPaymentsPage() {
       </div>
 
       {/* Modals */}
-      {selected && <ActionModal payment={selected} onClose={() => setSelected(null)} onDone={() => { setSelected(null); load(); }} />}
-      {tempTarget && <TempAccessModal payment={tempTarget} onClose={() => setTempTarget(null)} onDone={() => { setTempTarget(null); load(); }} />}
+      {selected && (
+        <ActionModal
+          payment={selected}
+          onClose={() => setSelected(null)}
+          onDone={() => {
+            setSelected(null);
+            load();
+          }}
+        />
+      )}
+      {tempTarget && (
+        <TempAccessModal
+          payment={tempTarget}
+          onClose={() => setTempTarget(null)}
+          onDone={() => {
+            setTempTarget(null);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }
