@@ -8,13 +8,13 @@ import {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
+import { triggerLogoutOverlay } from "@/lib/logoutOverlayStore";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   const fetchUser = useCallback(async () => {
     try {
@@ -36,10 +36,14 @@ export function AuthProvider({ children }) {
     fetchUser();
   }, [fetchUser]);
 
-  const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    setUser(null);
-    router.push("/");
+  const logout = () => {
+    fetch("/api/auth/logout", { method: "POST", credentials: "include" }).catch(
+      () => {},
+    );
+
+    triggerLogoutOverlay(() => {
+      setUser(null);
+    });
   };
 
   return (

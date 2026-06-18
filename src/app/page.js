@@ -11,7 +11,6 @@ import {
   Bell,
   Shield,
   Users,
-  Star,
   TrendingUp,
   ChevronRight,
   Zap,
