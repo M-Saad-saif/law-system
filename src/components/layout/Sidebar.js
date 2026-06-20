@@ -18,12 +18,14 @@ import {
   ShieldCheck,
   Layout,
   Users,
+  Lock,
 } from "lucide-react";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const Icon = {
   Dashboard: Home,
@@ -58,6 +60,7 @@ const Icon = {
   Users,
   Billing: CreditCard,
   Logout: LogOutIcon,
+  Lock,
   ChevronDown: () => (
     <svg
       className="w-4 h-4"
@@ -169,7 +172,45 @@ function buildNavSections(user) {
   ];
 }
 
-function NavItem({ item, pathname }) {
+function LockedNavItem({ item }) {
+  return (
+    <div className="relative group/locked">
+      <div
+        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+          border border-transparent opacity-40 cursor-not-allowed select-none"
+      >
+        <span className="text-slate-600">
+          <item.icon className="w-5 h-5" />
+        </span>
+        <span className="flex-1 truncate text-slate-600">{item.label}</span>
+        <Lock className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
+      </div>
+      {/* Tooltip */}
+      <div
+        className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50
+        opacity-0 group-hover/locked:opacity-100 pointer-events-none
+        transition-opacity duration-200 whitespace-nowrap"
+      >
+        <div
+          className="bg-slate-800 border border-slate-700/60 text-slate-300
+          text-[11px] px-2.5 py-1.5 rounded-lg shadow-xl shadow-black/40"
+        >
+          Renew your subscription to access
+          <div
+            className="absolute right-full top-1/2 -translate-y-1/2
+            border-4 border-transparent border-r-slate-700/60"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NavItem({ item, pathname, isLocked }) {
+  if (isLocked) {
+    return <LockedNavItem item={item} />;
+  }
+
   const isActive =
     pathname === item.href || pathname.startsWith(item.href + "/");
   const [subOpen, setSubOpen] = useState(isActive);
@@ -251,10 +292,16 @@ function NavItem({ item, pathname }) {
   );
 }
 
+const ALWAYS_ALLOWED_HREFS = new Set(["/billing"]);
+
 export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { isAllowed, subLoading } = useSubscription();
   const NAV_SECTIONS = buildNavSections(user);
+
+  const subscriptionExpired =
+    !subLoading && user && user.role !== "admin" && !isAllowed();
 
   return (
     <aside className="h-screen w-60 flex flex-col bg-[#0f172a] border-r border-slate-800/80 z-40 select-none shadow-2xl shadow-black/20">
@@ -276,6 +323,30 @@ export default function Sidebar() {
         </div>
       </div>
 
+      {/* Expired subscription banner */}
+      {subscriptionExpired && (
+        <div className="mx-3 mt-4 px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <div className="flex items-center gap-2 mb-0.5">
+            <Lock className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+            <p className="text-[11px] font-semibold text-amber-400">
+              Subscription Ended
+            </p>
+          </div>
+          <p className="text-[10px] text-amber-400/70 leading-relaxed">
+            Renew to unlock all features
+          </p>
+          <Link
+            href="/billing"
+            className="mt-2 flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg
+              bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30
+              text-[11px] font-semibold text-amber-400 transition-all duration-200"
+          >
+            <CreditCard className="w-3 h-3" />
+            Renew Now
+          </Link>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
         {NAV_SECTIONS.map((section) => (
@@ -285,9 +356,18 @@ export default function Sidebar() {
               {section.label}
             </p>
             <div className="space-y-0.5">
-              {section.items.map((item) => (
-                <NavItem key={item.href} item={item} pathname={pathname} />
-              ))}
+              {section.items.map((item) => {
+                const isLocked =
+                  subscriptionExpired && !ALWAYS_ALLOWED_HREFS.has(item.href);
+                return (
+                  <NavItem
+                    key={item.href}
+                    item={item}
+                    pathname={pathname}
+                    isLocked={isLocked}
+                  />
+                );
+              })}
             </div>
           </div>
         ))}
