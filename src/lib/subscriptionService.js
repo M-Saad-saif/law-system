@@ -7,7 +7,8 @@ import Subscription, {
   ALLOWED_STATUSES,
 } from "@/models/Subscription";
 import PaymentRequest, {
-  BASE_PLAN_PRICE,
+  PLAN_CONFIG,
+  PLAN_TYPE,
   PAYMENT_STATUS,
 } from "@/models/PaymentRequest";
 
@@ -90,22 +91,28 @@ async function generateInvoiceId(chamberId) {
 
 export async function createPaymentRequest(
   chamberId,
-  { payment_method = "raast", reference_id, screenshot_url } = {},
+  {
+    plan_type = PLAN_TYPE.MONTHLY,
+    payment_method = "raast",
+    reference_id,
+    screenshot_url,
+  } = {},
 ) {
   await connectDB();
 
   await PaymentRequest.deleteMany({
     chamber: chamberId,
-    status: { $in: [PAYMENT_STATUS.REJECTED, PAYMENT_STATUS.APPROVED] },
+    status: { $in: [PAYMENT_STATUS.REJECTED] },
   });
 
+  const plan = PLAN_CONFIG[plan_type] || PLAN_CONFIG[PLAN_TYPE.MONTHLY];
   const invoice_id = await generateInvoiceId(chamberId);
-  const payable_amount = BASE_PLAN_PRICE;
 
   const pr = await PaymentRequest.create({
     chamber: chamberId,
     invoice_id,
-    payable_amount,
+    plan_type,
+    payable_amount: plan.price,
     payment_method,
     reference_id,
     screenshot_url,
@@ -125,9 +132,11 @@ export async function approvePaymentRequest(paymentRequestId) {
     throw new Error(`Cannot approve a request with status: ${pr.status}`);
   }
 
+  const plan = PLAN_CONFIG[pr.plan_type] || PLAN_CONFIG[PLAN_TYPE.MONTHLY];
+
   const now = new Date();
   const end = new Date(now);
-  end.setDate(end.getDate() + 30);
+  end.setDate(end.getDate() + plan.durationDays);
 
   pr.status = PAYMENT_STATUS.APPROVED;
   pr.verified_at = now;
@@ -140,7 +149,6 @@ export async function approvePaymentRequest(paymentRequestId) {
         status: SUBSCRIPTION_STATUS.ACTIVE,
         subscription_starts_at: now,
         subscription_ends_at: end,
-        // Clear temp access field if it was set
         temp_access_ends_at: null,
       },
     },

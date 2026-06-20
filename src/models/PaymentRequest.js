@@ -6,7 +6,16 @@ export const PAYMENT_STATUS = Object.freeze({
   REJECTED: "rejected",
 });
 
-export const BASE_PLAN_PRICE = 5000;
+export const PLAN_TYPE = Object.freeze({
+  MONTHLY: "monthly",
+  YEARLY: "yearly",
+});
+
+// Plan pricing and duration config — single source of truth
+export const PLAN_CONFIG = Object.freeze({
+  monthly: { price: 10000, durationDays: 30, label: "Monthly Plan" },
+  yearly: { price: 50000, durationDays: 365, label: "Yearly Plan" },
+});
 
 const paymentRequestSchema = new mongoose.Schema(
   {
@@ -17,6 +26,11 @@ const paymentRequestSchema = new mongoose.Schema(
     },
 
     invoice_id: { type: String, required: true, unique: true },
+    plan_type: {
+      type: String,
+      enum: Object.values(PLAN_TYPE),
+      default: PLAN_TYPE.MONTHLY,
+    },
     payment_method: {
       type: String,
       enum: ["raast", "easypaisa", "jazzcash", "bank_transfer", "other"],
@@ -24,6 +38,8 @@ const paymentRequestSchema = new mongoose.Schema(
     },
     reference_id: { type: String, trim: true },
     screenshot_url: { type: String, trim: true },
+
+    payable_amount: { type: Number, required: true },
 
     submitted_at: { type: Date, default: Date.now },
     verified_at: { type: Date },

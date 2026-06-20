@@ -8,6 +8,10 @@ import Subscription, { SUBSCRIPTION_STATUS } from "@/models/Subscription";
 
 export const dynamic = "force-dynamic";
 
+function getPaymentAmount(payment) {
+  return payment?.payable_amount ?? payment?.amount ?? null;
+}
+
 async function buildPaymentItem(pr) {
   const chamber = await Chamber.findById(pr.chamber).lean();
   const owner = chamber
@@ -20,6 +24,7 @@ async function buildPaymentItem(pr) {
 
   return {
     ...pr,
+    amount: getPaymentAmount(pr),
     source: "paymentRequest",
     chamber,
     owner,
@@ -33,10 +38,22 @@ async function buildSubscriptionItem(subscription) {
     ? await User.findById(chamber.owner).select("name email phone").lean()
     : null;
 
+  const latestPayment = chamber
+    ? await PaymentRequest.findOne({ chamber: chamber._id })
+        .sort({ createdAt: -1 })
+        .lean()
+    : null;
+
   return {
     _id: subscription._id,
     source: "subscription",
     status: subscription.status,
+    payable_amount: getPaymentAmount(latestPayment),
+    amount: getPaymentAmount(latestPayment),
+    plan_type: latestPayment?.plan_type ?? null,
+    payment_method: latestPayment?.payment_method ?? null,
+    invoice_id: latestPayment?.invoice_id ?? null,
+    reference_id: latestPayment?.reference_id ?? null,
     chamber,
     owner,
     subscription,
@@ -149,7 +166,9 @@ export const GET = withAuth(async (request, context, user) => {
         {
           $group: {
             _id: null,
-            total: { $sum: "$payable_amount" },
+            total: {
+              $sum: { $ifNull: ["$payable_amount", "$amount"] },
+            },
             count: { $sum: 1 },
           },
         },
@@ -170,7 +189,9 @@ export const GET = withAuth(async (request, context, user) => {
         {
           $group: {
             _id: null,
-            total: { $sum: "$payable_amount" },
+            total: {
+              $sum: { $ifNull: ["$payable_amount", "$amount"] },
+            },
             count: { $sum: 1 },
           },
         },

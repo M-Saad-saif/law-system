@@ -2,7 +2,10 @@ import { withAuth, apiSuccess, apiError } from "@/lib/api";
 import connectDB from "@/lib/db";
 import Chamber from "@/models/Chamber";
 import Subscription from "@/models/Subscription";
-import PaymentRequest, { PAYMENT_STATUS } from "@/models/PaymentRequest";
+import PaymentRequest, {
+  PAYMENT_STATUS,
+  PLAN_TYPE,
+} from "@/models/PaymentRequest";
 import {
   getChamberForUser,
   createPaymentRequest,
@@ -92,9 +95,15 @@ export const POST = withAuth(async (request, context, user) => {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { payment_method, reference_id, screenshot_url } = body;
+    const { plan_type, payment_method, reference_id, screenshot_url } = body;
+
+    // Validate plan_type
+    if (plan_type && !Object.values(PLAN_TYPE).includes(plan_type)) {
+      return apiError("Invalid plan type. Choose 'monthly' or 'yearly'.", 400);
+    }
 
     const pr = await createPaymentRequest(chamber._id, {
+      plan_type: plan_type || PLAN_TYPE.MONTHLY,
       payment_method,
       reference_id,
       screenshot_url,

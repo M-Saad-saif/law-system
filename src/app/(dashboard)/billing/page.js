@@ -19,7 +19,29 @@ import {
   Shield,
   FileText,
   ArrowRight,
+  Calendar,
+  Zap,
 } from "lucide-react";
+
+const PLAN_OPTIONS = [
+  {
+    type: "monthly",
+    label: "Monthly Plan",
+    price: 10000,
+    duration: "30 days",
+    icon: Calendar,
+    description: "Pay month-to-month. Renew every 30 days.",
+  },
+  {
+    type: "yearly",
+    label: "Yearly Plan",
+    price: 50000,
+    duration: "365 days",
+    icon: Zap,
+    description: "Best value. Save PKR 70,000 vs monthly.",
+    badge: "Best Value",
+  },
+];
 
 const STATUS_CONFIG = {
   trialing: {
@@ -68,7 +90,10 @@ const PAYMENT_STATUS_CONFIG = {
   rejected: { label: "Rejected", color: "bg-red-50 text-red-700" },
 };
 
-// --- Sub-components ---
+function getPaymentAmount(payment) {
+  return payment?.payable_amount ?? payment?.amount ?? null;
+}
+
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.expired;
   const Icon = cfg.icon;
@@ -104,8 +129,75 @@ function formatDate(d) {
   });
 }
 
-// --- Payment submission form ---
-function PaymentForm({ chamber, onSuccess }) {
+function PlanSelector({ selected, onChange }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10">
+      <div className="p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-[#027675]/10 flex items-center justify-center">
+            <CreditCard className="w-5 h-5 text-[#027675]" />
+          </div>
+          <div>
+            <h2 className="font-bold text-lg text-gray-900">
+              Choose Your Plan
+            </h2>
+            <p className="text-xs text-gray-500">
+              Select the subscription that works best for you
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {PLAN_OPTIONS.map((plan) => {
+            const Icon = plan.icon;
+            const isSelected = selected === plan.type;
+            return (
+              <button
+                key={plan.type}
+                type="button"
+                onClick={() => onChange(plan.type)}
+                className={`relative text-left p-4 rounded-xl border-2 transition-all duration-200 ${
+                  isSelected
+                    ? "border-[#027675] bg-[#027675]/5 shadow-sm"
+                    : "border-gray-200 hover:border-[#027675]/40 hover:bg-gray-50"
+                }`}
+              >
+                {plan.badge && (
+                  <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 bg-[#027675] text-white rounded-full">
+                    {plan.badge}
+                  </span>
+                )}
+                <div className="flex items-center gap-2 mb-2">
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      isSelected
+                        ? "bg-[#027675] text-white"
+                        : "bg-gray-100 text-gray-500"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className="font-semibold text-sm text-gray-900">
+                    {plan.label}
+                  </span>
+                </div>
+                <p className="text-2xl font-bold text-gray-900">
+                  PKR {plan.price.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">{plan.duration}</p>
+                <p className="text-xs text-gray-400 mt-1.5">
+                  {plan.description}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PaymentForm({ chamber, selectedPlan, onSuccess }) {
   const [form, setForm] = useState({
     payment_method: "easypaisa",
     reference_id: "",
@@ -113,6 +205,9 @@ function PaymentForm({ chamber, onSuccess }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const plan =
+    PLAN_OPTIONS.find((p) => p.type === selectedPlan) || PLAN_OPTIONS[0];
 
   const handleFile = (e) => {
     const f = e.target.files?.[0];
@@ -140,6 +235,7 @@ function PaymentForm({ chamber, onSuccess }) {
       }
 
       await api.post("/api/billing", {
+        plan_type: selectedPlan,
         payment_method: form.payment_method,
         reference_id: form.reference_id.trim(),
         screenshot_url,
@@ -178,13 +274,26 @@ function PaymentForm({ chamber, onSuccess }) {
           </div>
         </div>
 
+        {/* Selected plan summary */}
+        <div className="bg-[#027675]/5 border border-[#027675]/15 rounded-xl p-3.5 mb-4 flex items-center justify-between">
+          <div>
+            <p className="text-xs text-gray-500 font-medium">Selected Plan</p>
+            <p className="text-sm font-bold text-gray-900">{plan.label}</p>
+            <p className="text-xs text-gray-400">{plan.duration}</p>
+          </div>
+          <p className="text-xl font-bold text-[#027675]">
+            PKR {plan.price.toLocaleString()}
+          </p>
+        </div>
+
         {/* Payment instructions */}
         <div className="bg-[#027675]/5 border border-[#027675]/10 rounded-xl p-4 mb-4 text-sm text-gray-700 space-y-1.5">
           <p className="font-semibold flex items-center gap-1.5 text-[#027675]">
             <Info className="w-4 h-4" /> Payment Instructions
           </p>
           <p className="text-xs">
-            Send the <strong>exact amount</strong> shown on your invoice to:
+            Send <strong>PKR {plan.price.toLocaleString()}</strong> (exact
+            amount) to:
           </p>
           <div className="mt-2 space-y-1.5 font-mono text-xs bg-white rounded-lg p-3 border border-[#027675]/10">
             <p>
@@ -279,7 +388,7 @@ function PaymentForm({ chamber, onSuccess }) {
               </>
             ) : (
               <>
-                Submit Payment Request
+                Submit Payment Request — PKR {plan.price.toLocaleString()}
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -290,7 +399,8 @@ function PaymentForm({ chamber, onSuccess }) {
   );
 }
 
-// --- Payment history ---
+// ─── Payment History ──────────────────────────────────────────────────────────
+
 function PaymentHistory({ payments }) {
   if (!payments?.length) return null;
 
@@ -305,6 +415,9 @@ function PaymentHistory({ payments }) {
           {payments.map((p) => {
             const cfg =
               PAYMENT_STATUS_CONFIG[p.status] || PAYMENT_STATUS_CONFIG.pending;
+            const planLabel = PLAN_OPTIONS.find(
+              (o) => o.type === p.plan_type,
+            )?.label;
             return (
               <div
                 key={p._id}
@@ -315,8 +428,9 @@ function PaymentHistory({ payments }) {
                     {p.invoice_id}
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    PKR {p.payable_amount?.toLocaleString()} ·{" "}
+                    PKR {getPaymentAmount(p)?.toLocaleString()} ·{" "}
                     {p.payment_method}
+                    {planLabel && ` · ${planLabel}`}
                   </p>
                   {p.admin_notes && (
                     <p className="text-xs text-red-500 mt-0.5">
@@ -345,11 +459,13 @@ function PaymentHistory({ payments }) {
   );
 }
 
-// --- Main page ---
+// ─── Main Page ────────────────────────────────────────────────────────────────
+
 export default function BillingPage() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedPlan, setSelectedPlan] = useState("monthly");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -413,7 +529,8 @@ export default function BillingPage() {
               </p>
               {isSenior && !pendingRequest && (
                 <p className="text-xs text-red-600 mt-1">
-                  Complete payment below to restore access for your entire team.
+                  Choose a plan below and complete payment to restore access for
+                  your entire team.
                 </p>
               )}
               {pendingRequest && (
@@ -494,8 +611,15 @@ export default function BillingPage() {
                 highlight
               />
               <InfoRow
+                label="Plan"
+                value={
+                  PLAN_OPTIONS.find((p) => p.type === pendingRequest.plan_type)
+                    ?.label || pendingRequest.plan_type
+                }
+              />
+              <InfoRow
                 label="Amount"
-                value={`PKR ${pendingRequest.payable_amount?.toLocaleString()}`}
+                value={`PKR ${getPaymentAmount(pendingRequest)?.toLocaleString()}`}
               />
               <InfoRow label="Method" value={pendingRequest.payment_method} />
               <InfoRow
@@ -510,9 +634,15 @@ export default function BillingPage() {
           </div>
         )}
 
-        {/* Payment submission — only for senior lawyers when expired and no pending request */}
         {isSenior && isExpired && !pendingRequest && (
-          <PaymentForm chamber={chamber} onSuccess={load} />
+          <>
+            <PlanSelector selected={selectedPlan} onChange={setSelectedPlan} />
+            <PaymentForm
+              chamber={chamber}
+              selectedPlan={selectedPlan}
+              onSuccess={load}
+            />
+          </>
         )}
 
         {/* Junior lawyer message */}

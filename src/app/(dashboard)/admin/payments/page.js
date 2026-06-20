@@ -81,6 +81,17 @@ const SUB_STATUS_STYLES = {
   blocked: "bg-red-100 text-red-800 border-red-200",
   cancelled: "bg-slate-100 text-slate-600 border-slate-200",
 };
+// Plan display labels — mirrors PLAN_CONFIG in PaymentRequest model
+const PLAN_LABELS = {
+  monthly: "Monthly Plan (30 days)",
+  yearly:  "Yearly Plan (365 days)",
+};
+
+function getPaymentAmount(payment) {
+  return payment?.payable_amount ?? payment?.amount ?? null;
+}
+
+
 
 // ---------- Helpers ----------
 function fmt(d) {
@@ -222,9 +233,18 @@ function ActionModal({ payment, onClose, onDone }) {
             />
             <InfoRow
               label="Amount"
-              value={`PKR ${payment.payable_amount?.toLocaleString()}`}
+              value={
+                getPaymentAmount(payment) != null
+                  ? `PKR ${Number(getPaymentAmount(payment)).toLocaleString()}`
+                  : "—"
+              }
               highlight
               icon={<DollarSign className="w-4 h-4" />}
+            />
+            <InfoRow
+              label="Plan"
+              value={PLAN_LABELS[payment.plan_type] || payment.plan_type || "—"}
+              icon={<CreditCard className="w-4 h-4" />}
             />
             <InfoRow
               label="Method"
@@ -554,7 +574,11 @@ function PaymentCard({ payment, onAction, onTempAccess }) {
                 <DetailItem
                   icon={<DollarSign className="w-3.5 h-3.5" />}
                   label="Amount"
-                  value={`PKR ${payment.payable_amount?.toLocaleString()}`}
+                  value={
+                    getPaymentAmount(payment) != null
+                      ? `PKR ${Number(getPaymentAmount(payment)).toLocaleString()}`
+                      : "—"
+                  }
                   highlight
                 />
                 <DetailItem
