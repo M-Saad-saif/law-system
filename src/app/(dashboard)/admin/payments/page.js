@@ -84,14 +84,12 @@ const SUB_STATUS_STYLES = {
 // Plan display labels — mirrors PLAN_CONFIG in PaymentRequest model
 const PLAN_LABELS = {
   monthly: "Monthly Plan (30 days)",
-  yearly:  "Yearly Plan (365 days)",
+  yearly: "Yearly Plan (365 days)",
 };
 
 function getPaymentAmount(payment) {
   return payment?.payable_amount ?? payment?.amount ?? null;
 }
-
-
 
 // ---------- Helpers ----------
 function fmt(d) {
@@ -198,165 +196,208 @@ function ActionModal({ payment, onClose, onDone }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-6">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 space-y-6 animate-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-[50%] h-full  p-5 md:p-8 flex flex-col animate-in zoom-in-95 duration-300">
+        {/* Header - Fixed at top */}
+        <div className="flex items-start justify-between shrink-0 pb-6">
+          <div className="space-y-1">
+            <h2 className="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">
               Payment Verification
             </h2>
-            <p className="text-sm text-slate-500 mt-1 font-mono">
-              {payment.invoice_id}
-            </p>
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <p className="text-sm text-slate-500 font-mono bg-slate-100 px-2.5 py-1 rounded-lg">
+                {payment.invoice_id}
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-slate-100 p-1"
+            className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl p-2 transition-all duration-200 hover:rotate-90"
           >
             <XCircle className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Payment details */}
-        <div className="bg-slate-50 rounded-xl p-6 space-y-4 border border-slate-200">
-          <div className="grid grid-cols-2 gap-4">
-            <InfoRow
-              label="Company"
-              value={payment.chamber?.name || payment.owner?.name}
-              icon={<Building2 className="w-4 h-4" />}
-            />
-            <InfoRow
-              label="Email"
-              value={payment.owner?.email}
-              icon={<User className="w-4 h-4" />}
-            />
-            <InfoRow
-              label="Amount"
-              value={
-                getPaymentAmount(payment) != null
-                  ? `PKR ${Number(getPaymentAmount(payment)).toLocaleString()}`
-                  : "—"
-              }
-              highlight
-              icon={<DollarSign className="w-4 h-4" />}
-            />
-            <InfoRow
-              label="Plan"
-              value={PLAN_LABELS[payment.plan_type] || payment.plan_type || "—"}
-              icon={<CreditCard className="w-4 h-4" />}
-            />
-            <InfoRow
-              label="Method"
-              value={payment.payment_method}
-              icon={<CreditCard className="w-4 h-4" />}
-            />
-            <InfoRow
-              label="Reference"
-              value={payment.reference_id || "—"}
-              icon={<FileText className="w-4 h-4" />}
-            />
-            <InfoRow
-              label="Submitted"
-              value={fmtDateTime(payment.submitted_at)}
-              icon={<Calendar className="w-4 h-4" />}
-            />
-          </div>
-        </div>
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto space-y-6 pr-2 custom-scrollbar">
+          {/* Payment details */}
+          <div className="relative bg-gradient-to-br from-slate-50 to-white rounded-xl p-6 space-y-5 border border-slate-200 shadow-sm">
+            {/* Decorative gradient */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#027675]/5 to-transparent rounded-bl-3xl -mr-2 -mt-2" />
 
-        {/* Screenshot */}
-        {payment.screenshot_url && (
-          <div>
-            <label className="text-xs font-semibold text-slate-500 mb-2 block uppercase tracking-wider">
-              Proof of Payment
-            </label>
-            <a
-              href={payment.screenshot_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block rounded-xl overflow-hidden border border-slate-200 hover:ring-2 hover:ring-primary-500/20 transition-all duration-200 group"
-            >
-              <div className="relative">
-                <img
-                  src={payment.screenshot_url}
-                  alt="Payment proof"
-                  className="w-full object-cover max-h-48"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="flex items-center justify-center gap-2 py-3 text-xs text-primary-600 bg-primary-50 group-hover:bg-primary-100 transition-colors font-medium">
-                <ExternalLink className="w-3.5 h-3.5" /> View Full Image
-              </div>
-            </a>
-          </div>
-        )}
-
-        {/* Decision */}
-        <div>
-          <label className="text-xs font-semibold text-slate-500 mb-3 block uppercase tracking-wider">
-            Decision
-          </label>
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              type="button"
-              onClick={() => setAction("approve")}
-              className={`flex items-center justify-center gap-2 rounded-xl border-2 py-3.5 text-sm font-semibold transition-all duration-200 ${
-                action === "approve"
-                  ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm"
-                  : "border-slate-200 text-slate-500 hover:border-emerald-300 hover:bg-emerald-50/50"
-              }`}
-            >
-              <CheckCircle className="w-4 h-4" /> Approve
-            </button>
-            <button
-              type="button"
-              onClick={() => setAction("reject")}
-              className={`flex items-center justify-center gap-2 rounded-xl border-2 py-3.5 text-sm font-semibold transition-all duration-200 ${
-                action === "reject"
-                  ? "border-rose-500 bg-rose-50 text-rose-700 shadow-sm"
-                  : "border-slate-200 text-slate-500 hover:border-rose-300 hover:bg-rose-50/50"
-              }`}
-            >
-              <XCircle className="w-4 h-4" /> Reject
-            </button>
-          </div>
-        </div>
-
-        {/* Notes for rejection */}
-        {action === "reject" && (
-          <div className="animate-in slide-in-from-top-2 duration-200">
-            <label className="text-xs font-semibold text-slate-500 mb-2 block uppercase tracking-wider">
-              Rejection Reason
-            </label>
-            <textarea
-              className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm resize-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all"
-              rows={3}
-              placeholder="Provide a clear reason for rejection..."
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-            />
-          </div>
-        )}
-
-        {/* Approval confirmation */}
-        {action === "approve" && (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 text-sm text-emerald-700 flex items-start gap-3 animate-in slide-in-from-top-2 duration-200">
-            <Shield className="w-5 h-5 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium">Confirm Approval</p>
-              <p className="text-emerald-600 mt-0.5">
-                This will activate a 30-day subscription and restore access for
-                all users in this chamber.
-              </p>
+            <div className="relative grid grid-cols-2 gap-4">
+              <InfoRow
+                label="Company"
+                value={payment.chamber?.name || payment.owner?.name}
+                icon={<Building2 className="w-4 h-4" />}
+              />
+              <InfoRow
+                label="Email"
+                value={payment.owner?.email}
+                icon={<User className="w-4 h-4" />}
+              />
+              <InfoRow
+                label="Amount"
+                value={
+                  getPaymentAmount(payment) != null
+                    ? `PKR ${Number(getPaymentAmount(payment)).toLocaleString()}`
+                    : "—"
+                }
+                highlight
+                icon={<DollarSign className="w-4 h-4" />}
+              />
+              <InfoRow
+                label="Plan"
+                value={
+                  PLAN_LABELS[payment.plan_type] || payment.plan_type || "—"
+                }
+                icon={<CreditCard className="w-4 h-4" />}
+              />
+              <InfoRow
+                label="Method"
+                value={payment.payment_method}
+                icon={<CreditCard className="w-4 h-4" />}
+              />
+              <InfoRow
+                label="Reference"
+                value={payment.reference_id || "—"}
+                icon={<FileText className="w-4 h-4" />}
+              />
+              <InfoRow
+                label="Submitted"
+                value={fmtDateTime(payment.submitted_at)}
+                icon={<Calendar className="w-4 h-4" />}
+              />
             </div>
           </div>
-        )}
 
-        {/* Actions */}
-        <div className="flex gap-4 pt-2">
+          {/* Screenshot */}
+          {payment.screenshot_url && (
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-500 flex items-center gap-2 uppercase tracking-wider">
+                <div className="w-1 h-1 rounded-full bg-slate-400" />
+                Proof of Payment
+              </label>
+              <a
+                href={payment.screenshot_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-xl overflow-hidden border border-slate-200 hover:ring-2 hover:ring-[#027675]/20 hover:border-[#027675]/30 transition-all duration-300 group shadow-sm hover:shadow-md"
+              >
+                <div className="relative overflow-hidden">
+                  <img
+                    src={payment.screenshot_url}
+                    alt="Payment proof"
+                    className="w-full object-cover max-h-64 group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-lg px-2.5 py-1.5 text-xs font-medium text-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-1 group-hover:translate-y-0 shadow-sm">
+                    Click to expand
+                  </div>
+                </div>
+                <div className="flex items-center justify-center gap-2 py-3 text-xs text-[#027675] bg-[#027675]/5 group-hover:bg-[#027675]/10 transition-colors font-medium">
+                  <ExternalLink className="w-3.5 h-3.5" /> View Full Image
+                </div>
+              </a>
+            </div>
+          )}
+
+          {/* Decision */}
+          <div className="space-y-3">
+            <label className="text-xs font-semibold text-slate-500 flex items-center gap-2 uppercase tracking-wider">
+              <div className="w-1 h-1 rounded-full bg-slate-400" />
+              Decision
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setAction("approve")}
+                className={`relative flex items-center justify-center gap-2 rounded-xl border-2 py-4 text-sm font-semibold transition-all duration-300 ${
+                  action === "approve"
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-lg shadow-emerald-500/20 scale-[1.02]"
+                    : "border-slate-200 text-slate-500 hover:border-emerald-300 hover:bg-emerald-50/50 hover:scale-[1.02]"
+                }`}
+              >
+                <CheckCircle
+                  className={`w-4 h-4 transition-transform duration-300 ${action === "approve" ? "scale-110" : ""}`}
+                />
+                Approve
+                {action === "approve" && (
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setAction("reject")}
+                className={`relative flex items-center justify-center gap-2 rounded-xl border-2 py-4 text-sm font-semibold transition-all duration-300 ${
+                  action === "reject"
+                    ? "border-rose-500 bg-rose-50 text-rose-700 shadow-lg shadow-rose-500/20 scale-[1.02]"
+                    : "border-slate-200 text-slate-500 hover:border-rose-300 hover:bg-rose-50/50 hover:scale-[1.02]"
+                }`}
+              >
+                <XCircle
+                  className={`w-4 h-4 transition-transform duration-300 ${action === "reject" ? "scale-110" : ""}`}
+                />
+                Reject
+                {action === "reject" && (
+                  <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full animate-ping" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Notes for rejection */}
+          {action === "reject" && (
+            <div className="animate-in slide-in-from-top-2 duration-300 space-y-2">
+              <label className="text-xs font-semibold text-rose-600 flex items-center gap-2 uppercase tracking-wider">
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+                Rejection Reason
+              </label>
+              <textarea
+                className="w-full rounded-xl border border-rose-200 bg-rose-50/30 px-4 py-3.5 text-sm resize-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none transition-all placeholder:text-rose-300"
+                rows={4}
+                placeholder="Provide a clear reason for rejection..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+              {!notes && (
+                <p className="text-xs text-rose-400 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  Required for rejection
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Approval confirmation */}
+          {action === "approve" && (
+            <div className="relative bg-gradient-to-r from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-xl p-5 text-sm text-emerald-700 flex items-start gap-3 animate-in slide-in-from-top-2 duration-300 shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                <Shield className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-emerald-800">
+                  Confirm Approval
+                </p>
+                <p className="text-emerald-600 mt-1 leading-relaxed">
+                  This will activate a 30-day subscription and restore access
+                  for all users in this chamber.
+                </p>
+                <div className="flex items-center gap-2 mt-3 text-xs text-emerald-500">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  Subscription renews automatically
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer Actions - Fixed at bottom */}
+        <div className="flex gap-4 pt-6 shrink-0 border-t border-slate-100 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-3.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+            className="flex-1 px-4 py-4 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200 hover:shadow-md"
             disabled={loading}
           >
             Cancel
@@ -364,15 +405,19 @@ function ActionModal({ payment, onClose, onDone }) {
           <button
             onClick={submit}
             disabled={loading || (action === "reject" && !notes)}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-white transition-all duration-200 ${
+            className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-4 text-sm font-semibold text-white transition-all duration-300 ${
               action === "approve"
-                ? "bg-emerald-600 hover:bg-emerald-700 shadow-sm hover:shadow-md"
-                : "bg-rose-600 hover:bg-rose-700 shadow-sm hover:shadow-md"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                ? "bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30"
+                : "bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 shadow-lg shadow-rose-500/20 hover:shadow-xl hover:shadow-rose-500/30"
+            } disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none transform hover:-translate-y-0.5 active:translate-y-0`}
           >
             {loading ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" /> Processing...
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span className="relative">
+                  Processing
+                  <span className="absolute -right-1">...</span>
+                </span>
               </>
             ) : action === "approve" ? (
               <>

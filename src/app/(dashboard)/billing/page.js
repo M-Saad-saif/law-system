@@ -21,6 +21,8 @@ import {
   ArrowRight,
   Calendar,
   Zap,
+  Mail,
+  Phone,
 } from "lucide-react";
 
 const PLAN_OPTIONS = [
@@ -399,8 +401,6 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
   );
 }
 
-// ─── Payment History ──────────────────────────────────────────────────────────
-
 function PaymentHistory({ payments }) {
   if (!payments?.length) return null;
 
@@ -647,17 +647,76 @@ export default function BillingPage() {
 
         {/* Junior lawyer message */}
         {!isSenior && isExpired && (
-          <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10 p-5 text-center">
-            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-[#027675]/5 flex items-center justify-center">
-              <Info className="w-7 h-7 text-[#027675]/40" />
+          <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10 p-6 text-center animate-in fade-in slide-in-from-bottom-2 duration-500">
+            {/* Status Indicator */}
+            <div className="relative w-16 h-16 mx-auto mb-4">
+              <div className="absolute inset-0 rounded-full bg-[#027675]/5 animate-pulse" />
+              <div className="relative w-16 h-16 rounded-full bg-[#027675]/5 flex items-center justify-center ring-2 ring-[#027675]/10">
+                <Info className="w-7 h-7 text-[#027675]/40" />
+              </div>
             </div>
-            <p className="text-sm text-gray-500">
-              Please ask your Senior Lawyer to submit a payment to restore
-              access.
-            </p>
+
+            {/* Message */}
+            <div className="space-y-2 mb-5">
+              <h3 className="text-lg font-semibold text-slate-800">
+                Access Expired
+              </h3>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto">
+                Please ask your Senior Lawyer to submit a payment to restore
+                access.
+              </p>
+            </div>
+
+            {/* Contact Card */}
+            {user?.createdBy && (
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#027675]/5 to-transparent rounded-2xl" />
+                <div className="relative inline-flex flex-col items-center gap-3 px-6 py-5 rounded-2xl bg-[#027675]/5 border border-[#027675]/10 w-full hover:border-[#027675]/20 transition-all duration-300">
+                  {/* Avatar */}
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-[#027675]/20 ring-2 ring-white">
+                    {user.createdBy.name?.charAt(0)?.toUpperCase() || "S"}
+                  </div>
+
+                  {/* Name & Role */}
+                  <div className="text-center">
+                    <p className="text-[10px] font-bold text-[#027675]/70 uppercase tracking-widest mb-1">
+                      Your Senior Lawyer
+                    </p>
+                    <p className="text-sm font-semibold text-gray-800">
+                      {user.createdBy.name}
+                    </p>
+                  </div>
+
+                  {/* Contact Links */}
+                  <div className="flex flex-col items-center gap-2 w-full pt-1 border-t border-[#027675]/10">
+                    {user.createdBy.email && (
+                      <a
+                        href={`mailto:${user.createdBy.email}`}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/50 transition-all duration-200 group w-full justify-center"
+                      >
+                        <Mail className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#027675] transition-colors" />
+                        <span className="text-[15px] text-gray-500 group-hover:text-[#027675] transition-colors">
+                          {user.createdBy.email}
+                        </span>
+                      </a>
+                    )}
+                    {user.createdBy.phone && (
+                      <a
+                        href={`tel:${user.createdBy.phone}`}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/50 transition-all duration-200 group w-full justify-center"
+                      >
+                        <Phone className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#027675] transition-colors" />
+                        <span className="text-[15px] text-gray-500 group-hover:text-[#027675] transition-colors">
+                          {user.createdBy.phone}
+                        </span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
-
         {/* Payment history */}
         <PaymentHistory payments={payments} />
       </div>

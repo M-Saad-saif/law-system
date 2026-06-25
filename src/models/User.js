@@ -32,6 +32,8 @@ const userSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+
+    hasSeenWelcome: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
