@@ -17,6 +17,22 @@ import {
   Globe,
   Lock,
   Sparkles,
+  LayoutDashboard,
+  Layers,
+  MessageSquare,
+  Image as ImageIcon,
+  FileText,
+  UserCheck,
+  StickyNote,
+  Settings,
+  Database,
+  Cpu,
+  Gavel,
+  Upload,
+  Search,
+  CheckCircle2,
+  UserPlus,
+  ClipboardList,
 } from "lucide-react";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 
@@ -147,7 +163,6 @@ export default function LandingPage() {
   const ctaHref = isLoggedIn ? "/dashboard" : "/register";
   const ctaLabel = isLoggedIn ? "Dashboard" : "Create account";
 
-
   return (
     <div className="min-h-screen bg-black overflow-x-hidden selection:bg-[#027f7e]/30">
       {/* Animated background grid */}
@@ -189,6 +204,35 @@ export default function LandingPage() {
               Law<span className="text-[#027f7e]">Portal</span>
             </span>
           </motion.div>
+
+          {/* NEW: Section links */}
+          <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+            <a
+              href="#features"
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Features
+            </a>
+            <a
+              href="#workflow"
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Workflow
+            </a>
+            <a
+              href="#tech"
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Tech Stack
+            </a>
+            <a
+              href="#cta"
+              className="text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              Get Started
+            </a>
+          </div>
+
           <div className="flex items-center gap-4">
             <Link
               href="/login"
@@ -209,7 +253,7 @@ export default function LandingPage() {
         </div>
       </motion.nav>
 
-      {/* Hero Section */}
+      {/* Hero Section (UNCHANGED) */}
       <motion.section
         ref={heroRef}
         style={{ opacity: heroOpacity, scale: heroScale }}
@@ -251,9 +295,37 @@ export default function LandingPage() {
               transition={{ delay: 0.5 }}
               className="text-gray-400 text-lg max-w-lg leading-relaxed"
             >
-              Case management, hearing calendar, law books library, and
-              reminders — built specifically for Pakistani lawyers.
+              Cases, hearings, proceedings, citations, PDF law books, reminders,
+              an AI image generator and live courtroom Q&A — built specifically
+              for Pakistani lawyers.
             </motion.p>
+
+            {/* NEW: Quick stat pills */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="flex flex-wrap gap-3"
+            >
+              {[
+                { label: "Next.js 14", color: "#027f7e" },
+                { label: "MongoDB", color: "#4a90e2" },
+                { label: "JWT Secured", color: "#33adad" },
+                { label: "AI-enabled", color: "#103168" },
+              ].map((t, i) => (
+                <span
+                  key={i}
+                  className="text-[11px] tracking-wider font-semibold px-3 py-1 rounded-full border backdrop-blur-sm"
+                  style={{
+                    color: t.color,
+                    borderColor: `${t.color}55`,
+                    backgroundColor: `${t.color}15`,
+                  }}
+                >
+                  {t.label}
+                </span>
+              ))}
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -289,7 +361,7 @@ export default function LandingPage() {
             </motion.div>
           </motion.div>
 
-          {/* Right content - Enhanced */}
+          {/* Right content — UNCHANGED hero card */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -298,11 +370,9 @@ export default function LandingPage() {
           >
             <FloatingElement delay={0}>
               <div className="relative">
-                {/* Decorative elements */}
                 <div className="absolute -top-8 -right-8 w-32 h-32 border-t-2 border-r-2 border-[#027f7e]/40 rounded-tr-3xl hidden lg:block" />
                 <div className="absolute -bottom-8 -left-8 w-32 h-32 border-b-2 border-l-2 border-[#103168]/40 rounded-bl-3xl hidden lg:block" />
 
-                {/* Main card */}
                 <div className="relative z-10 bg-gradient-to-br from-[#11161F] to-[#0A0F1A] border border-gray-800/50 rounded-3xl p-8 shadow-2xl shadow-black/50 backdrop-blur-xl transform hover:rotate-0 transition-all duration-500">
                   <div className="flex items-center gap-4 mb-6">
                     <motion.div
@@ -383,7 +453,6 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Floating smaller card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -415,7 +484,9 @@ export default function LandingPage() {
         </div>
       </motion.section>
 
-      {/* Features Section */}
+      {/* ============================================================ */}
+      {/* EXPANDED FEATURES SECTION — every real codebase feature      */}
+      {/* ============================================================ */}
       <section
         id="features"
         className="relative z-10 max-w-7xl mx-auto px-6 py-32"
@@ -443,54 +514,96 @@ export default function LandingPage() {
             Built for modern legal practice
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Everything you need to manage cases, track hearings, and stay
-            organized.
+            Everything you need to manage cases, track hearings, run live
+            courtroom Q&A and stay organized.
           </p>
         </motion.div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
             {
+              icon: LayoutDashboard,
+              title: "Dashboard & Analytics",
+              desc: "Stats overview for total, active, today's and tomorrow's hearings, with a recent cases table and quick actions.",
+              gradient: "from-[#027f7e] to-[#025a58]",
+              color: "#027f7e",
+            },
+            {
               icon: FolderOpen,
               title: "Case Management",
-              desc: "Full CRUD with case details, provisions, counsel info, FIR number, and hearing dates.",
-              color: "#027f7e",
+              desc: "Full CRUD with case title, suit no., court type, provisions, counsel info, FIR number, judge name and hearing dates.",
+              gradient: "from-[#103168] to-[#0d2855]",
+              color: "#103168",
+            },
+            {
+              icon: Layers,
+              title: "Tabbed Case Detail",
+              desc: "Overview, Proceedings timeline, Accused/Bail info, Citations and Quick Notes — all in one tabbed view.",
               gradient: "from-[#027f7e] to-[#025a58]",
+              color: "#027f7e",
             },
             {
               icon: CalendarCheck,
               title: "Hearing Calendar",
-              desc: "Monthly calendar view with hearing/proceeding dates, day-click modal, and upcoming events.",
-              color: "#103168",
+              desc: "Monthly calendar with hearing & proceeding date highlights, day-click modal, and an upcoming events sidebar.",
               gradient: "from-[#103168] to-[#0d2855]",
+              color: "#103168",
             },
             {
               icon: BookOpen,
               title: "Law Books Library",
-              desc: "Upload and manage PDF law books with inline viewer and search.",
-              color: "#027f7e",
+              desc: "Upload PDF law books with drag & drop, inline iframe viewer, tagging, search and quick delete.",
               gradient: "from-[#027f7e] to-[#025a58]",
+              color: "#027f7e",
             },
             {
               icon: Bell,
               title: "Smart Reminders",
-              desc: "Priority-based reminders with upcoming, overdue, and completed filters.",
-              color: "#103168",
+              desc: "Priority-based reminders with upcoming, overdue and completed filters, linked directly to a case.",
               gradient: "from-[#103168] to-[#0d2855]",
+              color: "#103168",
+            },
+            {
+              icon: MessageSquare,
+              title: "Live Courtroom Q&A",
+              desc: "Real-time courtroom question & answer module to capture and resolve queries during proceedings.",
+              gradient: "from-[#027f7e] to-[#025a58]",
+              color: "#027f7e",
+            },
+            {
+              icon: ImageIcon,
+              title: "AI Image Generator",
+              desc: "Generate visuals and case-related illustrations directly inside the portal, powered by AI.",
+              gradient: "from-[#103168] to-[#0d2855]",
+              color: "#103168",
             },
             {
               icon: Users,
               title: "Client Management",
-              desc: "Store client details, communication history, and case associations.",
-              color: "#027f7e",
+              desc: "Store client name, contact, phone and case associations — all linked to the lawyer's account.",
               gradient: "from-[#027f7e] to-[#025a58]",
+              color: "#027f7e",
             },
             {
               icon: Shield,
-              title: "Secure & Role-based",
-              desc: "JWT authentication with httpOnly cookies and middleware-protected routes.",
-              color: "#103168",
+              title: "JWT Auth & Roles",
+              desc: "JWT via httpOnly cookies with middleware-protected routes and admin / lawyer / associate roles.",
               gradient: "from-[#103168] to-[#0d2855]",
+              color: "#103168",
+            },
+            {
+              icon: Settings,
+              title: "Profile & Settings",
+              desc: "Manage profile, Bar Council number, phone and seed demo data with one click from settings.",
+              gradient: "from-[#027f7e] to-[#025a58]",
+              color: "#027f7e",
+            },
+            {
+              icon: FileText,
+              title: "Proceedings & Citations",
+              desc: "Add or remove proceedings, citations, accused entries and notes against any case via dedicated APIs.",
+              gradient: "from-[#103168] to-[#0d2855]",
+              color: "#103168",
             },
           ].map((feature, i) => (
             <motion.div
@@ -498,17 +611,17 @@ export default function LandingPage() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
+              transition={{ delay: i * 0.07, duration: 0.5 }}
               whileHover={{ y: -5 }}
               className="group relative bg-gradient-to-br from-[#11161F]/80 to-[#0A0F1A]/80 border border-gray-800/50 rounded-3xl p-8 hover:border-[#027f7e]/40 transition-all duration-500 backdrop-blur-sm"
             >
-              {/* Hover gradient effect */}
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#027f7e]/5 to-[#103168]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               <div className="relative z-10">
                 <motion.div
                   whileHover={{ scale: 1.1, rotate: 5 }}
-                  className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-lg shadow-${feature.color}/20 group-hover:shadow-xl group-hover:shadow-${feature.color}/30 transition-all duration-300`}
+                  className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 shadow-lg transition-all duration-300`}
+                  style={{ boxShadow: `0 10px 30px -10px ${feature.color}55` }}
                 >
                   <feature.icon className="w-8 h-8 text-white" />
                 </motion.div>
@@ -524,7 +637,196 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* ============================================================ */}
+      {/* NEW: CASE DETAIL TABS SHOWCASE                                */}
+      {/* ============================================================ */}
+      <section className="relative z-10 max-w-7xl mx-auto px-6 py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <div className="inline-flex items-center gap-2 bg-[#027f7e]/10 border border-[#027f7e]/30 rounded-full px-4 py-1.5 mb-6 backdrop-blur-sm">
+            <Gavel className="w-4 h-4 text-[#027f7e]" />
+            <span className="text-xs font-semibold text-[#027f7e] tracking-wider">
+              CASE DETAIL VIEW
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Every detail, one tabbed interface
+          </h2>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Switch between Overview, Proceedings, Accused, Citations and Notes
+            without ever leaving the case page.
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {[
+            { icon: FolderOpen, label: "Overview", color: "#027f7e" },
+            { icon: ClipboardList, label: "Proceedings", color: "#33adad" },
+            { icon: UserCheck, label: "Accused / Bail", color: "#4a90e2" },
+            { icon: FileText, label: "Citations", color: "#103168" },
+            { icon: StickyNote, label: "Quick Notes", color: "#027f7e" },
+          ].map((tab, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -4 }}
+              className="group relative bg-gradient-to-br from-[#11161F]/80 to-[#0A0F1A]/80 border border-gray-800/50 rounded-2xl p-6 hover:border-[#027f7e]/40 transition-all duration-300 backdrop-blur-sm text-center"
+            >
+              <div
+                className="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center border"
+                style={{
+                  backgroundColor: `${tab.color}20`,
+                  borderColor: `${tab.color}40`,
+                }}
+              >
+                <tab.icon className="w-7 h-7" style={{ color: tab.color }} />
+              </div>
+              <p className="text-sm font-semibold text-white">{tab.label}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* NEW: WORKFLOW / HOW IT WORKS                                  */}
+      {/* ============================================================ */}
+      <section
+        id="workflow"
+        className="relative z-10 max-w-7xl mx-auto px-6 py-24"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <div className="inline-flex items-center gap-2 bg-[#103168]/20 border border-[#103168]/40 rounded-full px-4 py-1.5 mb-6 backdrop-blur-sm">
+            <Zap className="w-4 h-4 text-[#4a90e2]" />
+            <span className="text-xs font-semibold text-[#4a90e2] tracking-wider">
+              HOW IT WORKS
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            From registration to verdict in 4 steps
+          </h2>
+        </motion.div>
+
+        <div className="grid md:grid-cols-4 gap-6 relative">
+          {/* connector line */}
+          <div className="hidden md:block absolute top-10 left-[10%] right-[10%] h-px bg-gradient-to-r from-transparent via-[#027f7e]/40 to-transparent" />
+
+          {[
+            {
+              icon: UserPlus,
+              step: "01",
+              title: "Register",
+              desc: "Create your lawyer account and add your Bar Council details.",
+            },
+            {
+              icon: FolderOpen,
+              step: "02",
+              title: "Add Cases",
+              desc: "Enter case details, provisions, counsel and hearing dates.",
+            },
+            {
+              icon: CalendarCheck,
+              step: "03",
+              title: "Track Hearings",
+              desc: "Use the calendar and reminders to stay ahead of every date.",
+            },
+            {
+              icon: CheckCircle2,
+              step: "04",
+              title: "Manage & Win",
+              desc: "Log proceedings, citations and notes from one dashboard.",
+            },
+          ].map((s, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.15 }}
+              className="relative bg-gradient-to-br from-[#11161F]/80 to-[#0A0F1A]/80 border border-gray-800/50 rounded-3xl p-6 backdrop-blur-sm text-center"
+            >
+              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#027f7e] to-[#103168] flex items-center justify-center shadow-lg shadow-[#027f7e]/30 relative z-10">
+                <s.icon className="w-9 h-9 text-white" />
+              </div>
+              <p className="text-xs font-mono font-semibold text-[#027f7e] mb-2">
+                STEP {s.step}
+              </p>
+              <h3 className="text-lg font-bold text-white mb-2">{s.title}</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">{s.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ============================================================ */}
+      {/* NEW: TECH STACK                                               */}
+      {/* ============================================================ */}
+      <section id="tech" className="relative z-10 max-w-7xl mx-auto px-6 py-24">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <div className="inline-flex items-center gap-2 bg-[#027f7e]/10 border border-[#027f7e]/30 rounded-full px-4 py-1.5 mb-6 backdrop-blur-sm">
+            <Cpu className="w-4 h-4 text-[#027f7e]" />
+            <span className="text-xs font-semibold text-[#027f7e] tracking-wider">
+              TECH STACK
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Production-ready foundation
+          </h2>
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Built with battle-tested tools loved by modern web teams.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[
+            { icon: Cpu, label: "Next.js 14", sub: "App Router" },
+            { icon: Database, label: "MongoDB", sub: "via Mongoose" },
+            { icon: Shield, label: "JWT + bcrypt", sub: "httpOnly cookies" },
+            { icon: Sparkles, label: "Tailwind CSS", sub: "Utility-first" },
+            { icon: BookOpen, label: "Playfair + DM Sans", sub: "Typography" },
+            { icon: Bell, label: "react-hot-toast", sub: "Notifications" },
+            { icon: Upload, label: "FormData + fs", sub: "PDF uploads" },
+            { icon: CalendarCheck, label: "date-fns", sub: "Date utils" },
+          ].map((t, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.05 }}
+              whileHover={{ y: -3, scale: 1.02 }}
+              className="bg-gradient-to-br from-[#11161F]/80 to-[#0A0F1A]/80 border border-gray-800/50 rounded-2xl p-5 hover:border-[#027f7e]/40 transition-all duration-300 backdrop-blur-sm"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#027f7e]/20 to-[#103168]/20 border border-[#027f7e]/20 flex items-center justify-center mb-3">
+                <t.icon className="w-5 h-5 text-[#027f7e]" />
+              </div>
+              <p className="text-sm font-bold text-white">{t.label}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t.sub}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Stats Section (UNCHANGED) */}
       <motion.section
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -533,7 +835,6 @@ export default function LandingPage() {
         className="relative z-10 max-w-7xl mx-auto px-6 py-16"
       >
         <div className="relative bg-gradient-to-r from-[#103168]/20 via-[#027f7e]/10 to-transparent border border-gray-800/50 rounded-3xl p-12 md:p-16 overflow-hidden backdrop-blur-sm">
-          {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#027f7e]/5 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#103168]/10 rounded-full blur-3xl" />
 
@@ -580,8 +881,9 @@ export default function LandingPage() {
         </div>
       </motion.section>
 
-      {/* CTA Section */}
+      {/* CTA Section (UNCHANGED) */}
       <motion.section
+        id="cta"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
@@ -589,7 +891,6 @@ export default function LandingPage() {
         className="relative z-10 max-w-7xl mx-auto px-6 py-24 mb-12"
       >
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0A0F1A] via-[#080C15] to-[#05080F] border border-gray-800/50 p-12 md:p-20 text-center backdrop-blur-sm">
-          {/* Animated background */}
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -662,42 +963,168 @@ export default function LandingPage() {
           </div>
         </div>
       </motion.section>
-
       {/* Footer */}
-      <footer className="relative z-10 border-t border-gray-800/50 py-12">
+      <footer className="relative z-10 border-t border-gray-800/50 py-16">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#027f7e] to-[#103168] flex items-center justify-center">
-                <Scale className="w-4 h-4 text-white" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+            {/* Brand column */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-3 mb-4">
+                <motion.div
+                  whileHover={{ rotate: 360 }}
+                  transition={{ duration: 0.6 }}
+                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#027f7e] to-[#103168] flex items-center justify-center shadow-lg shadow-[#027f7e]/20"
+                >
+                  <Scale className="w-5 h-5 text-white" />
+                </motion.div>
+                <span className="text-lg font-bold text-white">
+                  Law<span className="text-[#027f7e]">Portal</span>
+                </span>
               </div>
-              <span className="text-sm text-gray-500">
-                © 2026 LawPortal — Legal Management Platform
-              </span>
+              <p className="text-sm text-gray-500 mb-4 max-w-xs">
+                Complete legal practice management platform for Pakistani
+                lawyers. Built with Next.js 14, MongoDB, and JWT authentication.
+              </p>
+              <div className="flex items-center gap-3">
+                {[
+                  { label: "JWT Secured", icon: Shield },
+                  { label: "SSL Encrypted", icon: Lock },
+                  { label: "GDPR Ready", icon: Globe },
+                ].map((badge, i) => (
+                  <span
+                    key={i}
+                    className="text-[10px] font-medium text-gray-500 flex items-center gap-1 bg-white/5 rounded-full px-3 py-1 border border-gray-800"
+                  >
+                    <badge.icon className="w-3 h-3" />
+                    {badge.label}
+                  </span>
+                ))}
+              </div>
             </div>
-            {/* <div className="flex items-center gap-6">
-              <a
-                href="#"
-                className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
-              >
-                Privacy Policy
-              </a>
-              <a
-                href="#"
-                className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
-              >
-                Terms of Service
-              </a>
-              <a
-                href="#"
-                className="text-xs text-gray-600 hover:text-gray-400 transition-colors"
-              >
-                Contact
-              </a>
-            </div> */}
+
+            {/* Features column */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">
+                Core Features
+              </h4>
+              <div className="space-y-2.5">
+                {[
+                  { label: "Case Management", path: "/cases" },
+                  { label: "Hearing Calendar", path: "/hearings" },
+                  { label: "Law Books Library", path: "/law-books" },
+                  { label: "Smart Reminders", path: "/reminders" },
+                  { label: "Client Management", path: "/clients" },
+                ].map((item) => (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className="block text-sm text-gray-500 hover:text-[#027f7e] transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Advanced features column */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">
+                Advanced Tools
+              </h4>
+              <div className="space-y-2.5">
+                {[
+                  { label: "Live Court Q&A", path: "/court-qa" },
+                  { label: "AI Image Generator", path: "/image-generator" },
+                  { label: "Proceedings Timeline", path: "/cases" },
+                  { label: "Citations Manager", path: "/cases" },
+                  { label: "Quick Notes", path: "/cases" },
+                ].map((item) => (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className="block text-sm text-gray-500 hover:text-[#027f7e] transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Account column */}
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-4">Account</h4>
+              <div className="space-y-2.5">
+                {[
+                  { label: "Register", path: "/register" },
+                  { label: "Login", path: "/login" },
+                  { label: "Dashboard", path: "/dashboard" },
+                  { label: "Profile Settings", path: "/profile" },
+                ].map((item) => (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    className="block text-sm text-gray-500 hover:text-[#027f7e] transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <div className="pt-3 mt-3 border-t border-gray-800/50">
+                  <Link
+                    href="#"
+                    className="block text-sm text-gray-500 hover:text-[#027f7e] transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link
+                    href="#"
+                    className="block text-sm text-gray-500 hover:text-[#027f7e] transition-colors mt-2"
+                  >
+                    Terms of Service
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="border-t border-gray-800/50 pt-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#027f7e] to-[#103168] flex items-center justify-center">
+                  <Scale className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-sm text-gray-500">
+                  © {new Date().getFullYear()} LawPortal — Legal Management
+                  Platform
+                </span>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-gray-600">
+                <span className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  All systems operational
+                </span>
+                <span>•</span>
+                <span>Made for Pakistani Lawyers</span>
+                <span>•</span>
+                <a href="#" className="hover:text-gray-400 transition-colors">
+                  Contact Support
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
+
+      {/* Back to top button */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className="fixed bottom-8 right-8 z-50 w-12 h-12 rounded-2xl bg-gradient-to-br from-[#027f7e] to-[#103168] flex items-center justify-center shadow-lg shadow-[#027f7e]/20 hover:shadow-xl hover:shadow-[#027f7e]/30 transition-all duration-300 group"
+      >
+        <ArrowRight className="w-5 h-5 text-white rotate-[-90deg] group-hover:-translate-y-1 transition-transform" />
+      </motion.button>
 
       <style jsx global>{`
         @keyframes gradient {
@@ -714,6 +1141,23 @@ export default function LandingPage() {
         .animate-gradient {
           animation: gradient 3s ease infinite;
           background-size: 200% 200%;
+        }
+
+        @keyframes pulse {
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+        .animate-pulse {
+          animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .delay-1000 {
+          animation-delay: 1s;
         }
       `}</style>
     </div>

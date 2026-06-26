@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Case from "@/models/Case";
+import CalendarEvent from "@/models/CalendarEvent";
 import { withAuth } from "@/lib/api";
 
 export const GET = withAuth(async (request, context, user) => {
@@ -54,6 +55,27 @@ export const GET = withAuth(async (request, context, user) => {
           status: c.status,
         });
       }
+    });
+
+    const customEvents = await CalendarEvent.find({
+      userId: user.id,
+      date: { $gte: startDate, $lte: endDate },
+    });
+
+    customEvents.forEach((e) => {
+      events.push({
+        id: e._id.toString(),
+        caseId: e.linkedCase || null,
+        title: e.title,
+        caseNumber: null,
+        court: null,
+        date: e.date,
+        time: e.time,
+        type: e.type,
+        notes: e.notes,
+        status: null,
+        custom: true,
+      });
     });
 
     return NextResponse.json({ success: true, data: { events } });
