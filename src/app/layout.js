@@ -8,7 +8,7 @@ export const metadata = {
     icon: "/LawWebLogo.png",
   },
   title: {
-    default: "LawPortal — Law Firm Management for Pakistani Lawyers",
+    default: "LawPortal - Law Firm Management for Pakistani Lawyers",
     template: "%s | LawPortal",
   },
   description:

@@ -9,7 +9,7 @@ import { RouteTransitionProvider } from "@/hooks/useRouteTransition";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import RouteLoaderOverlay from "@/components/layout/RouteLoaderOverlay";
-import WelcomeGate from "@/components/layout/WelcomeGate";
+import WelcomeGate from "@/components/layout/Welcomegate";
 
 export default function DashboardLayout({ children }) {
   return (

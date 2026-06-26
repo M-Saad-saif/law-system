@@ -5,9 +5,13 @@ const PUBLIC_PATHS = [
   "/",
   "/login",
   "/register",
+  "/forgot-password",
+  "/reset-password",
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/logout",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
   "/api/internal/subscription-status",
 ];
 
@@ -27,6 +31,7 @@ const NON_ADMIN_PATHS = [
   "/library",
   "/books",
   "/billing",
+  "/setting",
 ];
 
 const SUBSCRIPTION_GUARDED_PATHS = [
