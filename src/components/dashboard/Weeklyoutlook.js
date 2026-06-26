@@ -21,14 +21,28 @@ function typeBadge(caseType) {
   );
 }
 
+const DATE_TYPE_LABELS = {
+  hearing: "Hearing",
+  proceeding: "Proceeding",
+  meeting: "Meeting",
+  deadline: "Deadline",
+  other: "Event",
+};
+
+const DATE_TYPE_STYLES = {
+  hearing: "bg-[#027f7e]/10 text-[#027f7e]",
+  proceeding: "bg-[#103168]/20 text-[#103168]",
+  meeting: "bg-blue-50 text-blue-700",
+  deadline: "bg-red-50 text-red-700",
+  other: "bg-gray-100 text-gray-600",
+};
+
 function dateTypeBadge(dateType) {
-  return dateType === "hearing" ? (
-    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#027f7e]/10 text-[#027f7e]">
-      Hearing
-    </span>
-  ) : (
-    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#103168]/20 text-[#103168]">
-      Proceeding
+  const cls = DATE_TYPE_STYLES[dateType] ?? DATE_TYPE_STYLES.other;
+  const label = DATE_TYPE_LABELS[dateType] ?? "Event";
+  return (
+    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${cls}`}>
+      {label}
     </span>
   );
 }
@@ -71,12 +85,8 @@ function DayColumn({ day, isSelected, onClick }) {
 }
 
 function HearingCard({ hearing }) {
-  return (
-    <Link
-      href={`/cases/${hearing._id}`}
-      className="group flex flex-col gap-2 w- p-3 rounded-xl border  bg-white hover:bg-gradient-to-t hover:from-[#22656c0d] hover:to-transparent
-        border-[#027f7e]/30 hover:shadow-sm transition-all"
-    >
+  const content = (
+    <>
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-semibold text-gray-900 leading-snug  transition-colors line-clamp-2">
           {hearing.caseTitle}
@@ -84,52 +94,99 @@ function HearingCard({ hearing }) {
         {dateTypeBadge(hearing.dateType)}
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        {typeBadge(hearing.caseType)}
-        {hearing.caseNumber && (
-          <span className="text-[10px] text-gray-400 font-mono">
-            #{hearing.caseNumber}
-          </span>
-        )}
-      </div>
-
-      <div className="flex items-center gap-1.5 text-xs text-gray-500">
-        <svg
-          className="w-3.5 h-3.5 flex-shrink-0"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.8}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3 6l9-3 9 3v12l-9 3-9-3V6z"
-          />
-        </svg>
-        <span className="truncate">
-          {hearing.courtName || "Court not specified"}
-        </span>
-      </div>
-
-      {hearing.clientName && (
-        <div className="flex items-center gap-1.5 text-xs text-gray-500">
-          <svg
-            className="w-3.5 h-3.5 flex-shrink-0"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.8}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-            />
-          </svg>
-          <span className="truncate">{hearing.clientName}</span>
+      {!hearing.custom && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {typeBadge(hearing.caseType)}
+          {hearing.caseNumber && (
+            <span className="text-[10px] text-gray-400 font-mono">
+              #{hearing.caseNumber}
+            </span>
+          )}
         </div>
       )}
+
+      {hearing.custom ? (
+        <>
+          {hearing.time && (
+            <div className="flex items-center gap-1.5 text-xs text-gray-500">
+              <svg
+                className="w-3.5 h-3.5 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span className="truncate">{hearing.time}</span>
+            </div>
+          )}
+          {hearing.notes && (
+            <p className="text-xs text-gray-500 line-clamp-2">{hearing.notes}</p>
+          )}
+        </>
+      ) : (
+        <>
+          <div className="flex items-center gap-1.5 text-xs text-gray-500">
+            <svg
+              className="w-3.5 h-3.5 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.8}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 6l9-3 9 3v12l-9 3-9-3V6z"
+              />
+            </svg>
+            <span className="truncate">
+              {hearing.courtName || "Court not specified"}
+            </span>
+          </div>
+
+          {hearing.clientName && (
+            <div className="flex items-center gap-1.5 text-xs text-gray-500">
+              <svg
+                className="w-3.5 h-3.5 flex-shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              <span className="truncate">{hearing.clientName}</span>
+            </div>
+          )}
+        </>
+      )}
+    </>
+  );
+
+  const className =
+    "group flex flex-col gap-2 w- p-3 rounded-xl border  bg-white hover:bg-gradient-to-t hover:from-[#22656c0d] hover:to-transparent border-[#027f7e]/30 hover:shadow-sm transition-all";
+
+  if (hearing.custom) {
+    return (
+      <Link href="/calendar" className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <Link href={`/cases/${hearing._id}`} className={className}>
+      {content}
     </Link>
   );
 }
@@ -152,7 +209,7 @@ function EmptyDay() {
           />
         </svg>
       </div>
-      <p className="text-sm text-gray-400 font-medium">No hearings scheduled</p>
+      <p className="text-sm text-gray-400 font-medium">No events scheduled</p>
       <p className="text-xs text-gray-300 mt-1">Free day</p>
     </div>
   );
@@ -233,8 +290,8 @@ export default function WeeklyOutlook() {
           </h2>
           <p className="text-xs text-gray-400 mt-0.5">
             {totalCount === 0
-              ? "No hearings in the next 7 days"
-              : `${totalCount} hearing${totalCount !== 1 ? "s" : ""} scheduled this week`}
+              ? "No events in the next 7 days"
+              : `${totalCount} event${totalCount !== 1 ? "s" : ""} scheduled this week`}
           </p>
         </div>
         <Link
@@ -269,8 +326,8 @@ export default function WeeklyOutlook() {
               {selectedDay.label}
             </p>
             {selectedDay.count > 0 && (
-              <span className="text-xs text-[#027f7e] font-medium">
-                {selectedDay.count} matter{selectedDay.count !== 1 ? "s" : ""}
+            <span className="text-xs text-[#027f7e] font-medium">
+                {selectedDay.count} item{selectedDay.count !== 1 ? "s" : ""}
               </span>
             )}
           </div>

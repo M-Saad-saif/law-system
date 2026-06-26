@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { withAuth } from "@/lib/api";
 import dbConnect from "@/lib/db";
 import Case from "@/models/Case";
+import CalendarEvent from "@/models/CalendarEvent";
 
 export const GET = withAuth(async (req, context, user) => {
   await dbConnect();
@@ -30,6 +31,13 @@ export const GET = withAuth(async (req, context, user) => {
     .select(
       "caseTitle caseNumber courtName caseType nextHearingDate nextProceedingDate status clientName",
     )
+    .lean();
+
+  const customEvents = await CalendarEvent.find({
+    userId: user.id,
+    date: { $gte: today, $lte: sevenDaysLater },
+  })
+    .select("title date time type notes linkedCase")
     .lean();
 
   const toKey = (date) => {
@@ -81,6 +89,48 @@ export const GET = withAuth(async (req, context, user) => {
         });
       }
     }
+  });
+
+  customEvents.forEach((event) => {
+    const key = toKey(event.date);
+    if (grouped[key] === undefined) return;
+
+    grouped[key].push({
+      _id: event._id,
+      caseTitle: event.title,
+      caseNumber: null,
+      courtName: null,
+      caseType: null,
+      clientName: null,
+      status: null,
+      dateType: event.type || "other",
+      date: event.date,
+      time: event.time || "",
+      notes: event.notes || "",
+      custom: true,
+      linkedCase: event.linkedCase || null,
+    });
+  });
+
+  Object.values(grouped).forEach((items) => {
+    items.sort((a, b) => {
+      const toMinutes = (value) => {
+        if (!value) return Number.MAX_SAFE_INTEGER;
+        const timeMatch = String(value).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+        if (timeMatch) {
+          let hours = Number(timeMatch[1]);
+          const minutes = Number(timeMatch[2]);
+          const period = timeMatch[3]?.toUpperCase();
+          if (period === "PM" && hours !== 12) hours += 12;
+          if (period === "AM" && hours === 12) hours = 0;
+          return hours * 60 + minutes;
+        }
+        const parsed = new Date(value).getTime();
+        return Number.isNaN(parsed) ? Number.MAX_SAFE_INTEGER : parsed;
+      };
+
+      return toMinutes(a.time || a.date) - toMinutes(b.time || b.date);
+    });
   });
 
   // Shape into array of day objects

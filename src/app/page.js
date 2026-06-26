@@ -1058,7 +1058,7 @@ export default function LandingPage() {
                   { label: "Register", path: "/register" },
                   { label: "Login", path: "/login" },
                   { label: "Dashboard", path: "/dashboard" },
-                  { label: "Profile Settings", path: "/profile" },
+                  { label: "Profile Settings", path: "/settings" },
                 ].map((item) => (
                   <Link
                     key={item.path}
@@ -1068,7 +1068,7 @@ export default function LandingPage() {
                     {item.label}
                   </Link>
                 ))}
-                <div className="pt-3 mt-3 border-t border-gray-800/50">
+                {/* <div className="pt-3 mt-3 border-t border-gray-800/50">
                   <Link
                     href="#"
                     className="block text-sm text-gray-500 hover:text-[#027f7e] transition-colors"
@@ -1081,7 +1081,7 @@ export default function LandingPage() {
                   >
                     Terms of Service
                   </Link>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
