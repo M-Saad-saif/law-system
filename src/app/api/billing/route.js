@@ -33,7 +33,7 @@ export const GET = withAuth(async (request, context, user) => {
 
     const payments = await PaymentRequest.find({ chamber: chamber._id })
       .sort({ createdAt: -1 })
-      .limit(10)
+      .limit(2) 
       .lean();
 
     const pendingRequest =

@@ -12,7 +12,6 @@ import {
   XCircle,
   Clock,
   RefreshCw,
-  ExternalLink,
   Search,
   Building2,
   User,
@@ -170,7 +169,7 @@ function StatCard({ label, value, icon: Icon, color, bg, onClick, isActive }) {
   );
 }
 
-function ActionModal({ payment, onClose, onDone }) {
+function ActionModal({ payment, onClose, onDone, onPreviewScreenshot }) {
   const [action, setAction] = useState("approve");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
@@ -279,11 +278,12 @@ function ActionModal({ payment, onClose, onDone }) {
                 <div className="w-1 h-1 rounded-full bg-slate-400" />
                 Proof of Payment
               </label>
-              <a
-                href={payment.screenshot_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block rounded-xl overflow-hidden border border-slate-200 hover:ring-2 hover:ring-[#027675]/20 hover:border-[#027675]/30 transition-all duration-300 group shadow-sm hover:shadow-md"
+              <button
+                type="button"
+                onClick={() =>
+                  onPreviewScreenshot?.(payment.screenshot_url, payment.invoice_id)
+                }
+                className="block w-full rounded-xl overflow-hidden border border-slate-200 hover:ring-2 hover:ring-[#027675]/20 hover:border-[#027675]/30 transition-all duration-300 group shadow-sm hover:shadow-md text-left cursor-zoom-in"
               >
                 <div className="relative overflow-hidden">
                   <img
@@ -297,9 +297,9 @@ function ActionModal({ payment, onClose, onDone }) {
                   </div>
                 </div>
                 <div className="flex items-center justify-center gap-2 py-3 text-xs text-[#027675] bg-[#027675]/5 group-hover:bg-[#027675]/10 transition-colors font-medium">
-                  <ExternalLink className="w-3.5 h-3.5" /> View Full Image
+                  <Eye className="w-3.5 h-3.5" /> Expand Image
                 </div>
-              </a>
+              </button>
             </div>
           )}
 
@@ -552,7 +552,53 @@ function TempAccessModal({ payment, onClose, onDone }) {
   );
 }
 
-function PaymentCard({ payment, onAction, onTempAccess }) {
+function PaymentProofModal({ src, label, onClose }) {
+  if (!src) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl animate-in zoom-in-95 duration-300">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 border-b border-slate-100 px-6 py-4">
+          <div className="min-w-0">
+            <p className="text-base font-semibold text-slate-800">
+              Payment Proof
+            </p>
+            <p className="truncate text-sm text-slate-500">
+              {label || "Screenshot preview"}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-2 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Close image preview"
+          >
+            <XCircle className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Image Container */}
+        <div className="flex max-h-[calc(90vh-73px)] items-center justify-center overflow-auto bg-slate-50 p-6">
+          <img
+            src={src}
+            alt="Payment proof preview"
+            className="max-h-[calc(90vh-105px)] w-auto max-w-full rounded-lg object-contain shadow-lg"
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-slate-100 px-6 py-3 flex items-center justify-end">
+          <span className="text-xs text-slate-400">
+            Click outside or press Esc to close
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PaymentCard({ payment, onAction, onTempAccess, onPreviewScreenshot }) {
   const subStatus = payment.subscription?.status;
   const isSubscriptionItem = payment.source === "subscription";
   const statusColor = STATUS_DOT_COLORS[payment.status] || "bg-slate-400";
@@ -669,15 +715,16 @@ function PaymentCard({ payment, onAction, onTempAccess }) {
             </button>
           )}
           {payment.screenshot_url && (
-            <a
-              href={payment.screenshot_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-medium px-5 py-3 rounded-lg flex items-center gap-2 hover:bg-slate-50 transition-all"
+            <button
+              type="button"
+              onClick={() =>
+                onPreviewScreenshot?.(payment.screenshot_url, payment.invoice_id)
+              }
+              className="border border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-medium px-5 py-3 rounded-lg flex items-center gap-2 hover:bg-slate-50 transition-all text-left"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <Eye className="w-3.5 h-3.5" />
               Proof
-            </a>
+            </button>
           )}
           {payment.chamber?._id && (
             <button
@@ -712,6 +759,7 @@ export default function AdminPaymentsPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(null);
   const [tempTarget, setTempTarget] = useState(null);
+  const [proofPreview, setProofPreview] = useState(null);
   const [sortOrder, setSortOrder] = useState("newest");
   const [viewMode, setViewMode] = useState("list");
 
@@ -822,6 +870,11 @@ export default function AdminPaymentsPage() {
   return (
     <div className="min-h-screen bg-slate-50/50">
       <div className="max-w-7xl mx-auto space-y-8 p-6 sm:p-8 lg:p-10">
+        <PaymentProofModal
+          src={proofPreview?.src}
+          label={proofPreview?.label}
+          onClose={() => setProofPreview(null)}
+        />
         {/* Header */}
         <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -1055,6 +1108,9 @@ export default function AdminPaymentsPage() {
                     payment={p}
                     onAction={setSelected}
                     onTempAccess={setTempTarget}
+                    onPreviewScreenshot={(src, label) =>
+                      setProofPreview({ src, label })
+                    }
                   />
                 </div>
               ))}
@@ -1067,9 +1123,16 @@ export default function AdminPaymentsPage() {
       {selected && (
         <ActionModal
           payment={selected}
-          onClose={() => setSelected(null)}
+          onClose={() => {
+            setSelected(null);
+            setProofPreview(null);
+          }}
+          onPreviewScreenshot={(src, label) =>
+            setProofPreview({ src, label })
+          }
           onDone={() => {
             setSelected(null);
+            setProofPreview(null);
             load();
           }}
         />

@@ -1,4 +1,4 @@
-import { withRole, withAuth, apiSuccess, apiError } from "@/lib/api";
+import { withAuth, apiSuccess, apiError } from "@/lib/api";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 
@@ -15,7 +15,7 @@ export const GET = withAuth(async (request, context, user) => {
       seniority: "junior",
       createdBy: user.id,
     })
-      .select("-password")
+      .select("-password") 
       .sort({ createdAt: -1 });
 
     return apiSuccess({ juniors, total: juniors.length });

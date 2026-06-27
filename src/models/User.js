@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema(
     barCouncilNo: { type: String, trim: true },
     isActive: { type: Boolean, default: true },
 
+    profilePicture: { type: String, trim: true, default: null },
+
     // senior lawyer creates a junior account
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

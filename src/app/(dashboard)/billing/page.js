@@ -23,7 +23,9 @@ import {
   Zap,
   Mail,
   Phone,
+  ExternalLink,
 } from "lucide-react";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 const PLAN_OPTIONS = [
   {
@@ -402,64 +404,172 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
 }
 
 function PaymentHistory({ payments }) {
+  const [selectedScreenshot, setSelectedScreenshot] = useState(null);
+
   if (!payments?.length) return null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10">
-      <div className="p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <FileText className="w-4 h-4 text-[#027675]" />
-          <h2 className="font-bold text-lg text-gray-900">Payment History</h2>
-        </div>
-        <div className="space-y-2">
-          {payments.map((p) => {
-            const cfg =
-              PAYMENT_STATUS_CONFIG[p.status] || PAYMENT_STATUS_CONFIG.pending;
-            const planLabel = PLAN_OPTIONS.find(
-              (o) => o.type === p.plan_type,
-            )?.label;
-            return (
-              <div
-                key={p._id}
-                className="flex items-center justify-between p-3.5 bg-gray-50/80 rounded-xl border border-gray-100 hover:border-[#027675]/10 transition-colors"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-gray-800">
-                    {p.invoice_id}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    PKR {getPaymentAmount(p)?.toLocaleString()} ·{" "}
-                    {p.payment_method}
-                    {planLabel && ` · ${planLabel}`}
-                  </p>
-                  {p.admin_notes && (
-                    <p className="text-xs text-red-500 mt-0.5">
-                      Note: {p.admin_notes}
-                    </p>
-                  )}
-                </div>
-                <div className="text-right">
-                  <span
-                    className={`text-xs font-bold px-2.5 py-1 rounded-lg ${cfg.color}`}
-                  >
-                    {cfg.label}
-                  </span>
-                  <p className="text-xs text-gray-400 mt-1">
-                    {new Date(p.submitted_at || p.createdAt).toLocaleDateString(
-                      "en-PK",
+    <>
+      <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10">
+        <div className="p-5">
+          <div className="flex items-center gap-2 mb-5">
+            <div className="p-2 bg-[#027675]/10 rounded-lg">
+              <FileText className="w-4 h-4 text-[#027675]" />
+            </div>
+            <h2 className="font-bold text-lg text-gray-900">Payment History</h2>
+          </div>
+          
+          <div className="space-y-3">
+            {payments.map((p) => {
+              const cfg =
+                PAYMENT_STATUS_CONFIG[p.status] || PAYMENT_STATUS_CONFIG.pending;
+              const planLabel = PLAN_OPTIONS.find(
+                (o) => o.type === p.plan_type,
+              )?.label;
+              
+              return (
+                <div
+                  key={p._id}
+                  className="group p-4 bg-gray-50/50 rounded-xl border border-gray-100 hover:border-[#027675]/20 hover:shadow-sm transition-all"
+                >
+                  <div className="flex gap-4">
+                    {/* Left: Screenshot Thumbnail */}
+                    {p.screenshot_url && (
+                      <button
+                        onClick={() => setSelectedScreenshot(p.screenshot_url)}
+                        className="shrink-0 group/thumb"
+                      >
+                        <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 group-hover/thumb:border-[#027675]/40 transition-colors">
+                          <img
+                            src={p.screenshot_url}
+                            alt="Payment proof"
+                            className="w-full h-full object-cover group-hover/thumb:scale-110 transition-transform duration-300"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover/thumb:bg-black/30 transition-all flex items-center justify-center">
+                            <svg className="w-4 h-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </button>
                     )}
-                  </p>
+
+                    {/* Right: Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <p className="text-sm font-semibold text-gray-900 truncate">
+                              {p.invoice_id}
+                            </p>
+                            <span
+                              className={`text-[11px] font-semibold px-2 py-0.5 rounded-md shrink-0 ${cfg.color}`}
+                            >
+                              {cfg.label}
+                            </span>
+                          </div>
+                          
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <span className="text-sm text-gray-700 font-medium">
+                              PKR {getPaymentAmount(p)?.toLocaleString()}
+                            </span>
+                            <span className="text-gray-300">·</span>
+                            <span className="text-sm text-gray-500 capitalize">
+                              {p.payment_method}
+                            </span>
+                            {planLabel && (
+                              <>
+                                <span className="text-gray-300">·</span>
+                                <span className="text-sm text-gray-500">
+                                  {planLabel}
+                                </span>
+                              </>
+                            )}
+                          </div>
+
+                          {p.admin_notes && (
+                            <div className="mt-2 flex items-start gap-1.5">
+                              <div className="w-1 h-1 rounded-full bg-red-400 mt-1.5 shrink-0" />
+                              <p className="text-xs text-red-600 leading-relaxed">
+                                {p.admin_notes}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <p className="text-xs text-gray-400 whitespace-nowrap">
+                            {new Date(p.submitted_at || p.createdAt).toLocaleDateString(
+                              "en-PK",
+                              { year: 'numeric', month: 'short', day: 'numeric' }
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Screenshot Modal */}
+      {selectedScreenshot && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setSelectedScreenshot(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <h3 className="font-semibold text-gray-900">Payment Proof</h3>
+              <button
+                onClick={() => setSelectedScreenshot(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Modal content */}
+            <div className="p-4 overflow-auto max-h-[calc(90vh-80px)]">
+              <img
+                src={selectedScreenshot}
+                alt="Payment proof full size"
+                className="w-full rounded-lg"
+              />
+            </div>
+
+            {/* Modal footer */}
+            <div className="p-4 border-t border-gray-100 flex justify-end gap-3">
+              <a
+                href={selectedScreenshot}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 text-sm text-[#027675] hover:bg-[#027675]/5 rounded-lg transition-colors font-medium"
+              >
+                Open in new tab
+              </a>
+              <button
+                onClick={() => setSelectedScreenshot(null)}
+                className="px-4 py-2 text-sm bg-[#027675] text-white rounded-lg hover:bg-[#02605e] transition-colors font-medium"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
-
-// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function BillingPage() {
   const { user } = useAuth();
@@ -672,10 +782,11 @@ export default function BillingPage() {
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-[#027675]/5 to-transparent rounded-2xl" />
                 <div className="relative inline-flex flex-col items-center gap-3 px-6 py-5 rounded-2xl bg-[#027675]/5 border border-[#027675]/10 w-full hover:border-[#027675]/20 transition-all duration-300">
-                  {/* Avatar */}
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-[#027675]/20 ring-2 ring-white">
-                    {user.createdBy.name?.charAt(0)?.toUpperCase() || "S"}
-                  </div>
+                  <UserAvatar
+                    user={user.createdBy}
+                    size="xl"
+                    className="shadow-lg shadow-[#027675]/20 ring-2 ring-white"
+                  />
 
                   {/* Name & Role */}
                   <div className="text-center">

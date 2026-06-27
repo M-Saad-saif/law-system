@@ -54,6 +54,7 @@ async function buildSubscriptionItem(subscription) {
     payment_method: latestPayment?.payment_method ?? null,
     invoice_id: latestPayment?.invoice_id ?? null,
     reference_id: latestPayment?.reference_id ?? null,
+    screenshot_url: latestPayment?.screenshot_url ?? null, 
     chamber,
     owner,
     subscription,

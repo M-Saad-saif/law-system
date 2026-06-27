@@ -26,6 +26,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 const Icon = {
   Dashboard: Home,
@@ -83,11 +84,7 @@ function buildNavSections(user) {
       {
         label: "Account Details",
         items: [
-          {
-            label: "Users",
-            href: "/admin/users",
-            icon: Icon.Users,
-          },
+          { label: "Users", href: "/admin/users", icon: Icon.Users },
           {
             label: "Payment Verification",
             href: "/admin/payments",
@@ -143,11 +140,7 @@ function buildNavSections(user) {
     {
       label: "Judgements",
       items: [
-        {
-          label: "Search Judgements",
-          href: "/judgements",
-          icon: Icon.Search,
-        },
+        { label: "Search Judgements", href: "/judgements", icon: Icon.Search },
         {
           label: "AI Extractor",
           href: "/judgement-extractor",
@@ -206,9 +199,7 @@ function LockedNavItem({ item }) {
 }
 
 function NavItem({ item, pathname, isLocked }) {
-  if (isLocked) {
-    return <LockedNavItem item={item} />;
-  }
+  if (isLocked) return <LockedNavItem item={item} />;
 
   const isActive =
     pathname === item.href || pathname.startsWith(item.href + "/");
@@ -230,11 +221,9 @@ function NavItem({ item, pathname, isLocked }) {
             }
           `}
         >
-          {/* Active indicator bar */}
           {isActive && (
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-teal-400 rounded-r-full shadow-lg shadow-teal-400/50" />
           )}
-
           <span
             className={`transition-transform duration-200 group-hover:scale-110 ${
               isActive
@@ -302,27 +291,39 @@ export default function Sidebar() {
   const subscriptionExpired =
     !subLoading && user && user.role !== "admin" && !isAllowed();
 
+  const seniorityLabel =
+    user?.seniority === "senior"
+      ? "Senior Lawyer"
+      : user?.seniority === "junior"
+        ? "Junior Lawyer"
+        : user?.role || "Lawyer";
+
   return (
     <aside className="h-screen w-60 flex flex-col bg-[#0f172a] border-r border-slate-800/80 z-40 select-none shadow-2xl shadow-black/20">
-      {/* Logo Section */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-800/80 bg-gradient-to-b from-slate-800/50 to-transparent">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#026665] to-[#024947] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#026665]/20 ring-1 ring-[#026665]/30">
-          <Scale className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <p
-            className="text-sm font-bold text-white tracking-wide bg-gradient-to-r from-white to-slate-300 bg-clip-text"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            LawPortal
-          </p>
-          <p className="text-[10px] text-slate-500 uppercase tracking-[0.15em] font-medium">
-            Legal Practice
-          </p>
-        </div>
-      </div>
+      {user && (
+        <div className="px-4 pt-5 pb-4 border-b border-slate-800/80 bg-gradient-to-b from-slate-800/40 to-transparent">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-shrink-0">
+              <UserAvatar user={user} size="lg" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#0f172a] shadow-lg shadow-emerald-500/50" />
+            </div>
 
-      {/* Expired subscription banner */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white truncate leading-tight">
+                {user.name}
+              </p>
+              <p className="text-[10px] text-slate-400 truncate mt-0.5 font-medium">
+                {user.email}
+              </p>
+              <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold uppercase tracking-widest text-teal-400/80">
+                <span className="w-1 h-1 rounded-full bg-teal-400 inline-block" />
+                {seniorityLabel}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {subscriptionExpired && (
         <div className="mx-3 mt-4 px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
           <div className="flex items-center gap-2 mb-0.5">
@@ -346,7 +347,6 @@ export default function Sidebar() {
         </div>
       )}
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
@@ -372,40 +372,19 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* User Profile Section */}
-      {user && (
-        <div className="border-t border-slate-800/80 px-4 py-4 bg-gradient-to-t from-slate-800/50 to-transparent backdrop-blur-sm">
-          <div className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#026665]/20 to-[#026665]/5 border-2 border-[#026665]/30 flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#026665]/10 group-hover:scale-105 transition-transform duration-200">
-                <span className="text-[#026665] text-xs font-bold uppercase tracking-wider">
-                  {user.name?.charAt(0) || "U"}
-                </span>
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#0f172a] shadow-lg shadow-emerald-500/50" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-white truncate leading-tight">
-                {user.name}
-              </p>
-              <p className="text-[10px] text-slate-500 truncate capitalize font-medium">
-                {user.seniority === "senior"
-                  ? "Senior Lawyer"
-                  : user.seniority === "junior"
-                    ? "Junior Lawyer"
-                    : user.role}
-              </p>
-            </div>
-            <button
-              onClick={logout}
-              className="p-2 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 group/logout flex-shrink-0"
-              title="Logout"
-            >
-              <LogOutIcon className="w-4 h-4 group-hover/logout:scale-110 transition-transform duration-200" />
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="border-t border-slate-800/80 px-3 py-2 bg-gradient-to-t from-slate-800/40 to-transparent">
+        <button
+          onClick={logout}
+          className="flex items-center gap-3 w-full px-4 py-1 rounded-xl
+            text-sm font-semibold text-slate-400
+            hover:text-rose-400 hover:bg-rose-500/10
+            border border-transparent hover:border-rose-500/20
+            transition-all duration-200 group"
+        >
+          <LogOutIcon className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
+          Sign Out
+        </button>
+      </div>
     </aside>
   );
 }

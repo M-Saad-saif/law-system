@@ -5,8 +5,9 @@ export const dynamic = "force-dynamic";
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { api } from "@/utils/api";
+import { api, uploadFile } from "@/utils/api";
 import { Spinner } from "@/components/ui";
+import UserAvatar from "@/components/ui/UserAvatar";
 import {
   User,
   Shield,
@@ -25,6 +26,7 @@ import {
   Building2,
   Scale,
   Briefcase,
+  Camera,
 } from "lucide-react";
 
 function ProfileSection({ user, refetch }) {
@@ -34,6 +36,13 @@ function ProfileSection({ user, refetch }) {
     barCouncilNo: user?.barCouncilNo || "",
   });
   const [saving, setSaving] = useState(false);
+
+  const [uploadingPic, setUploadingPic] = useState(false);
+  const [previewPic, setPreviewPic] = useState(user?.profilePicture || null);
+
+  useEffect(() => {
+    setPreviewPic(user?.profilePicture || null);
+  }, [user?.profilePicture]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -46,6 +55,34 @@ function ProfileSection({ user, refetch }) {
       toast.error(err.message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePictureChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const localPreview = URL.createObjectURL(file);
+    setPreviewPic(localPreview);
+
+    setUploadingPic(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const uploadRes = await uploadFile("/api/upload", fd);
+      const cloudinaryUrl = uploadRes.url;
+
+      await api.patch("/api/auth/me/profile-picture", {
+        profilePicture: cloudinaryUrl,
+      });
+
+      await refetch();
+      toast.success("Profile picture updated!");
+    } catch (err) {
+      setPreviewPic(user?.profilePicture || null);
+      toast.error(err.message || "Failed to upload picture.");
+    } finally {
+      setUploadingPic(false);
     }
   };
 
@@ -69,8 +106,63 @@ function ProfileSection({ user, refetch }) {
               Profile Information
             </h2>
             <p className="text-sm text-gray-500 mt-0.5 font-medium">
-              Manage your personal details and professional credentials
+              Manage your personal details, credentials, and profile picture
             </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6 mb-8 p-5 bg-[#027675]/5 rounded-2xl border border-[#027675]/10">
+          {/* Avatar preview */}
+          <div className="relative shrink-0">
+            {previewPic ? (
+              <img
+                src={previewPic}
+                alt="Your profile picture"
+                className="w-24 h-24 rounded-full object-cover ring-4 ring-white shadow-lg"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center text-white text-3xl font-bold ring-4 ring-white shadow-lg">
+                {user?.name?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+            )}
+
+            {/* Camera icon overlay */}
+            <label
+              htmlFor="dp-upload"
+              className="absolute bottom-0 right-0 w-8 h-8 bg-[#027675] rounded-full flex items-center justify-center cursor-pointer shadow-md hover:bg-[#015f5d] transition-colors"
+              title="Change profile picture"
+            >
+              {uploadingPic ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4 text-white" />
+              )}
+            </label>
+            <input
+              id="dp-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePictureChange}
+              disabled={uploadingPic}
+            />
+          </div>
+
+          <div>
+            <p className="font-semibold text-gray-900 text-sm">
+              Profile Picture
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Click the camera icon to upload a new photo.
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              JPG, PNG, WEBP — max 5MB
+            </p>
+            {uploadingPic && (
+              <p className="text-xs text-[#027675] font-medium mt-1 animate-pulse">
+                Uploading...
+              </p>
+            )}
           </div>
         </div>
 
@@ -480,7 +572,7 @@ function JuniorLawyersSection({ onJuniorsChange }) {
               No junior lawyers added yet
             </p>
             <p className="text-sm text-gray-400">
-              Click the "Add Junior" button to invite team members
+              Click the &quot;Add Junior&quot; button to invite team members
             </p>
           </div>
         ) : (
@@ -491,9 +583,7 @@ function JuniorLawyersSection({ onJuniorsChange }) {
                 className="flex items-center justify-between p-4 hover:bg-[#027675]/5 rounded-xl transition-all group border border-transparent hover:border-[#027675]/10"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#027675]/10 to-[#019d8e]/10 flex items-center justify-center group-hover:from-[#027675]/20 group-hover:to-[#019d8e]/20 transition-all">
-                    <User className="w-5 h-5 text-[#027675]" />
-                  </div>
+                  <UserAvatar user={j} size="lg" />
                   <div>
                     <p className="font-semibold text-gray-900">{j.name}</p>
                     <p className="text-sm text-gray-500">{j.email}</p>
@@ -606,13 +696,19 @@ function AccountInfoSection({ user, juniorCount }) {
                   Supervising Counsel
                 </span>
               </div>
-              <span className="font-semibold text-gray-900">
-                {user?.createdBy?.name ||
-                  user?.seniorLawyer?.name ||
-                  seniorName ||
-                  user?.seniorName ||
-                  "Not assigned"}
-              </span>
+              <div className="flex items-center gap-3">
+                {/* Show the senior lawyer's profile picture */}
+                {user?.createdBy && (
+                  <UserAvatar user={user.createdBy} size="sm" />
+                )}
+                <span className="font-semibold text-gray-900">
+                  {user?.createdBy?.name ||
+                    user?.seniorLawyer?.name ||
+                    seniorName ||
+                    user?.seniorName ||
+                    "Not assigned"}
+                </span>
+              </div>
             </div>
           )}
 

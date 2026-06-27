@@ -11,6 +11,14 @@ import PaymentRequest, {
   PLAN_TYPE,
   PAYMENT_STATUS,
 } from "@/models/PaymentRequest";
+import { v2 as cloudinary } from "cloudinary";
+
+// Configure Cloudinary (same env vars used in /api/upload)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // ---- Chamber helpers ----
 export async function getChamberForUser(userId) {
@@ -123,6 +131,45 @@ export async function createPaymentRequest(
   return pr;
 }
 
+async function destroyCloudinaryImage(url) {
+  if (!url || !url.includes("res.cloudinary.com")) return;
+
+  try {
+    const uploadIndex = url.indexOf("/upload/");
+    if (uploadIndex === -1) return;
+
+    const afterUpload = url.slice(uploadIndex + "/upload/".length);
+    const withoutVersion = afterUpload.replace(/^v\d+\//, "");
+    const publicId = withoutVersion.replace(/\.[^/.]+$/, "");
+
+    await cloudinary.uploader.destroy(publicId);
+  } catch (err) {
+  }
+}
+
+async function cleanupOldPayments(chamberId) {
+  const allPayments = await PaymentRequest.find({ chamber: chamberId })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const toDelete = allPayments.slice(2);
+
+  if (toDelete.length === 0) return;
+
+  for (const payment of toDelete) {
+    if (payment.screenshot_url) {
+      await destroyCloudinaryImage(payment.screenshot_url);
+    }
+  }
+
+  const idsToDelete = toDelete.map((p) => p._id);
+  await PaymentRequest.deleteMany({ _id: { $in: idsToDelete } });
+
+  console.log(
+    `[cleanup] Deleted ${toDelete.length} old payment record(s) for chamber ${chamberId}`,
+  );
+}
+
 export async function approvePaymentRequest(paymentRequestId) {
   await connectDB();
 
@@ -154,6 +201,7 @@ export async function approvePaymentRequest(paymentRequestId) {
     },
     { new: true },
   );
+  await cleanupOldPayments(pr.chamber);
 
   return pr;
 }

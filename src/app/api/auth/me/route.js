@@ -8,7 +8,7 @@ export const GET = withAuth(async (request, context, user) => {
   try {
     await connectDB();
     const fullUser = await User.findById(user.id)
-      .populate("createdBy", "name email phone")
+      .populate("createdBy", "name email phone profilePicture")
       .lean();
     if (!fullUser) {
       const response = apiError("Unauthorized. Please login.", 401);

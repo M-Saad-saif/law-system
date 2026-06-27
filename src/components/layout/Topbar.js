@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Bell,
-  Search,
   Menu,
   X,
   Scale,
@@ -19,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/utils/helpers";
 import { api } from "@/utils/api";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -77,7 +77,7 @@ export default function Topbar() {
   return (
     <>
       <header className="h-14 bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-4 md:px-5 shrink-0 z-20 shadow-sm">
-        {/* Mobile menu btn */}
+        {/* Mobile menu button */}
         <button
           className="md:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-all duration-200 active:scale-95"
           onClick={() => setMobileOpen(true)}
@@ -98,11 +98,6 @@ export default function Topbar() {
         </div>
 
         <div className="flex items-center gap-1.5 ml-auto">
-          {/* Search Button (Optional - can be activated) */}
-          {/* <button className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all duration-200">
-            <Search className="w-4 h-4" />
-          </button> */}
-
           {/* Notification Bell */}
           <Link
             href="/reminders"
@@ -124,14 +119,14 @@ export default function Topbar() {
           {/* Divider */}
           <div className="w-px h-4 bg-slate-200 mx-1.5" />
 
-          {/* User Profile */}
-          <div className="flex items-center gap-2 group cursor-pointer">
+
+          <Link
+            href="/settings"
+            className="flex items-center gap-2 group cursor-pointer hover:bg-slate-50 px-2 py-1 rounded-xl transition-all duration-200"
+          >
             <div className="relative">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center shadow-md shadow-teal-500/20 group-hover:shadow-lg group-hover:shadow-teal-500/30 transition-all duration-200">
-                <span className="text-white text-[10px] font-bold tracking-wider">
-                  {user?.name?.charAt(0)?.toUpperCase() || "U"}
-                </span>
-              </div>
+              <UserAvatar user={user} size="sm" />
+              {/* Online dot */}
               <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
             </div>
             <div className="hidden sm:block">
@@ -139,12 +134,12 @@ export default function Topbar() {
                 {user?.name}
               </div>
               <p className="text-[9px] text-slate-500 leading-tight font-medium capitalize">
-                {user.seniority
+                {user?.seniority
                   ? `${user.seniority} ${user.role || "Lawyer"}`
-                  : user.role || "Lawyer"}
+                  : user?.role || "Lawyer"}
               </p>
             </div>
-          </div>
+          </Link>
         </div>
       </header>
 
@@ -156,15 +151,18 @@ export default function Topbar() {
             onClick={() => setMobileOpen(false)}
           />
           <aside className="absolute left-0 top-0 bottom-0 w-64 flex flex-col bg-slate-900 shadow-2xl animate-in slide-in-from-left duration-300">
-            {/* Mobile Sidebar Header */}
+            {/* Mobile Sidebar Header — also shows DP */}
             <div className="flex items-center justify-between px-4 h-14 border-b border-slate-800">
               <div className="flex items-center gap-2.5">
-                <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-teal-600 shadow-lg shadow-teal-500/20">
-                  <Scale className="w-3.5 h-3.5 text-white" />
+                <UserAvatar user={user} size="sm" />
+                <div>
+                  <p className="text-white font-semibold text-xs truncate max-w-[120px]">
+                    {user?.name}
+                  </p>
+                  <p className="text-slate-500 text-[10px] capitalize">
+                    {user?.seniority || user?.role}
+                  </p>
                 </div>
-                <span className="text-white font-bold text-sm tracking-tight">
-                  LawPortal
-                </span>
               </div>
               <button
                 onClick={() => setMobileOpen(false)}
