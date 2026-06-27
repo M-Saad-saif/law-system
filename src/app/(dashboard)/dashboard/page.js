@@ -40,8 +40,16 @@ export default function DashboardPage() {
   if (loading) return <PageLoader />;
 
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  let greeting = "";
+  if (hour >= 0 && hour < 5) {
+    greeting = "Good Night";
+  } else if (hour >= 5 && hour < 12) {
+    greeting = "Good Morning";
+  } else if (hour >= 12 && hour < 17) {
+    greeting = "Good Afternoon";
+  } else {
+    greeting = "Good Night";
+  }
 
   return (
     <div className="min-h-screen bg-[#eef5f3] pb-12">

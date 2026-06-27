@@ -6,7 +6,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Mail, Lock, Eye, EyeOff, Gavel } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Scale } from "lucide-react";
 import { api } from "@/utils/api";
 import { LaptopMockup } from "@/components/auth/LaptopMockup";
 
@@ -56,7 +56,7 @@ function Logo() {
   return (
     <div className="flex items-center gap-2.5 mb-16 group cursor-pointer animate-scale-in">
       <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f766e] to-[#0d9488] flex items-center justify-center shadow-lg transform group-hover:rotate-180 transition-all duration-700 animate-gradient-shift">
-        <Gavel className="text-white w-5 h-5" />
+        <Scale className="text-white w-5 h-5" />
       </div>
       <span className="text-sm font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
         LawPortal
@@ -67,49 +67,42 @@ function Logo() {
 
 function BackgroundPattern() {
   return (
-    <div className="absolute inset-0 w-full h-full pointer-events-none z-0 hidden lg:block">
-      <svg
-        className="absolute right-0 top-0 h-full w-[60%] object-cover"
-        viewBox="0 0 800 900"
-        preserveAspectRatio="none"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M180 0C320 180 200 420 480 620C680 760 520 900 800 900V0H180Z"
-          fill="#042f2e"
-          className="animate-sweep-1"
-          style={{ opacity: 0.2 }}
-          transform="translate(-40, 20)"
-        />
-        <path
-          d="M180 0C320 180 200 420 480 620C680 760 520 900 800 900V0H180Z"
-          fill="#0d9488"
-          className="animate-sweep-2"
-          style={{ opacity: 0.4 }}
-          transform="translate(-20, 10)"
-        />
-        <path
-          d="M180 0C320 180 200 420 480 620C680 760 520 900 800 900V0H180Z"
-          fill="url(#tealGradient)"
-          className="animate-sweep-3"
-        />
-        <defs>
-          <linearGradient
-            id="tealGradient"
-            x1="180"
-            y1="0"
-            x2="800"
-            y2="900"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop stopColor="#0d9488" />
-            <stop offset="0.6" stopColor="#0f766e" />
-            <stop offset="1" stopColor="#042f2e" />
-          </linearGradient>
-        </defs>
-      </svg>
-    </div>
+   <div className="absolute inset-0 w-full h-full pointer-events-none z-0 hidden lg:block">
+        <svg
+          className="absolute right-0 top-0 h-full w-[60%] object-cover"
+          viewBox="0 0 800 900"
+          preserveAspectRatio="none"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M180 0C320 180 200 420 480 620C680 760 520 900 800 900V0H180Z"
+            fill="#042f2e"
+            className="opacity-0 animate-sweep-1"
+            style={{ opacity: 0.2 }}
+            transform="translate(-40, 20)"
+          />
+          <path
+            d="M180 0C320 180 200 420 480 620C680 760 520 900 800 900V0H180Z"
+            fill="#0d9488"
+            className="opacity-0 animate-sweep-2"
+            style={{ opacity: 0.4 }}
+            transform="translate(-20, 10)"
+          />
+          <path
+            d="M180 0C320 180 200 420 480 620C680 760 520 900 800 900V0H180Z"
+            fill="url(#tealGradient)"
+            className="animate-sweep-3"
+          />
+          <defs>
+            <linearGradient id="tealGradient" x1="180" y1="0" x2="800" y2="900" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#0d9488" />
+              <stop offset="0.6" stopColor="#0f766e" />
+              <stop offset="1" stopColor="#042f2e" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
   );
 }
 
@@ -202,16 +195,7 @@ export default function LoginPage() {
             background-position: 200% 0;
           }
         }
-        @keyframes sweepIn {
-          0% {
-            transform: translateX(80px);
-            opacity: 0;
-          }
-          100% {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
+      
 
         .animate-sweep-1 {
           animation: sweepIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;

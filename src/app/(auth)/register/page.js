@@ -212,7 +212,7 @@ export default function RegisterPage() {
           {/* Logo with Animation */}
           <div className="flex items-center gap-2.5 mb-16 group cursor-pointer animate-scale-in">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f766e] to-[#0d9488] flex items-center justify-center shadow-lg transform group-hover:rotate-180 transition-all duration-700 animate-gradient-shift">
-              <Gavel className="text-white w-5 h-5" />
+              <Scale className="text-white w-5 h-5" />
             </div>
             <span className="text-sm font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
               LawPortal
@@ -230,10 +230,10 @@ export default function RegisterPage() {
           </div>
 
           {/* Info Alert with Border Glow Animation */}
-          <div className="flex items-start gap-2 bg-[#0d9488]/5 border border-[#0d9488]/10 rounded-xl p-3 mb-6 transform hover:scale-[1.01] transition-transform duration-300 animate-border-glow">
+          <div className="flex items-start gap-2 bg-[#0d9488]/5 border border-[#0d9488]/10 rounded-xl p-3 mb-6 transform transition-transform duration-300 animate-border-glow">
             <ShieldCheck className="w-4 h-4 text-[#0f766e] shrink-0 mt-0.5 animate-pulse-slow" />
             <p className="text-[11px] text-[#042f2e]/80 leading-normal">
-              Registering a <span className="font-semibold text-[#0f766e]">Senior Lawyer</span> node. Junior profiles are integrated exclusively inside the secure management console dashboard.
+              Registering a <span className="font-semibold text-[#0f766e]">Senior Lawyer</span> . Junior profiles are integrated exclusively inside the secure management console dashboard.
             </p>
           </div>
 
@@ -242,7 +242,7 @@ export default function RegisterPage() {
             <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
               <Field
                 label="Full Name"
-                placeholder="John Doe"
+                placeholder="Full name"
                 required
                 value={form.name}
                 onChange={set("name")}
@@ -312,23 +312,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Utility Controls with Animation */}
-            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 px-2 select-none animate-slide-up" style={{ animationDelay: "700ms" }}>
-              <label className="flex items-center gap-1.5 cursor-pointer group">
-                <input 
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded-sm border-slate-300 text-[#0f766e] focus:ring-0 checked:bg-[#0f766e] w-3.5 h-3.5 accent-[#0f766e] transition-transform group-hover:scale-105" 
-                />
-                <span className="group-hover:text-slate-600 transition-colors">Remember me</span>
-              </label>
-              <Link href="#" className="hover:text-slate-600 transition-colors hover:underline">
-                Forgot Password?
-              </Link>
-            </div>
-
-            {/* Submit Buttons with Enhanced Animations */}
+                    {/* Submit Buttons with Enhanced Animations */}
             <div className="flex items-center gap-8 pt-4 pl-1 animate-slide-up" style={{ animationDelay: "800ms" }}>
               <button
                 type="submit"

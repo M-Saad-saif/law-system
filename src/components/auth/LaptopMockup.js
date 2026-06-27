@@ -108,10 +108,10 @@ function DashboardSidebar() {
           </div>
           <div className="truncate">
             <p className="font-bold text-white text-[11px] leading-tight">
-              saad
+              User
             </p>
             <p className="text-[8px] text-white/50 truncate">
-              gcsaadsaif123@gmail.com
+              youremail@gmail.com
             </p>
           </div>
         </div>
@@ -162,6 +162,20 @@ function DashboardSidebar() {
 }
 
 function DashboardWorkspace() {
+  const hour = new Date().getHours();
+
+  let greeting = "";
+
+  if (hour >= 0 && hour < 5) {
+    greeting = "Good Night";
+  } else if (hour >= 5 && hour < 12) {
+    greeting = "Good Morning";
+  } else if (hour >= 12 && hour < 17) {
+    greeting = "Good Afternoon";
+  } else {
+    greeting = "Good Night";
+  }
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="bg-white px-4 py-2.5 flex justify-between items-center border-b border-slate-100 shadow-xs">
@@ -176,7 +190,7 @@ function DashboardWorkspace() {
           <div className="flex items-center gap-2 border-l pl-3 border-slate-200">
             <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-amber-700 to-amber-900" />
             <div className="text-[9px] leading-none">
-              <p className="font-bold text-slate-700">saad</p>
+              <p className="font-bold text-slate-700">User</p>
               <p className="text-slate-400 text-[6px] mt-0.5">Senior Lawyer</p>
             </div>
           </div>
@@ -187,7 +201,7 @@ function DashboardWorkspace() {
         <div className="flex justify-between items-end">
           <div>
             <h1 className="text-base font-serif font-bold text-[#042f2e]">
-              Good evening, saad
+              {greeting}, User
             </h1>
             <p className="text-[9px] text-slate-400 mt-0.5">
               Here's your practice overview • Saturday, 27 June 2026
