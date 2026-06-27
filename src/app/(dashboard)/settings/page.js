@@ -693,21 +693,32 @@ function AccountInfoSection({ user, juniorCount }) {
                   <Building2 className="w-5 h-5 text-[#027675]" />
                 </div>
                 <span className="font-semibold text-gray-700">
-                  Supervising Counsel
+                  Senior Lawyer
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                {/* Show the senior lawyer's profile picture */}
                 {user?.createdBy && (
                   <UserAvatar user={user.createdBy} size="sm" />
                 )}
-                <span className="font-semibold text-gray-900">
-                  {user?.createdBy?.name ||
-                    user?.seniorLawyer?.name ||
-                    seniorName ||
-                    user?.seniorName ||
-                    "Not assigned"}
-                </span>
+                <div className="flex flex-col">
+                  <span className="font-semibold text-gray-900 text-sm text-center">
+                    {user?.createdBy?.name || "Error in displaying"}
+                  </span>
+                  <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+                    {user?.createdBy?.email && (
+                      <span className="flex items-center gap-1">
+                        <Mail className="w-3 h-3" />
+                        {user?.createdBy?.email || "Error in displaying"}
+                      </span>
+                    )}
+                    {user?.createdBy?.phone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="w-3 h-3" />
+                        {user?.createdBy?.phone || "Error in displaying"}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -787,7 +798,7 @@ export default function SettingsPage() {
         {/* Footer */}
         <div className="mt-12 text-center">
           <p className="text-sm text-gray-400">
-            Need help? Contact your system administrator or support team
+            Need help? Contact your system administrator or support team 
           </p>
         </div>
       </div>
