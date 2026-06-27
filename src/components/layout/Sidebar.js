@@ -168,14 +168,14 @@ function LockedNavItem({ item }) {
   return (
     <div className="relative group/locked">
       <div
-        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
+        className="flex items-center gap-3 px-3.5 py-2.5 rounded-full text-sm font-medium
           border border-transparent opacity-40 cursor-not-allowed select-none"
       >
-        <span className="text-slate-600">
+        <span className="text-white/50">
           <item.icon className="w-5 h-5" />
         </span>
-        <span className="flex-1 truncate text-slate-600">{item.label}</span>
-        <Lock className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
+        <span className="flex-1 truncate text-white/50">{item.label}</span>
+        <Lock className="w-3.5 h-3.5 text-white/30 flex-shrink-0" />
       </div>
       {/* Tooltip */}
       <div
@@ -184,14 +184,10 @@ function LockedNavItem({ item }) {
         transition-opacity duration-200 whitespace-nowrap"
       >
         <div
-          className="bg-slate-800 border border-slate-700/60 text-slate-300
-          text-[11px] px-2.5 py-1.5 rounded-lg shadow-xl shadow-black/40"
+          className="bg-slate-900 text-white
+          text-[11px] px-2.5 py-1.5 rounded-lg shadow-xl border border-white/10"
         >
-          Renew your subscription to access
-          <div
-            className="absolute right-full top-1/2 -translate-y-1/2
-            border-4 border-transparent border-r-slate-700/60"
-          />
+          Renew subscription to access
         </div>
       </div>
     </div>
@@ -212,38 +208,35 @@ function NavItem({ item, pathname, isLocked }) {
         <Link
           href={item.href}
           className={`
-            flex items-center gap-3 flex-1 px-3 py-2.5 rounded-xl text-sm font-medium
+            flex items-center gap-3 flex-1 px-3.5 py-2.5 rounded-full text-sm font-medium
             transition-all duration-200 relative overflow-hidden
             ${
               isActive
-                ? "bg-teal-500/10 text-teal-400 border border-teal-500/20 shadow-lg shadow-teal-500/5"
-                : "text-slate-400 hover:text-slate-200 hover:bg-white/5 border border-transparent hover:shadow-md"
+                ? "bg-white text-[#0f766e] shadow-lg shadow-black/10"
+                : "text-teal-100/80 hover:text-white hover:bg-white/10 border border-transparent"
             }
           `}
         >
-          {isActive && (
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-teal-400 rounded-r-full shadow-lg shadow-teal-400/50" />
-          )}
           <span
             className={`transition-transform duration-200 group-hover:scale-110 ${
-              isActive
-                ? "text-teal-400 drop-shadow-sm"
-                : "text-slate-500 group-hover:text-slate-300"
+              isActive ? "text-[#0f766e]" : "text-teal-200/70 group-hover:text-white"
             }`}
           >
             <item.icon className="w-5 h-5" />
           </span>
-          <span className="flex-1 truncate">{item.label}</span>
+          <span className={`flex-1 truncate ${isActive ? 'font-semibold' : ''}`}>{item.label}</span>
+          
           {item.badge && (
-            <span className="text-[10px] font-bold bg-gradient-to-r from-teal-500 to-teal-600 text-white px-2 py-0.5 rounded-full tracking-wide shadow-md shadow-teal-500/20">
+            <span className="text-[10px] font-bold bg-[#0f766e] text-white px-2 py-0.5 rounded-full tracking-wide shadow-sm">
               {item.badge}
             </span>
           )}
         </Link>
+        
         {hasSubLinks && (
           <button
             onClick={() => setSubOpen((v) => !v)}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/5 ml-1 transition-all duration-200"
+            className="p-1.5 rounded-full text-teal-200/60 hover:text-white hover:bg-white/10 ml-1 transition-all duration-200"
           >
             <span
               className={`block transition-transform duration-300 ${subOpen ? "rotate-180" : ""}`}
@@ -253,23 +246,22 @@ function NavItem({ item, pathname, isLocked }) {
           </button>
         )}
       </div>
+      
+      {/* Submenu */}
       {hasSubLinks && subOpen && (
-        <div className="ml-8 mt-1.5 space-y-1 border-l-2 border-slate-700/50 pl-4">
+        <div className="ml-6 mt-1 space-y-0.5 pl-3 border-l border-white/10">
           {item.subLinks.map((sub) => {
             const subActive = pathname === sub.href;
             return (
               <Link
                 key={sub.href}
                 href={sub.href}
-                className={`block py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200 relative ${
+                className={`block py-1.5 px-3 rounded-lg text-xs font-medium transition-all duration-200 ${
                   subActive
-                    ? "text-teal-400 bg-teal-500/5 border border-teal-500/10"
-                    : "text-slate-500 hover:text-slate-300 hover:bg-white/5 border border-transparent"
+                    ? "text-white bg-white/15"
+                    : "text-teal-200/60 hover:text-white hover:bg-white/5"
                 }`}
               >
-                {subActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-teal-400 rounded-r-full" />
-                )}
                 {sub.label}
               </Link>
             );
@@ -291,70 +283,66 @@ export default function Sidebar() {
   const subscriptionExpired =
     !subLoading && user && user.role !== "admin" && !isAllowed();
 
-  const seniorityLabel =
-    user?.seniority === "senior"
-      ? "Senior Lawyer"
-      : user?.seniority === "junior"
-        ? "Junior Lawyer"
-        : user?.role || "Lawyer";
-
   return (
-    <aside className="h-screen w-60 flex flex-col bg-[#0f172a] border-r border-slate-800/80 z-40 select-none shadow-2xl shadow-black/20">
+    <aside 
+      className="h-[calc(100vh-1.5rem)] my-3 ml-3 w-64 flex flex-col z-40 select-none shrink-0 rounded-3xl
+                 bg-gradient-to-b from-[#0f766e] via-[#0d9488] to-[#042f2e]
+                 shadow-xl shadow-teal-900/25"
+    >
+      {/* User Profile Section */}
       {user && (
-        <div className="px-4 pt-5 pb-4 border-b border-slate-800/80 bg-gradient-to-b from-slate-800/40 to-transparent">
+        <div className="px-5 pt-6 pb-5">
           <div className="flex items-center gap-3">
             <div className="relative flex-shrink-0">
-              <UserAvatar user={user} size="lg" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-[#0f172a] shadow-lg shadow-emerald-500/50" />
+              <div className="rounded-full ring-2 ring-white/40 ring-offset-2 ring-offset-[#0f766e]">
+                <UserAvatar user={user} size="lg" />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#0f766e] shadow-sm" />
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate leading-tight">
+              <p className="text-sm font-bold text-white truncate leading-tight">
                 {user.name}
               </p>
-              <p className="text-[10px] text-slate-400 truncate mt-0.5 font-medium">
+              <p className="text-[11px] text-teal-200/70 truncate mt-0.5 font-medium">
                 {user.email}
               </p>
-              <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-bold uppercase tracking-widest text-teal-400/80">
-                <span className="w-1 h-1 rounded-full bg-teal-400 inline-block" />
-                {seniorityLabel}
-              </span>
             </div>
           </div>
         </div>
       )}
 
+      {/* Subscription Warning */}
       {subscriptionExpired && (
-        <div className="mx-3 mt-4 px-3 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
-          <div className="flex items-center gap-2 mb-0.5">
-            <Lock className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-            <p className="text-[11px] font-semibold text-amber-400">
-              Subscription Ended
+        <div className="mx-4 mb-2 px-4 py-3 rounded-2xl bg-amber-500/20 border border-amber-400/30 backdrop-blur-sm">
+          <div className="flex items-center gap-2 mb-1">
+            <Lock className="w-4 h-4 text-amber-300 flex-shrink-0" />
+            <p className="text-xs font-semibold text-amber-100">
+              Subscription Expired
             </p>
           </div>
-          <p className="text-[10px] text-amber-400/70 leading-relaxed">
-            Renew to unlock all features
+          <p className="text-[10px] text-amber-200/80 leading-relaxed mb-2">
+            Renew access to unlock features
           </p>
           <Link
             href="/billing"
-            className="mt-2 flex items-center justify-center gap-1.5 w-full py-1.5 rounded-lg
-              bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30
-              text-[11px] font-semibold text-amber-400 transition-all duration-200"
+            className="block w-full text-center py-1.5 rounded-full
+                     bg-amber-400 hover:bg-amber-300 text-amber-950
+                     text-xs font-bold transition-colors"
           >
-            <CreditCard className="w-3 h-3" />
             Renew Now
           </Link>
         </div>
       )}
 
-      <nav className="flex-1 overflow-y-auto py-5 px-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-4 pb-4 space-y-6 scrollbar-thin scrollbar-thumb-teal-900/50 scrollbar-track-transparent">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
-            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.15em] px-3 mb-2.5 flex items-center gap-2">
-              <span className="w-1 h-1 rounded-full bg-slate-600" />
+            <p className="text-[10px] font-bold text-teal-300/60 uppercase tracking-widest px-3 mb-2 ml-1">
               {section.label}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {section.items.map((item) => {
                 const isLocked =
                   subscriptionExpired && !ALWAYS_ALLOWED_HREFS.has(item.href);
@@ -372,16 +360,16 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="border-t border-slate-800/80 px-3 py-2 bg-gradient-to-t from-slate-800/40 to-transparent">
-        <button
+      {/* Footer */}
+      <div className="px-4 pb-5 pt-2 border-t border-white/10 mt-auto">
+         <button
           onClick={logout}
-          className="flex items-center gap-3 w-full px-4 py-1 rounded-xl
-            text-sm font-semibold text-slate-400
-            hover:text-rose-400 hover:bg-rose-500/10
-            border border-transparent hover:border-rose-500/20
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full
+            text-sm font-medium text-red-100
+            bg-red-500/10 hover:bg-red-500/20 border border-red-400/20
             transition-all duration-200 group"
         >
-          <LogOutIcon className="w-4 h-4 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
+          <LogOutIcon className="w-4 h-4 group-hover:translate-x-[-2px] transition-transform" />
           Sign Out
         </button>
       </div>

@@ -53,7 +53,7 @@ function DayColumn({ day, isSelected, onClick }) {
   return (
     <button
       onClick={() => onClick(day.dateKey)}
-      className={`w-full flex flex-col items-center gap-1 px-2 py-2 rounded-xl transition-all
+      className={`w-full flex flex-col items-center gap-1 px-2 py-2.5 rounded-2xl transition-all
         ${
           isSelected
             ? "bg-[#103168] text-white shadow-sm "
@@ -174,7 +174,7 @@ function HearingCard({ hearing }) {
   );
 
   const className =
-    "group flex flex-col gap-2 w- p-3 rounded-xl border  bg-white hover:bg-gradient-to-t hover:from-[#22656c0d] hover:to-transparent border-[#027f7e]/30 hover:shadow-sm transition-all";
+    "group flex flex-col gap-2 w- p-3 rounded-2xl border  bg-white hover:bg-gradient-to-t hover:from-[#22656c0d] hover:to-transparent border-[#027f7e]/30 hover:shadow-sm transition-all";
 
   if (hearing.custom) {
     return (

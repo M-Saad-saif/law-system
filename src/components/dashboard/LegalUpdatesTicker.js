@@ -248,7 +248,7 @@ export default function LegalUpdatesTicker() {
   const tickerDuration = Math.max(25, Math.min(60, filtered.length * 3));
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
       {/* -- Header bar -- */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50/60 gap-3 flex-wrap">
         <div className="flex items-center gap-2.5 min-w-0">
