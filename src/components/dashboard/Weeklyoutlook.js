@@ -56,7 +56,7 @@ function DayColumn({ day, isSelected, onClick }) {
       className={`w-full flex flex-col items-center gap-1 px-2 py-2.5 rounded-2xl transition-all
         ${
           isSelected
-            ? "bg-[#103168] text-white shadow-sm "
+            ? "bg-[#0f766e] text-white shadow-sm "
             : day.isToday
               ? "bg-[#027f7e]/5 text-[#027f7e] border border-[#027f7e]/20"
               : "text-gray-500 bg-gray-100 hover:bg-white hover:border-[0.5px] hover:border-gray-300"

@@ -27,24 +27,140 @@ import {
   Scale,
   Briefcase,
   Camera,
+  Copy,
+  ExternalLink,
+  Sparkles,
+  X,
 } from "lucide-react";
 
-function ProfileSection({ user, refetch }) {
+function LeftProfileSidebar({ user, previewPic, juniorCount, onOpenModal }) {
+  const isSenior = user?.seniority === "senior";
+  const seniorityLabel =
+    user?.seniority === "senior"
+      ? "Senior Counsel"
+      : user?.seniority === "junior"
+        ? "Junior Associate"
+        : user?.seniority || "Member";
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-lg shadow-gray-100/50 p-6 flex flex-col items-center text-center h-fit transform transition-all duration-500 hover:shadow-xl hover:shadow-[#027675]/5 hover:-translate-y-1">
+      {/* Avatar Container */}
+      <div className="relative mb-4 group">
+        <div className="relative">
+          {previewPic ? (
+            <img
+              src={previewPic}
+              alt="Your profile picture"
+              className="w-28 h-28 rounded-full object-cover border-2 border-gray-100 shadow-md transition-all duration-300 group-hover:border-[#027675]/30"
+            />
+          ) : (
+            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center text-white text-4xl font-bold shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:scale-105">
+              {user?.name?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+          )}
+
+          {/* Status indicator */}
+          <span className="absolute bottom-2 right-2 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full animate-pulse"></span>
+        </div>
+      </div>
+
+      {/* User Info */}
+      <h3 className="font-bold text-gray-900 text-lg animate-fade-in">
+        {user?.name || "User Name"}
+      </h3>
+      <p className="text-sm text-gray-400 mt-0.5 mb-6">
+        {seniorityLabel} - LawPortal
+      </p>
+      <p className="text-sm text-gray-400 ">{user?.email}</p>
+      <p className="text-sm text-gray-400 ">{user?.phone}</p>
+
+      {/* Stats / Indicators Grid */}
+      <div className="w-full border-t border-b border-gray-100 py-3 my-2 space-y-3 text-left">
+        <div className="flex items-center justify-between text-sm px-1 group hover:bg-gray-50 rounded-lg p-2 transition-all duration-300">
+          <span className="text-gray-500">Account Role</span>
+          <span className="font-semibold text-[#027675] capitalize flex items-center gap-1.5">
+            <Shield className="w-3.5 h-3.5" />
+            {user?.role || "user"}
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-sm px-1 group hover:bg-gray-50 rounded-lg p-2 transition-all duration-300">
+          <span className="text-gray-500">Status</span>
+          <span className="font-semibold text-emerald-600 flex items-center gap-1.5">
+            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+            Active
+          </span>
+        </div>
+        {isSenior && (
+          <div className="flex items-center justify-between text-sm px-1 group hover:bg-gray-50 rounded-lg p-2 transition-all duration-300">
+            <span className="text-gray-500">Junior Associates</span>
+            <span className="font-bold text-gray-800 bg-[#027675]/5 px-2.5 py-0.5 rounded-full">
+              {juniorCount || 0}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <div className="w-full mt-4 space-y-2">
+        <button
+          onClick={onOpenModal}
+          className="w-full py-2.5 px-4 text-sm font-medium text-gray-600 bg-white border-2 border-gray-200 rounded-xl hover:border-[#027675]/30 hover:text-[#027675] hover:bg-[#027675]/5 transition-all duration-300 transform hover:scale-[1.02]"
+        >
+          View Public Profile
+        </button>
+        <div className="flex items-center mt-2 rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-50 group hover:border-[#027675]/30 transition-all duration-300"></div>
+      </div>
+    </div>
+  );
+}
+
+export default function SettingsPage() {
+  const { user, refetch } = useAuth();
+  const [juniorCount, setJuniorCount] = useState(0);
+  const [activeTab, setActiveTab] = useState("account");
+  const [isTabChanging, setIsTabChanging] = useState(false);
+
+  // 3. Added Modal State Variable
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const isSenior = user?.seniority === "senior" || user?.role === "admin";
+  const seniorityLabel =
+    user?.seniority === "senior"
+      ? "Senior Counsel"
+      : user?.seniority === "junior"
+        ? "Junior Associate"
+        : user?.seniority || "Member";
+
+  const handleJuniorsChange = (count) => {
+    setJuniorCount(count);
+  };
+
+  const handleTabChange = (tab) => {
+    setIsTabChanging(true);
+    setActiveTab(tab);
+    setTimeout(() => setIsTabChanging(false), 300);
+  };
+
   const [profile, setProfile] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
     barCouncilNo: user?.barCouncilNo || "",
   });
   const [saving, setSaving] = useState(false);
-
   const [uploadingPic, setUploadingPic] = useState(false);
   const [previewPic, setPreviewPic] = useState(user?.profilePicture || null);
 
   useEffect(() => {
     setPreviewPic(user?.profilePicture || null);
-  }, [user?.profilePicture]);
+    if (user) {
+      setProfile({
+        name: user.name || "",
+        phone: user.phone || "",
+        barCouncilNo: user.barCouncilNo || "",
+      });
+    }
+  }, [user]);
 
-  const handleSave = async (e) => {
+  const handleProfileSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     try {
@@ -86,314 +202,47 @@ function ProfileSection({ user, refetch }) {
     }
   };
 
-  return (
-    <div className="relative overflow-hidden bg-white rounded-2xl shadow-[0_2px_20px_rgba(2,103,117,0.08)] border border-[#027675]/10 hover:shadow-[0_8px_30px_rgba(2,103,117,0.12)] transition-all duration-300">
-      {/* Header accent bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#027675] via-[#028a7a] to-[#019d8e]" />
-
-      <div className="p-8">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="relative">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#027675] to-[#019d8e] flex items-center justify-center shadow-lg shadow-[#027675]/20">
-              <User className="w-6 h-6 text-white" />
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-400 rounded-full border-2 border-white flex items-center justify-center">
-              <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-            </div>
-          </div>
-          <div>
-            <h2 className="font-bold text-2xl text-gray-900 font-display tracking-tight">
-              Profile Information
-            </h2>
-            <p className="text-sm text-gray-500 mt-0.5 font-medium">
-              Manage your personal details, credentials, and profile picture
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6 mb-8 p-5 bg-[#027675]/5 rounded-2xl border border-[#027675]/10">
-          {/* Avatar preview */}
-          <div className="relative shrink-0">
-            {previewPic ? (
-              <img
-                src={previewPic}
-                alt="Your profile picture"
-                className="w-24 h-24 rounded-full object-cover ring-4 ring-white shadow-lg"
-              />
-            ) : (
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center text-white text-3xl font-bold ring-4 ring-white shadow-lg">
-                {user?.name?.charAt(0)?.toUpperCase() || "?"}
-              </div>
-            )}
-
-            {/* Camera icon overlay */}
-            <label
-              htmlFor="dp-upload"
-              className="absolute bottom-0 right-0 w-8 h-8 bg-[#027675] rounded-full flex items-center justify-center cursor-pointer shadow-md hover:bg-[#015f5d] transition-colors"
-              title="Change profile picture"
-            >
-              {uploadingPic ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Camera className="w-4 h-4 text-white" />
-              )}
-            </label>
-            <input
-              id="dp-upload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handlePictureChange}
-              disabled={uploadingPic}
-            />
-          </div>
-
-          <div>
-            <p className="font-semibold text-gray-900 text-sm">
-              Profile Picture
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Click the camera icon to upload a new photo.
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              JPG, PNG, WEBP — max 5MB
-            </p>
-            {uploadingPic && (
-              <p className="text-xs text-[#027675] font-medium mt-1 animate-pulse">
-                Uploading...
-              </p>
-            )}
-          </div>
-        </div>
-
-        <form onSubmit={handleSave} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1.5">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <User className="w-4 h-4 text-[#027675]" />
-                Full Name
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-200 font-medium"
-                value={profile.name}
-                onChange={(e) =>
-                  setProfile({ ...profile, name: e.target.value })
-                }
-                placeholder="Enter your full name"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <Mail className="w-4 h-4 text-[#027675]" />
-                Email Address
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed font-medium"
-                value={user?.email || ""}
-                readOnly
-              />
-              <p className="text-xs text-gray-400 mt-1">
-                Contact support to change email
-              </p>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <Phone className="w-4 h-4 text-[#027675]" />
-                Phone Number
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-200 font-medium"
-                placeholder="+92-300-0000000"
-                value={profile.phone}
-                onChange={(e) =>
-                  setProfile({ ...profile, phone: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <Scale className="w-4 h-4 text-[#027675]" />
-                Bar Council No.
-              </label>
-              <input
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-200 font-medium tracking-wide"
-                placeholder="e.g., PBC-2023-0456"
-                value={profile.barCouncilNo}
-                onChange={(e) =>
-                  setProfile({ ...profile, barCouncilNo: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-4 border-t border-gray-100">
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-2 px-8 py-3 bg-[#027675] text-white font-semibold rounded-xl shadow-lg shadow-[#027675]/20 hover:shadow-xl hover:shadow-[#027675]/30 hover:bg-[#015f5d] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
-            >
-              {saving ? (
-                <>
-                  <Spinner size="sm" className="text-white" />
-                  Saving Changes...
-                </>
-              ) : (
-                <>
-                  Save Changes
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-function ChangePasswordSection() {
-  const [form, setForm] = useState({
+  const [pwdForm, setPwdForm] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-  const [saving, setSaving] = useState(false);
+  const [savingPwd, setSavingPwd] = useState(false);
 
-  const handleChange = async (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
-    if (form.newPassword !== form.confirmPassword) {
+    if (pwdForm.newPassword !== pwdForm.confirmPassword) {
       return toast.error("New passwords do not match.");
     }
-    if (form.newPassword.length < 8) {
+    if (pwdForm.newPassword.length < 8) {
       return toast.error(
         "Password must be at least 8 characters for security.",
       );
     }
-    setSaving(true);
+    setSavingPwd(true);
     try {
       await api.put("/api/auth/change-password", {
-        currentPassword: form.currentPassword,
-        newPassword: form.newPassword,
+        currentPassword: pwdForm.currentPassword,
+        newPassword: pwdForm.newPassword,
       });
       toast.success("Password changed successfully.");
-      setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
       toast.error(err.message);
     } finally {
-      setSaving(false);
+      setSavingPwd(false);
     }
   };
 
-  const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
-
-  return (
-    <div className="relative overflow-hidden bg-white rounded-2xl shadow-[0_2px_20px_rgba(2,103,117,0.08)] border border-[#027675]/10 hover:shadow-[0_8px_30px_rgba(2,103,117,0.12)] transition-all duration-300">
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#027675] via-[#028a7a] to-[#019d8e]" />
-
-      <div className="p-8">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#027675] to-[#019d8e] flex items-center justify-center shadow-lg shadow-[#027675]/20">
-            <Lock className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="font-bold text-2xl text-gray-900 font-display tracking-tight">
-              Security Settings
-            </h2>
-            <p className="text-sm text-gray-500 mt-0.5 font-medium">
-              Update your password to keep your account secure
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleChange} className="space-y-5">
-          <div className="space-y-1.5">
-            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <Key className="w-4 h-4 text-[#027675]" />
-              Current Password
-            </label>
-            <input
-              type="password"
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-200 font-medium"
-              placeholder="Enter your current password"
-              value={form.currentPassword}
-              onChange={set("currentPassword")}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-1.5">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <Lock className="w-4 h-4 text-[#027675]" />
-                New Password
-              </label>
-              <input
-                type="password"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-200 font-medium"
-                placeholder="Minimum 8 characters"
-                value={form.newPassword}
-                onChange={set("newPassword")}
-                required
-                minLength={8}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                <CheckCircle2 className="w-4 h-4 text-[#027675]" />
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-200 font-medium"
-                placeholder="Re-enter new password"
-                value={form.confirmPassword}
-                onChange={set("confirmPassword")}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <Shield className="w-4 h-4" />
-              <span>
-                Use a strong password with letters, numbers, and symbols
-              </span>
-            </div>
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-2 px-8 py-3 bg-[#027675] text-white font-semibold rounded-xl shadow-lg shadow-[#027675]/20 hover:shadow-xl hover:shadow-[#027675]/30 hover:bg-[#015f5d] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-[1.02]"
-            >
-              {saving ? (
-                <>
-                  <Spinner size="sm" className="text-white" />
-                  Updating Password...
-                </>
-              ) : (
-                <>
-                  Update Password
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-function JuniorLawyersSection({ onJuniorsChange }) {
   const [juniors, setJuniors] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [creating, setCreating] = useState(false);
-  const [showForm, setShowForm] = useState(false);
+  const [juniorForm, setJuniorForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [creatingJunior, setCreatingJunior] = useState(false);
+  const [showJuniorForm, setShowJuniorForm] = useState(false);
 
   const fetchJuniors = useCallback(async () => {
     setLoadingList(true);
@@ -401,233 +250,44 @@ function JuniorLawyersSection({ onJuniorsChange }) {
       const res = await api.get("/api/senior/junior-lawyers");
       const juniorsList = res.data?.juniors || [];
       setJuniors(juniorsList);
-      if (onJuniorsChange) {
-        onJuniorsChange(juniorsList.length);
-      }
+      handleJuniorsChange(juniorsList.length);
     } catch {
-      if (onJuniorsChange) {
-        onJuniorsChange(0);
-      }
+      handleJuniorsChange(0);
     } finally {
       setLoadingList(false);
     }
-  }, [onJuniorsChange]);
+  }, []);
 
   useEffect(() => {
-    fetchJuniors();
-  }, [fetchJuniors]);
+    if (isSenior) {
+      fetchJuniors();
+    }
+  }, [fetchJuniors, isSenior]);
 
-  const handleCreate = async (e) => {
+  const handleCreateJunior = async (e) => {
     e.preventDefault();
-    if (form.password.length < 8)
+    if (juniorForm.password.length < 8)
       return toast.error("Password must be at least 8 characters.");
-    setCreating(true);
+    setCreatingJunior(true);
     try {
-      await api.post("/api/senior/junior-lawyers", form);
-      toast.success(`Account created successfully for ${form.name}.`);
-      setForm({ name: "", email: "", password: "" });
-      setShowForm(false);
+      await api.post("/api/senior/junior-lawyers", juniorForm);
+      toast.success(`Account created successfully for ${juniorForm.name}.`);
+      setJuniorForm({ name: "", email: "", password: "" });
+      setShowJuniorForm(false);
       await fetchJuniors();
     } catch (err) {
       toast.error(err.message);
     } finally {
-      setCreating(false);
+      setCreatingJunior(false);
     }
   };
 
-  const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
-
-  return (
-    <div className="relative overflow-hidden bg-white rounded-2xl shadow-[0_2px_20px_rgba(2,103,117,0.08)] border border-[#027675]/10 hover:shadow-[0_8px_30px_rgba(2,103,117,0.12)] transition-all duration-300">
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#027675] via-[#028a7a] to-[#019d8e]" />
-
-      <div className="p-8">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#027675] to-[#019d8e] flex items-center justify-center shadow-lg shadow-[#027675]/20">
-              <Users className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h2 className="font-bold text-2xl text-gray-900 font-display tracking-tight">
-                Junior Lawyers
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5 font-medium">
-                Manage your team of junior associates
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowForm((v) => !v)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#027675] text-white font-semibold text-sm rounded-xl shadow-lg shadow-[#027675]/20 hover:shadow-xl hover:shadow-[#027675]/30 hover:bg-[#015f5d] transition-all duration-200 transform hover:scale-105"
-          >
-            <UserPlus className="w-4 h-4" />
-            {showForm ? "Cancel" : "Add Junior"}
-          </button>
-        </div>
-
-        {showForm && (
-          <form
-            onSubmit={handleCreate}
-            className="bg-gradient-to-br from-[#027675]/5 to-white border-2 border-[#027675]/20 rounded-xl p-6 mb-8 space-y-5"
-          >
-            <div className="flex items-center gap-3 pb-3 border-b border-[#027675]/10">
-              <div className="w-10 h-10 rounded-lg bg-[#027675]/10 flex items-center justify-center">
-                <UserPlus className="w-5 h-5 text-[#027675]" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">
-                  Create New Account
-                </p>
-                <p className="text-xs text-gray-500">
-                  Set up credentials for a new junior lawyer
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-gray-700">
-                  Full Name
-                </label>
-                <input
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all text-sm font-medium"
-                  placeholder="Enter full name"
-                  value={form.name}
-                  onChange={set("name")}
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-gray-700">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all text-sm font-medium"
-                  placeholder="junior@lawfirm.com"
-                  value={form.email}
-                  onChange={set("email")}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-gray-700">
-                Temporary Password
-              </label>
-              <input
-                type="password"
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all text-sm font-medium"
-                placeholder="Minimum 8 characters"
-                value={form.password}
-                onChange={set("password")}
-                required
-                minLength={8}
-              />
-            </div>
-
-            <div className="flex items-center gap-3 justify-end pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setForm({ name: "", email: "", password: "" });
-                }}
-                className="px-6 py-2.5 text-sm font-semibold text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-all border border-gray-200"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={creating}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#027675] text-white text-sm font-semibold rounded-lg hover:bg-[#015f5d] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-[#027675]/20"
-              >
-                {creating ? (
-                  <>
-                    <Spinner size="sm" className="text-white" />
-                    Creating Account...
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-4 h-4" />
-                    Create Account
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        )}
-
-        {loadingList ? (
-          <div className="flex justify-center py-12">
-            <Spinner />
-          </div>
-        ) : juniors.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-[#027675]/5 flex items-center justify-center">
-              <Users className="w-10 h-10 text-[#027675]/40" />
-            </div>
-            <p className="text-gray-500 font-medium mb-2">
-              No junior lawyers added yet
-            </p>
-            <p className="text-sm text-gray-400">
-              Click the &quot;Add Junior&quot; button to invite team members
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {juniors.map((j) => (
-              <div
-                key={j._id}
-                className="flex items-center justify-between p-4 hover:bg-[#027675]/5 rounded-xl transition-all group border border-transparent hover:border-[#027675]/10"
-              >
-                <div className="flex items-center gap-4">
-                  <UserAvatar user={j} size="lg" />
-                  <div>
-                    <p className="font-semibold text-gray-900">{j.name}</p>
-                    <p className="text-sm text-gray-500">{j.email}</p>
-                  </div>
-                </div>
-                <span
-                  className={`inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full font-semibold ${
-                    j.isActive
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                      : "bg-red-50 text-red-600 border border-red-200"
-                  }`}
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full ${j.isActive ? "bg-emerald-500 animate-pulse" : "bg-red-500"}`}
-                  ></span>
-                  {j.isActive ? "Active" : "Inactive"}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function AccountInfoSection({ user, juniorCount }) {
   const [seniorName, setSeniorName] = useState("");
-  const isSenior = user?.seniority === "senior" || user?.role === "admin";
-
-  const seniorityLabel =
-    user?.seniority === "senior"
-      ? "Senior Counsel"
-      : user?.seniority === "junior"
-        ? "Junior Associate"
-        : user?.seniority;
-
   useEffect(() => {
     if (isSenior) return;
     if (user?.createdBy?.name) {
       setSeniorName(user.createdBy.name);
-      return;
-    }
-    if (user?.seniorLawyer?.name) {
+    } else if (user?.seniorLawyer?.name) {
       setSeniorName(user.seniorLawyer.name);
     } else if (user?.seniorName) {
       setSeniorName(user.seniorName);
@@ -636,172 +296,709 @@ function AccountInfoSection({ user, juniorCount }) {
     }
   }, [user, isSenior]);
 
-  return (
-    <div className="relative overflow-hidden bg-white rounded-2xl shadow-[0_2px_20px_rgba(2,103,117,0.08)] border border-[#027675]/10 hover:shadow-[0_8px_30px_rgba(2,103,117,0.12)] transition-all duration-300">
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#027675] via-[#028a7a] to-[#019d8e]" />
-
-      <div className="p-8">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#027675] to-[#019d8e] flex items-center justify-center shadow-lg shadow-[#027675]/20">
-            <Shield className="w-6 h-6 text-white" />
+  const tabContent = {
+    account: (
+      <form
+        onSubmit={handleProfileSave}
+        className="space-y-6 animate-fade-in-up"
+      >
+        <div className="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-gray-100">
+          <div className="relative group">
+            {previewPic ? (
+              <img
+                src={previewPic}
+                alt="Profile picture preview"
+                className="w-20 h-20 rounded-full object-cover border-2 border-gray-100 shadow-md transition-all duration-300 group-hover:border-[#027675]/30"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center text-white text-2xl font-bold shadow-md">
+                {user?.name?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+            )}
+            <label
+              htmlFor="settings-dp-upload"
+              className="absolute bottom-0 right-0 w-7 h-7 bg-gradient-to-r from-[#027675] to-[#015f5d] rounded-full flex items-center justify-center cursor-pointer shadow-md hover:scale-110 transition-all duration-300"
+              title="Change profile picture"
+            >
+              {uploadingPic ? (
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Camera className="w-3.5 h-3.5 text-white" />
+              )}
+            </label>
+            <input
+              id="settings-dp-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePictureChange}
+              disabled={uploadingPic}
+            />
           </div>
-          <div>
-            <h2 className="font-bold text-2xl text-gray-900 font-display tracking-tight">
-              Account Overview
-            </h2>
-            <p className="text-sm text-gray-500 mt-0.5 font-medium">
-              Your account type, status, and professional details
+          <div className="text-center sm:text-left">
+            <h4 className="text-sm font-semibold text-gray-900">
+              Profile Picture
+            </h4>
+            <p className="text-xs text-gray-400 mt-1">
+              PNG, JPG or JPEG. Max size of 2MB.
             </p>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 hover:bg-[#027675]/5 rounded-xl transition-all group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-[#027675]/5 flex items-center justify-center group-hover:bg-[#027675]/10 transition-colors">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1.5 group">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider transition-colors duration-300 group-focus-within:text-[#027675]">
+              Full Name
+            </label>
+            <input
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
+              value={profile.name}
+              onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+              placeholder="First and last name"
+              required
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Email Address
+            </label>
+            <input
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed text-sm"
+              value={user?.email || ""}
+              readOnly
+            />
+          </div>
+
+          <div className="space-y-1.5 group">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider transition-colors duration-300 group-focus-within:text-[#027675]">
+              Phone Number
+            </label>
+            <input
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
+              placeholder="+92-300-0000000"
+              value={profile.phone}
+              onChange={(e) =>
+                setProfile({ ...profile, phone: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="space-y-1.5 group">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider transition-colors duration-300 group-focus-within:text-[#027675]">
+              Bar Council No.
+            </label>
+            <input
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
+              placeholder="e.g., PBC-2023-0456"
+              value={profile.barCouncilNo}
+              onChange={(e) =>
+                setProfile({ ...profile, barCouncilNo: e.target.value })
+              }
+            />
+          </div>
+        </div>
+
+        <div className="pt-6 border-t-2 border-gray-100 flex justify-start">
+          <button
+            type="submit"
+            disabled={saving}
+            className="px-8 py-3 bg-gradient-to-r from-[#027675] to-[#015f5d] text-white text-sm font-semibold rounded-xl hover:from-[#015f5d] hover:to-[#014a49] transition-all duration-300 disabled:opacity-50 transform hover:scale-105 hover:shadow-lg hover:shadow-[#027675]/20 active:scale-95"
+          >
+            {saving ? (
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Updating...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4" />
+                Update Profile
+              </span>
+            )}
+          </button>
+        </div>
+      </form>
+    ),
+    security: (
+      <form
+        onSubmit={handlePasswordChange}
+        className="space-y-6 animate-fade-in-up"
+      >
+        <div className="space-y-1.5 max-w-md group">
+          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider transition-colors duration-300 group-focus-within:text-[#027675]">
+            Current Password
+          </label>
+          <input
+            type="password"
+            className="w-[143%] px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
+            placeholder="Verify past credentials"
+            value={pwdForm.currentPassword}
+            onChange={(e) =>
+              setPwdForm({ ...pwdForm, currentPassword: e.target.value })
+            }
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-1.5 group">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider transition-colors duration-300 group-focus-within:text-[#027675]">
+              New Password
+            </label>
+            <input
+              type="password"
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
+              placeholder="Minimum 8 characters"
+              value={pwdForm.newPassword}
+              onChange={(e) =>
+                setPwdForm({ ...pwdForm, newPassword: e.target.value })
+              }
+              required
+              minLength={8}
+            />
+          </div>
+
+          <div className="space-y-1.5 group">
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider transition-colors duration-300 group-focus-within:text-[#027675]">
+              Confirm New Password
+            </label>
+            <input
+              type="password"
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
+              placeholder="Match character block"
+              value={pwdForm.confirmPassword}
+              onChange={(e) =>
+                setPwdForm({ ...pwdForm, confirmPassword: e.target.value })
+              }
+              required
+            />
+          </div>
+        </div>
+
+        <div className="pt-6 border-t-2 border-gray-100 flex justify-start">
+          <button
+            type="submit"
+            disabled={savingPwd}
+            className="px-8 py-3 bg-gradient-to-r from-[#027675] to-[#015f5d] text-white text-sm font-semibold rounded-xl hover:from-[#015f5d] hover:to-[#014a49] transition-all duration-300 disabled:opacity-50 transform hover:scale-105 hover:shadow-lg hover:shadow-[#027675]/20 active:scale-95"
+          >
+            {savingPwd ? (
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Saving...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <Lock className="w-4 h-4" />
+                Change Password
+              </span>
+            )}
+          </button>
+        </div>
+      </form>
+    ),
+    team: isSenior && (
+      <div className="space-y-6 animate-fade-in-up">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="font-semibold text-gray-900 text-lg flex items-center gap-2">
+              <Users className="w-5 h-5 text-[#027675]" />
+              Associates Directory
+            </h4>
+            <p className="text-xs text-gray-400 mt-1">
+              Invite and monitor active team legal members
+            </p>
+          </div>
+          <button
+            onClick={() => setShowJuniorForm((v) => !v)}
+            className={`px-5 py-2.5 font-semibold text-xs rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+              showJuniorForm
+                ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                : "bg-gradient-to-r from-[#027675] to-[#015f5d] text-white hover:shadow-lg hover:shadow-[#027675]/20"
+            }`}
+          >
+            {showJuniorForm ? "Hide Form" : "Add New Junior"}
+          </button>
+        </div>
+
+        {showJuniorForm && (
+          <form
+            onSubmit={handleCreateJunior}
+            className="p-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl border-2 border-gray-200 space-y-4 animate-slide-down"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1 group">
+                <label className="text-xs font-medium text-gray-600 transition-colors duration-300 group-focus-within:text-[#027675]">
+                  Full Name
+                </label>
+                <input
+                  className="w-full px-4 py-2.5 border-2 border-gray-200 bg-white rounded-xl text-sm focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300"
+                  placeholder="Associate name"
+                  value={juniorForm.name}
+                  onChange={(e) =>
+                    setJuniorForm({ ...juniorForm, name: e.target.value })
+                  }
+                  required
+                />
+              </div>
+              <div className="space-y-1 group">
+                <label className="text-xs font-medium text-gray-600 transition-colors duration-300 group-focus-within:text-[#027675]">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  className="w-full px-4 py-2.5 border-2 border-gray-200 bg-white rounded-xl text-sm focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300"
+                  placeholder="User Email"
+                  value={juniorForm.email}
+                  onChange={(e) =>
+                    setJuniorForm({ ...juniorForm, email: e.target.value })
+                  }
+                  required
+                />
+              </div>
+            </div>
+            <div className="space-y-1 group">
+              <label className="text-xs font-medium text-gray-600 transition-colors duration-300 group-focus-within:text-[#027675]">
+                Temporary Password
+              </label>
+              <input
+                type="password"
+                className="w-full px-4 py-2.5 border-2 border-gray-200 bg-white rounded-xl text-sm focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300"
+                placeholder="Min 8 characters"
+                value={juniorForm.password}
+                onChange={(e) =>
+                  setJuniorForm({ ...juniorForm, password: e.target.value })
+                }
+                required
+                minLength={8}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowJuniorForm(false)}
+                className="px-5 py-2.5 text-sm text-gray-600 border-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-300"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={creatingJunior}
+                className="px-5 py-2.5 text-sm bg-gradient-to-r from-[#027675] to-[#015f5d] text-white font-semibold rounded-xl hover:from-[#015f5d] hover:to-[#014a49] transition-all duration-300 disabled:opacity-50 transform hover:scale-105 hover:shadow-lg hover:shadow-[#027675]/20 active:scale-95"
+              >
+                {creatingJunior ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Creating...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <UserPlus className="w-4 h-4" />
+                    Save Account
+                  </span>
+                )}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {loadingList ? (
+          <div className="flex justify-center py-8">
+            <Spinner />
+          </div>
+        ) : juniors.length === 0 ? (
+          <div className="text-center py-8">
+            <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-sm text-gray-400">
+              No junior associates assigned to your profile yet.
+            </p>
+            <button
+              onClick={() => setShowJuniorForm(true)}
+              className="mt-3 text-sm text-[#027675] hover:text-[#015f5d] font-medium transition-colors duration-300"
+            >
+              Invite your first team member →
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto pr-1 scrollbar-thin">
+            {juniors.map((j) => (
+              <div
+                key={j._id}
+                className="flex items-center justify-between py-4 first:pt-0 last:pb-0 group hover:bg-gray-50 rounded-lg px-3 transition-all duration-300"
+              >
+                <div className="flex items-center gap-3">
+                  <UserAvatar user={j} size="sm" />
+                  <div>
+                    <p className="font-medium text-gray-900 text-sm">
+                      {j.name}
+                    </p>
+                    <p className="text-xs text-gray-400">{j.email}</p>
+                  </div>
+                </div>
+                <span
+                  className={`text-xs font-medium px-3 py-1 rounded-full transition-all duration-300 ${
+                    j.isActive
+                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      : "bg-gray-100 text-gray-500 border border-gray-200"
+                  }`}
+                >
+                  {j.isActive ? "Active" : "Inactive"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ),
+    info: (
+      <div className="space-y-6 animate-fade-in-up">
+        <div>
+          <h4 className="font-semibold text-gray-900 text-lg flex items-center gap-2">
+            <Activity className="w-5 h-5 text-[#027675]" />
+            Account Overview
+          </h4>
+          <p className="text-xs text-gray-400 mt-1">
+            Your account type, status, and professional indicators
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          {/* Professional Role */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-gray-50 to-white border-2 border-gray-100 flex items-center justify-between group hover:border-[#027675]/20 hover:shadow-md transition-all duration-500 transform hover:scale-[1.02]">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-[#027675]/10 rounded-xl group-hover:bg-[#027675]/20 transition-colors duration-300">
                 <Briefcase className="w-5 h-5 text-[#027675]" />
               </div>
-              <span className="font-semibold text-gray-700">
+              <span className="text-sm font-semibold text-gray-700">
                 Professional Role
               </span>
             </div>
-            <span className="inline-flex items-center px-4 py-2 font-semibold text-white bg-gradient-to-r from-[#027675] to-[#019d8e] rounded-full capitalize text-sm shadow-md">
+            <span className="inline-flex items-center px-4 py-1.5 font-semibold text-white bg-gradient-to-r from-[#027675] to-[#015f5d] rounded-full text-xs capitalize shadow-md">
               {seniorityLabel || user?.role}
             </span>
           </div>
 
           {isSenior ? (
-            <div className="flex items-center justify-between p-4 hover:bg-[#027675]/5 rounded-xl transition-all group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-[#027675]/5 flex items-center justify-center group-hover:bg-[#027675]/10 transition-colors">
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-gray-50 to-white border-2 border-gray-100 flex items-center justify-between group hover:border-[#027675]/20 hover:shadow-md transition-all duration-500 transform hover:scale-[1.02]">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#027675]/10 rounded-xl group-hover:bg-[#027675]/20 transition-colors duration-300">
                   <Users className="w-5 h-5 text-[#027675]" />
                 </div>
-                <span className="font-semibold text-gray-700">
-                  Junior Associates
+                <span className="text-sm font-semibold text-gray-700">
+                  Junior Lawyers
                 </span>
               </div>
-              <span className="inline-flex items-center gap-2 font-semibold text-gray-900">
-                <span className="w-10 h-10 rounded-full bg-[#027675]/10 flex items-center justify-center text-[#027675] font-bold text-lg">
-                  {juniorCount || 0}
-                </span>
+              <span className="w-10 h-10 rounded-full bg-gradient-to-br from-[#027675]/10 to-[#027675]/20 flex items-center justify-center text-[#027675] font-bold text-sm border-2 border-[#027675]/20">
+                {juniorCount || 0}
               </span>
             </div>
           ) : (
-            <div className="flex items-center justify-between p-4 hover:bg-[#027675]/5 rounded-xl transition-all group">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-[#027675]/5 flex items-center justify-center group-hover:bg-[#027675]/10 transition-colors">
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-gray-50 to-white border-2 border-gray-100 flex items-center justify-between group hover:border-[#027675]/20 hover:shadow-md transition-all duration-500 transform hover:scale-[1.02]">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#027675]/10 rounded-xl group-hover:bg-[#027675]/20 transition-colors duration-300">
                   <Building2 className="w-5 h-5 text-[#027675]" />
                 </div>
-                <span className="font-semibold text-gray-700">
+                <span className="text-sm font-semibold text-gray-700">
                   Senior Lawyer
                 </span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {user?.createdBy && (
                   <UserAvatar user={user.createdBy} size="sm" />
                 )}
+
                 <div className="flex flex-col">
-                  <span className="font-semibold text-gray-900 text-sm text-center">
-                    {user?.createdBy?.name || "Error in displaying"}
+                  <span className="text-sm font-medium text-gray-900">
+                    {seniorName}
                   </span>
-                  <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
-                    {user?.createdBy?.email && (
-                      <span className="flex items-center gap-1">
-                        <Mail className="w-3 h-3" />
-                        {user?.createdBy?.email || "Error in displaying"}
-                      </span>
-                    )}
-                    {user?.createdBy?.phone && (
-                      <span className="flex items-center gap-1">
-                        <Phone className="w-3 h-3" />
-                        {user?.createdBy?.phone || "Error in displaying"}
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-[12px] font-medium text-[#a5a8b8]">
+                    {user?.createdBy?.email}
+                  </span>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="flex items-center justify-between p-4 hover:bg-[#027675]/5 rounded-xl transition-all group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-[#027675]/5 flex items-center justify-center group-hover:bg-[#027675]/10 transition-colors">
-                <Settings className="w-5 h-5 text-[#027675]" />
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-gray-50 to-white border-2 border-gray-100 flex items-center justify-between group hover:border-[#027675]/20 hover:shadow-md transition-all duration-500 transform hover:scale-[1.02]">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-emerald-50 rounded-xl group-hover:bg-emerald-100 transition-colors duration-300">
+                <Activity className="w-5 h-5 text-emerald-600" />
               </div>
-              <span className="font-semibold text-gray-700">Access Level</span>
-            </div>
-            <span className="inline-flex items-center px-4 py-1.5 font-semibold text-[#027675] bg-[#027675]/5 border-2 border-[#027675]/20 rounded-full capitalize text-sm">
-              {user?.role}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between p-4 hover:bg-[#027675]/5 rounded-xl transition-all group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-[#027675]/5 flex items-center justify-center group-hover:bg-[#027675]/10 transition-colors">
-                <Activity className="w-5 h-5 text-[#027675]" />
-              </div>
-              <span className="font-semibold text-gray-700">
+              <span className="text-sm font-semibold text-gray-700">
                 Account Status
               </span>
             </div>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 font-semibold text-emerald-700 bg-emerald-50 border-2 border-emerald-200 rounded-full text-sm">
-              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-500/50"></span>
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 font-semibold text-emerald-700 bg-emerald-50 border-2 border-emerald-200 rounded-full text-xs shadow-sm">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
               Active
             </span>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-export default function SettingsPage() {
-  const { user, refetch } = useAuth();
-  const [juniorCount, setJuniorCount] = useState(0);
-
-  const isSenior = user?.seniority === "senior" || user?.role === "admin";
-
-  const handleJuniorsChange = (count) => {
-    setJuniorCount(count);
+    ),
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-4 mb-3">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center shadow-xl shadow-[#027675]/20">
-              <Settings className="w-7 h-7 text-white" />
+    <div className="min-h-screen bg-gradient-to-br py-10 bg-[#eef5f3]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8 animate-fade-in-down">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <Settings className="w-8 h-8 text-[#027675]" />
+            Settings
+          </h1>
+          <p className="text-gray-500 mt-2 ml-11">
+            Manage your account, security, and team settings
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+          <div className="md:col-span-1 animate-fade-in-left">
+            <LeftProfileSidebar
+              user={user}
+              previewPic={previewPic}
+              juniorCount={juniorCount}
+              onOpenModal={() => setIsProfileModalOpen(true)}
+            />
+          </div>
+
+          <div className="md:col-span-3 bg-white rounded-2xl border-2 border-gray-100 shadow-xl shadow-gray-100/50 overflow-hidden flex flex-col min-h-[600px] transition-all duration-500 hover:shadow-2xl hover:shadow-gray-100/80 animate-fade-in-right">
+            <div className="border-b-2 border-gray-100 px-6 bg-gradient-to-r from-white to-gray-50/50 flex flex-wrap gap-6">
+              <button
+                onClick={() => handleTabChange("account")}
+                className={`py-4 text-sm font-semibold border-b-2 transition-all duration-300 relative ${
+                  activeTab === "account"
+                    ? "border-[#027675] text-[#027675]"
+                    : "border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Account Settings
+                </span>
+                {activeTab === "account" && (
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-[#027675] rounded-full"></span>
+                )}
+              </button>
+              <button
+                onClick={() => handleTabChange("security")}
+                className={`py-4 text-sm font-semibold border-b-2 transition-all duration-300 relative ${
+                  activeTab === "security"
+                    ? "border-[#027675] text-[#027675]"
+                    : "border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Lock className="w-4 h-4" />
+                  Security Settings
+                </span>
+                {activeTab === "security" && (
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-[#027675] rounded-full"></span>
+                )}
+              </button>
+              {isSenior && (
+                <button
+                  onClick={() => handleTabChange("team")}
+                  className={`py-4 text-sm font-semibold border-b-2 transition-all duration-300 relative ${
+                    activeTab === "team"
+                      ? "border-[#027675] text-[#027675]"
+                      : "border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Junior Lawyers ({juniorCount})
+                  </span>
+                  {activeTab === "team" && (
+                    <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-[#027675] rounded-full"></span>
+                  )}
+                </button>
+              )}
+              <button
+                onClick={() => handleTabChange("info")}
+                className={`py-4 text-sm font-semibold border-b-2 transition-all duration-300 relative ${
+                  activeTab === "info"
+                    ? "border-[#027675] text-[#027675]"
+                    : "border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-300"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Activity className="w-4 h-4" />
+                  System Overview
+                </span>
+                {activeTab === "info" && (
+                  <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-[#027675] rounded-full"></span>
+                )}
+              </button>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 font-display tracking-tight">
-                Settings
-              </h1>
-              <p className="text-gray-500 mt-1 font-medium">
-                Manage your account, security, and team members
-              </p>
+
+            <div className="p-8 flex-1">
+              <div
+                className={`transition-all duration-300 ${isTabChanging ? "opacity-0 transform translate-y-4" : "opacity-100 transform translate-y-0"}`}
+              >
+                {tabContent[activeTab]}
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Settings Cards */}
-        <div className="space-y-8">
-          <ProfileSection user={user} refetch={refetch} />
-          <ChangePasswordSection />
-          {isSenior && (
-            <JuniorLawyersSection onJuniorsChange={handleJuniorsChange} />
-          )}
-          <AccountInfoSection user={user} juniorCount={juniorCount} />
-        </div>
-
-        {/* Footer */}
-        <div className="mt-12 text-center">
-          <p className="text-sm text-gray-400">
-            Need help? Contact your system administrator or support team 
-          </p>
-        </div>
       </div>
+
+      {isProfileModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xl animate-fade-in"
+          onClick={() => setIsProfileModalOpen(false)}
+        >
+          <div
+            className="relative group max-w-2xl w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setIsProfileModalOpen(false)}
+              className="absolute -top-4 -right-4 z-10 p-2 bg-white/90 backdrop-blur-md hover:bg-white transition-all duration-300 rounded-full shadow-lg hover:scale-110 hover:rotate-90 border border-white/20"
+            >
+              <X className="w-5 h-5 text-gray-700" />
+            </button>
+
+            <div className="relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-lg border border-white/20 shadow-[0_30px_80px_-15px_rgba(0,0,0,0.5)]">
+              {previewPic ? (
+                <img
+                  src={previewPic}
+                  alt={user?.name || "User"}
+                  className="w-full h-auto max-h-[80vh] object-contain transition-transform duration-700 group-hover:scale-[1.02]"
+                />
+              ) : (
+                <div className="w-full aspect-square max-h-[80vh] bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center">
+                  <span className="text-8xl font-bold text-white/30">
+                    {user?.name || "?"}
+                  </span>
+                </div>
+              )}
+
+              {/* Subtle gradient overlay at bottom */}
+              <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/50 to-transparent pointer-events-none"></div>
+
+              {/* Minimal user info overlay */}
+              <div className="absolute bottom-6 left-6 right-6 pointer-events-none">
+                <p className="text-white text-xl font-semibold drop-shadow-lg">
+                  {user?.name || "User"}
+                </p>
+                <p className="text-white/60 text-sm drop-shadow-lg">
+                  {user?.email || "---"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx global>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fade-in-down {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fade-in-left {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fade-in-right {
+          from {
+            opacity: 0;
+            transform: translateX(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes slide-down {
+          from {
+            opacity: 0;
+            max-height: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            max-height: 500px;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.2s ease-out;
+        }
+
+        .animate-fade-in-up {
+          animation: fade-in-up 0.6s ease-out;
+        }
+
+        .animate-fade-in-down {
+          animation: fade-in-down 0.6s ease-out;
+        }
+
+        .animate-fade-in-left {
+          animation: fade-in-left 0.6s ease-out;
+        }
+
+        .animate-fade-in-right {
+          animation: fade-in-right 0.6s ease-out;
+        }
+
+        .animate-slide-down {
+          animation: slide-down 0.4s ease-out;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+          background: #f1f5f9;
+          border-radius: 10px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
+        }
+      `}</style>
     </div>
   );
 }
