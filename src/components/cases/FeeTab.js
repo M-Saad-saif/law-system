@@ -10,16 +10,31 @@ import {
   Trash2,
   CheckCircle2,
   AlertCircle,
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Calendar as CalendarIcon,
+  Receipt,
+  PiggyBank,
+  CreditCard,
+  ArrowUpRight,
+  ArrowDownRight,
+  Building2,
+  FileText,
+  Clock,
+  CircleDollarSign,
+  Percent,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 // ---- Helpers ----
 
 const METHODS = [
-  { value: "cash", label: "Cash" },
-  { value: "bank_transfer", label: "Bank Transfer" },
-  { value: "cheque", label: "Cheque" },
-  { value: "online", label: "Online" },
-  { value: "other", label: "Other" },
+  { value: "cash", label: "Cash", icon: Banknote },
+  { value: "bank_transfer", label: "Bank Transfer", icon: Building2 },
+  { value: "cheque", label: "Cheque", icon: FileText },
+  { value: "online", label: "Online", icon: CreditCard },
+  { value: "other", label: "Other", icon: Receipt },
 ];
 
 function fmt(n) {
@@ -40,68 +55,98 @@ function pct(paid, total) {
 function FeeProgressBar({ paid, agreed }) {
   const p = pct(paid, agreed);
   const isFullyPaid = p >= 100;
-  const barColor = isFullyPaid
-    ? "bg-emerald-500"
+  const progressGradient = isFullyPaid
+    ? "bg-gradient-to-r from-emerald-400 to-emerald-500"
     : p >= 60
-      ? "bg-amber-400"
-      : "bg-red-400";
+      ? "bg-gradient-to-r from-amber-400 to-amber-500"
+      : "bg-gradient-to-r from-rose-400 to-rose-500";
 
   return (
-    <div>
-      <div className="flex items-end justify-between mb-2">
-        <div>
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-5"
+    >
+      <div className="flex items-end justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+            <Wallet className="w-3.5 h-3.5" />
             Amount Paid
           </p>
-          <p className="text-2xl font-bold text-slate-800">{fmt(paid)}</p>
+          <motion.p
+            key={paid}
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent"
+          >
+            {fmt(paid)}
+          </motion.p>
         </div>
-        <div className="text-right">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-0.5">
+        <div className="text-right space-y-1">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-end gap-1.5">
+            <CircleDollarSign className="w-3.5 h-3.5" />
             Agreed Fee
           </p>
-          <p className="text-lg font-semibold text-slate-600">{fmt(agreed)}</p>
+          <p className="text-xl font-semibold text-slate-600">{fmt(agreed)}</p>
         </div>
       </div>
 
-      {/* Track */}
-      <div className="relative h-4 bg-slate-100 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
-          style={{ width: `${p}%` }}
-        />
-      </div>
+      {/* Progress Track */}
+      <div className="space-y-2.5">
+        <div className="relative h-3.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${p}%` }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className={`h-full rounded-full transition-all ${progressGradient}`}
+          />
 
-      <div className="flex items-center justify-between mt-2">
-        <span
-          className={`text-xs font-bold ${
-            isFullyPaid ? "text-emerald-600" : "text-slate-500"
-          }`}
-        >
-          {p}% paid
-        </span>
-        {isFullyPaid ? (
-          <span className="flex items-center gap-1 text-xs font-bold text-emerald-600">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Fully Paid
-          </span>
-        ) : (
-          <span className="text-xs text-slate-400">
-            {fmt(Math.max(0, agreed - paid))} remaining
-          </span>
-        )}
+          {/* Percentage label inside bar */}
+          {p > 15 && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[10px] font-bold text-white/90 drop-shadow-sm">
+                {p}%
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span
+              className={`text-xs font-bold ${isFullyPaid ? "text-emerald-600" : "text-slate-500"}`}
+            >
+              {p}% paid
+            </span>
+            {isFullyPaid && (
+              <motion.span
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" /> Fully Paid
+              </motion.span>
+            )}
+          </div>
+          {!isFullyPaid && agreed > 0 && (
+            <span className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+              <TrendingDown className="w-3.5 h-3.5 text-rose-400" />
+              {fmt(Math.max(0, agreed - paid))} remaining
+            </span>
+          )}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 // ---- Payment Slider Input ----
-// Lets lawyer drag to record a partial payment quickly
 
 function PaymentSlider({ agreedAmount, paidSoFar, onQuickAdd }) {
   const remaining = Math.max(0, agreedAmount - paidSoFar);
   const [sliderValue, setSliderValue] = useState(0);
   const [adding, setAdding] = useState(false);
 
-  // Reset when remaining changes
   useEffect(() => {
     setSliderValue(0);
   }, [paidSoFar]);
@@ -123,47 +168,72 @@ function PaymentSlider({ agreedAmount, paidSoFar, onQuickAdd }) {
   };
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
-      <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-4">
-        Quick Payment — drag to amount received
-      </p>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-gradient-to-br from-slate-50 to-white border border-slate-200/60 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+    >
+      <div className="flex items-center gap-2 mb-5">
+        <div className="p-1.5 rounded-lg bg-blue-50">
+          <TrendingUp className="w-4 h-4 text-blue-600" />
+        </div>
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          Quick Payment — drag to amount received
+        </p>
+      </div>
 
       {/* Slider */}
-      <div className="relative mb-3">
-        <input
-          type="range"
-          min={0}
-          max={remaining}
-          step={Math.max(1, Math.round(remaining / 100))}
-          value={sliderValue}
-          onChange={(e) => setSliderValue(Number(e.target.value))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-slate-900"
-        />
-        <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-          <span>0</span>
-          <span>{fmt(remaining / 2)}</span>
-          <span>{fmt(remaining)}</span>
+      <div className="space-y-2">
+        <div className="relative">
+          <input
+            type="range"
+            min={0}
+            max={remaining}
+            step={Math.max(1, Math.round(remaining / 100))}
+            value={sliderValue}
+            onChange={(e) => setSliderValue(Number(e.target.value))}
+            className="w-full h-2 rounded-full appearance-none cursor-pointer bg-gradient-to-r from-slate-200 to-slate-300 accent-slate-800"
+            style={{
+              background: `linear-gradient(to right, #1e293b 0%, #1e293b ${(sliderValue / remaining) * 100}%, #e2e8f0 ${(sliderValue / remaining) * 100}%, #e2e8f0 100%)`,
+            }}
+          />
+          <div className="flex justify-between text-[10px] text-slate-400 mt-1.5">
+            <span>0</span>
+            <span>{fmt(remaining / 2)}</span>
+            <span>{fmt(remaining)}</span>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-200/60">
         <div>
-          <p className="text-xs text-slate-400">Selected amount</p>
-          <p className="text-xl font-bold text-slate-800">{fmt(sliderValue)}</p>
+          <p className="text-xs text-slate-400 font-medium">Selected amount</p>
+          <p className="text-2xl font-bold text-slate-800">
+            {fmt(sliderValue)}
+          </p>
         </div>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleAdd}
           disabled={adding || sliderValue <= 0}
-          className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 hover:shadow-lg hover:shadow-slate-900/20 text-white text-sm font-semibold px-6 py-2.5 rounded-xl disabled:opacity-50 transition-all duration-300"
         >
-          {adding ? "Adding…" : "Record Payment"}
-        </button>
+          {adding ? (
+            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <Plus className="w-4 h-4" />
+              Record Payment
+            </>
+          )}
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
-// --- Add Payment Form (full manual entry) ---
+// --- Add Payment Form ---
 
 function AddPaymentForm({ onAdd, onClose }) {
   const [form, setForm] = useState({
@@ -186,91 +256,136 @@ function AddPaymentForm({ onAdd, onClose }) {
     try {
       await onAdd({ ...form, amount });
       onClose();
-    } finally {
+    } catch {
       setSaving(false);
     }
   };
 
-  return (
-    <div className="border border-slate-200 rounded-2xl bg-white p-5 space-y-4">
-      <p className="text-sm font-bold text-slate-700">Add Payment Entry</p>
+  const MethodIcon =
+    METHODS.find((m) => m.value === form.method)?.icon || Banknote;
 
-      <div className="grid grid-cols-2 gap-3">
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="border border-slate-200/60 rounded-2xl bg-gradient-to-br from-white to-slate-50 p-6 shadow-sm space-y-5"
+    >
+      <div className="flex items-center gap-2">
+        <div className="p-1.5 rounded-lg bg-emerald-50">
+          <Receipt className="w-4 h-4 text-emerald-600" />
+        </div>
+        <p className="text-sm font-bold text-slate-700">Add Payment Entry</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">
-            Amount (PKR) *
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+            Amount (PKR) <span className="text-rose-500">*</span>
           </label>
-          <input
-            type="number"
-            min={1}
-            value={form.amount}
-            onChange={(e) => set("amount", e.target.value)}
-            placeholder="e.g. 25000"
-            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-          />
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              Rs.
+            </span>
+            <input
+              type="number"
+              min={1}
+              value={form.amount}
+              onChange={(e) => set("amount", e.target.value)}
+              placeholder="25,000"
+              className="w-full border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+          </div>
         </div>
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">
-            Date *
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+            Date <span className="text-rose-500">*</span>
           </label>
-          <input
-            type="date"
-            value={form.date}
-            onChange={(e) => set("date", e.target.value)}
-            className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-          />
+          <div className="relative">
+            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="date"
+              value={form.date}
+              onChange={(e) => set("date", e.target.value)}
+              className="w-full border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            />
+          </div>
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           Payment Method
         </label>
-        <div className="flex flex-wrap gap-2">
-          {METHODS.map((m) => (
-            <button
-              key={m.value}
-              onClick={() => set("method", m.value)}
-              className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all ${
-                form.method === m.value
-                  ? "bg-slate-900 text-white border-slate-900"
-                  : "border-slate-200 text-slate-600 hover:border-slate-400"
-              }`}
-            >
-              {m.label}
-            </button>
-          ))}
+        <div className="grid grid-cols-5 gap-2">
+          {METHODS.map((m) => {
+            const Icon = m.icon;
+            const isActive = form.method === m.value;
+            return (
+              <motion.button
+                key={m.value}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => set("method", m.value)}
+                className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all ${
+                  isActive
+                    ? "border-slate-800 bg-slate-800 text-white shadow-lg shadow-slate-900/20"
+                    : "border-slate-200 text-slate-600 hover:border-slate-400 hover:bg-slate-50"
+                }`}
+              >
+                <Icon
+                  className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-500"}`}
+                />
+                <span className="text-[10px] font-medium">{m.label}</span>
+              </motion.button>
+            );
+          })}
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-1.5">
+        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
           Note (optional)
         </label>
-        <input
-          value={form.note}
-          onChange={(e) => set("note", e.target.value)}
-          placeholder="e.g. Advance for hearing on 15 Jan"
-          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-        />
+        <div className="relative">
+          <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            value={form.note}
+            onChange={(e) => set("note", e.target.value)}
+            placeholder="e.g. Advance for hearing on 15 Jan"
+            className="w-full border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+          />
+        </div>
       </div>
 
-      <div className="flex gap-3">
-        <button
+      <div className="flex gap-3 pt-2">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleSubmit}
           disabled={saving}
-          className="flex-1 bg-slate-900 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60 transition-colors"
+          className="flex-1 bg-gradient-to-r from-slate-800 to-slate-900 hover:shadow-lg hover:shadow-slate-900/20 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60 transition-all"
         >
-          {saving ? "Saving…" : "Add Payment"}
-        </button>
+          {saving ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Saving...
+            </div>
+          ) : (
+            <>
+              <Plus className="w-4 h-4 inline mr-2" />
+              Add Payment
+            </>
+          )}
+        </motion.button>
         <button
           onClick={onClose}
-          className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm"
+          className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition-colors"
         >
           Cancel
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -300,22 +415,31 @@ function AgreedFeeEditor({ current, notes, onSave }) {
 
   if (!open) {
     return (
-      <button
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         onClick={() => setOpen(true)}
-        className="text-xs text-slate-400 hover:text-slate-700 underline underline-offset-2 transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 font-medium transition-colors"
       >
+        <PiggyBank className="w-3.5 h-3.5" />
         {current > 0 ? "Edit agreed fee" : "Set agreed fee"}
-      </button>
+      </motion.button>
     );
   }
 
   return (
-    <div className="mt-4 border border-slate-200 rounded-2xl bg-white p-4 space-y-3">
-      <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      className="border border-slate-200/60 rounded-2xl bg-white p-5 space-y-4 shadow-sm"
+    >
+      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+        <CircleDollarSign className="w-4 h-4" />
         Agreed Fee Settings
       </p>
       <div>
-        <label className="block text-xs text-slate-400 mb-1">
+        <label className="block text-xs text-slate-500 font-medium mb-1.5">
           Total Agreed Amount (PKR)
         </label>
         <input
@@ -323,12 +447,12 @@ function AgreedFeeEditor({ current, notes, onSave }) {
           min={0}
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="e.g. 150000"
-          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+          placeholder="150,000"
+          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
         />
       </div>
       <div>
-        <label className="block text-xs text-slate-400 mb-1">
+        <label className="block text-xs text-slate-500 font-medium mb-1.5">
           Fee Notes (optional)
         </label>
         <textarea
@@ -336,25 +460,34 @@ function AgreedFeeEditor({ current, notes, onSave }) {
           value={feeNotes}
           onChange={(e) => setFeeNotes(e.target.value)}
           placeholder="e.g. Includes court filing fees. Monthly installments agreed."
-          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 resize-none"
+          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
         />
       </div>
-      <div className="flex gap-2">
-        <button
+      <div className="flex gap-3">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleSave}
           disabled={saving}
-          className="bg-slate-900 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2 rounded-xl disabled:opacity-60"
+          className="bg-gradient-to-r from-slate-800 to-slate-900 hover:shadow-lg hover:shadow-slate-900/20 text-white text-sm font-semibold px-6 py-2.5 rounded-xl disabled:opacity-60 transition-all"
         >
-          {saving ? "Saving…" : "Save"}
-        </button>
+          {saving ? (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Saving...
+            </div>
+          ) : (
+            "Save"
+          )}
+        </motion.button>
         <button
           onClick={() => setOpen(false)}
-          className="text-sm text-slate-400 hover:text-slate-600 px-3"
+          className="text-sm text-slate-400 hover:text-slate-600 px-4 font-medium"
         >
           Cancel
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -374,65 +507,84 @@ function PaymentRow({ payment, onDelete, runningTotal }) {
     }
   };
 
-  const methodLabel =
-    METHODS.find((m) => m.value === payment.method)?.label || payment.method;
+  const methodData = METHODS.find((m) => m.value === payment.method);
+  const MethodIcon = methodData?.icon || Banknote;
 
   return (
-    <div className="flex items-center gap-4 py-3 border-b border-slate-50 last:border-0">
-      <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
-        <Banknote className="w-4 h-4 text-emerald-600" />
+    <motion.div
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="flex items-center gap-4 py-3.5 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 rounded-lg px-2 -mx-2 transition-colors group"
+    >
+      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center flex-shrink-0">
+        <Banknote className="w-4.5 h-4.5 text-emerald-600" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <span className="text-sm font-bold text-slate-800">
             {fmt(payment.amount)}
           </span>
-          <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-medium">
-            {methodLabel}
+          <span className="inline-flex items-center gap-1 text-[10px] bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-medium">
+            <MethodIcon className="w-3 h-3" />
+            {methodData?.label || payment.method}
           </span>
         </div>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-xs text-slate-400">
+          <span className="text-xs text-slate-400 flex items-center gap-1">
+            <CalendarIcon className="w-3 h-3" />
             {payment.date ? format(new Date(payment.date), "dd MMM yyyy") : "—"}
           </span>
           {payment.note && (
-            <span className="text-xs text-slate-400 truncate max-w-[200px]">
-              · {payment.note}
-            </span>
+            <>
+              <span className="text-xs text-slate-300">·</span>
+              <span className="text-xs text-slate-400 truncate max-w-[200px] flex items-center gap-1">
+                <FileText className="w-3 h-3" />
+                {payment.note}
+              </span>
+            </>
           )}
         </div>
       </div>
       <div className="text-right flex-shrink-0">
-        <p className="text-xs text-slate-400">Running total</p>
-        <p className="text-xs font-semibold text-slate-600">
-          {fmt(runningTotal)}
+        <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+          Running total
         </p>
+        <p className="text-xs font-bold text-slate-600">{fmt(runningTotal)}</p>
       </div>
       {!confirm ? (
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={() => setConfirm(true)}
-          className="text-slate-300 hover:text-red-400 transition-colors flex-shrink-0"
+          className="p-1.5 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
         >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+          <Trash2 className="w-4 h-4" />
+        </motion.button>
       ) : (
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <span className="text-[10px] text-slate-400 font-medium">
+            Delete?
+          </span>
           <button
             onClick={handleDelete}
             disabled={deleting}
-            className="text-[11px] bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded-lg font-semibold disabled:opacity-60"
+            className="text-[11px] bg-rose-500 hover:bg-rose-600 text-white px-2.5 py-1 rounded-lg font-semibold disabled:opacity-60 transition-colors"
           >
-            {deleting ? "…" : "Yes"}
+            {deleting ? (
+              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              "Yes"
+            )}
           </button>
           <button
             onClick={() => setConfirm(false)}
-            className="text-[11px] text-slate-400 hover:text-slate-600 px-1"
+            className="text-[11px] text-slate-400 hover:text-slate-600 px-1.5 font-medium"
           >
             No
           </button>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -447,10 +599,7 @@ export default function FeeTab({ caseId, onUpdate }) {
     try {
       const data = await api.get(`/api/cases/${caseId}/fee`);
       const feeData =
-        data?.fee ??
-        data?.data?.fee ??
-        data?.data?.case?.fee ??
-        null;
+        data?.fee ?? data?.data?.fee ?? data?.data?.case?.fee ?? null;
       setFee(feeData);
     } catch {
       toast.error("Failed to load fee data.");
@@ -467,10 +616,7 @@ export default function FeeTab({ caseId, onUpdate }) {
     try {
       const data = await api.put(`/api/cases/${caseId}/fee`, payload);
       const feeData =
-        data?.fee ??
-        data?.data?.fee ??
-        data?.data?.case?.fee ??
-        null;
+        data?.fee ?? data?.data?.fee ?? data?.data?.case?.fee ?? null;
       setFee(feeData);
       onUpdate?.();
     } catch (err) {
@@ -483,10 +629,7 @@ export default function FeeTab({ caseId, onUpdate }) {
     try {
       const data = await api.post(`/api/cases/${caseId}/fee`, payload);
       const feeData =
-        data?.fee ??
-        data?.data?.fee ??
-        data?.data?.case?.fee ??
-        null;
+        data?.fee ?? data?.data?.fee ?? data?.data?.case?.fee ?? null;
       setFee(feeData);
       toast.success("Payment recorded.");
       onUpdate?.();
@@ -500,10 +643,7 @@ export default function FeeTab({ caseId, onUpdate }) {
     try {
       const data = await api.delete(`/api/cases/${caseId}/fee`, { paymentId });
       const feeData =
-        data?.fee ??
-        data?.data?.fee ??
-        data?.data?.case?.fee ??
-        null;
+        data?.fee ?? data?.data?.fee ?? data?.data?.case?.fee ?? null;
       setFee(feeData);
       toast.success("Payment removed.");
       onUpdate?.();
@@ -515,15 +655,16 @@ export default function FeeTab({ caseId, onUpdate }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-40">
-        <div className="w-6 h-6 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-48">
+        <div className="relative">
+          <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin" />
+        </div>
       </div>
     );
   }
 
   const agreed = fee?.agreedAmount || 0;
   const payments = fee?.payments || [];
-  // Sort by date ascending to compute running totals
   const sorted = [...payments].sort(
     (a, b) => new Date(a.date) - new Date(b.date),
   );
@@ -536,53 +677,83 @@ export default function FeeTab({ caseId, onUpdate }) {
   const isFullyPaid = agreed > 0 && totalPaid >= agreed;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-      {/* Left — progress + controls */}
-      <div className="lg:col-span-2 space-y-5">
-        {/* Progress card */}
-        <div className="card p-6 space-y-5">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Left Column */}
+      <div className="lg:col-span-2 space-y-6">
+        {/* Progress Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-md transition-shadow p-6 space-y-5"
+        >
           <div className="flex items-start justify-between gap-3">
-            <h3 className="section-title">Fee Status</h3>
-            {isFullyPaid && (
-              <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                <CheckCircle2 className="w-3 h-3" /> Fully Paid
-              </span>
-            )}
-            {!isFullyPaid && agreed > 0 && (
-              <span className="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
-                <AlertCircle className="w-3 h-3" /> Outstanding
-              </span>
-            )}
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
+                <CircleDollarSign className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-800">
+                  Fee Status
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Payment overview & progress
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {isFullyPaid && (
+                <motion.span
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Fully Paid
+                </motion.span>
+              )}
+              {!isFullyPaid && agreed > 0 && (
+                <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full">
+                  <AlertCircle className="w-3.5 h-3.5" /> Outstanding
+                </span>
+              )}
+            </div>
           </div>
 
           {agreed > 0 ? (
             <FeeProgressBar paid={totalPaid} agreed={agreed} />
           ) : (
-            <div className="py-8 text-center border-2 border-dashed border-slate-200 rounded-2xl">
-              <Banknote className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="py-10 text-center border-2 border-dashed border-slate-200 rounded-2xl"
+            >
+              <Banknote className="w-10 h-10 text-slate-300 mx-auto mb-3" />
               <p className="text-sm text-slate-400 font-medium">
                 No agreed fee set yet
               </p>
               <p className="text-xs text-slate-300 mt-0.5">
                 Set the agreed amount to track payments
               </p>
-            </div>
+            </motion.div>
           )}
 
-          <AgreedFeeEditor
-            current={agreed}
-            notes={fee?.notes}
-            onSave={handleUpdateFee}
-          />
+          <div className="flex items-center justify-between">
+            <AgreedFeeEditor
+              current={agreed}
+              notes={fee?.notes}
+              onSave={handleUpdateFee}
+            />
+            {fee?.notes && (
+              <span className="text-xs text-slate-400 flex items-center gap-1">
+                <FileText className="w-3 h-3" />
+                {fee.notes.length > 40
+                  ? `${fee.notes.slice(0, 40)}...`
+                  : fee.notes}
+              </span>
+            )}
+          </div>
+        </motion.div>
 
-          {fee?.notes && (
-            <p className="text-xs text-slate-400 italic border-l-2 border-slate-200 pl-3">
-              {fee.notes}
-            </p>
-          )}
-        </div>
-
-        {/* Slider quick-pay card */}
+        {/* Quick Payment Slider */}
         <PaymentSlider
           agreedAmount={agreed}
           paidSoFar={totalPaid}
@@ -596,39 +767,59 @@ export default function FeeTab({ caseId, onUpdate }) {
           }
         />
 
-        {/* Add payment form */}
-        {showAddForm ? (
-          <AddPaymentForm
-            onAdd={handleAddPayment}
-            onClose={() => setShowAddForm(false)}
-          />
-        ) : (
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-slate-200 rounded-2xl text-sm text-slate-400 hover:border-slate-400 hover:text-slate-600 transition-colors font-medium"
-          >
-            <Plus className="w-4 h-4" /> Add Payment Entry
-          </button>
-        )}
+        {/* Add Payment Form */}
+        <AnimatePresence>
+          {showAddForm ? (
+            <AddPaymentForm
+              onAdd={handleAddPayment}
+              onClose={() => setShowAddForm(false)}
+            />
+          ) : (
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={() => setShowAddForm(true)}
+              className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-slate-200 rounded-2xl text-sm text-slate-400 hover:border-slate-400 hover:text-slate-600 transition-all font-medium"
+            >
+              <Plus className="w-4 h-4" /> Add Payment Entry
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Right — payment history */}
+      {/* Right Column - Payment History */}
       <div className="space-y-4">
-        <div className="card p-5">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-md transition-shadow p-5"
+        >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Payment History</h3>
-            <span className="text-xs text-slate-400 font-medium">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-slate-100">
+                <Receipt className="w-4 h-4 text-slate-600" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-700">
+                Payment History
+              </h3>
+            </div>
+            <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
               {payments.length} entries
             </span>
           </div>
 
           {withRunning.length === 0 ? (
-            <div className="text-center py-8 text-slate-400 text-xs">
-              No payments recorded yet.
+            <div className="text-center py-10">
+              <Banknote className="w-10 h-10 text-slate-200 mx-auto mb-2" />
+              <p className="text-sm text-slate-400 font-medium">
+                No payments yet
+              </p>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Record the first payment
+              </p>
             </div>
           ) : (
-            <div>
-              {/* Show newest first for readability */}
+            <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               {[...withRunning].reverse().map((p) => (
                 <PaymentRow
                   key={p._id}
@@ -640,20 +831,22 @@ export default function FeeTab({ caseId, onUpdate }) {
             </div>
           )}
 
-          {/* Summary footer */}
+          {/* Summary Footer */}
           {withRunning.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <div className="flex justify-between text-xs text-slate-400 mb-1">
-                <span>Total paid</span>
+            <div className="mt-4 pt-4 border-t border-slate-100 space-y-1.5">
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-400 font-medium">Total Paid</span>
                 <span className="font-bold text-slate-700">
                   {fmt(totalPaid)}
                 </span>
               </div>
               {agreed > 0 && (
-                <div className="flex justify-between text-xs text-slate-400">
-                  <span>Balance due</span>
+                <div className="flex justify-between text-xs">
+                  <span className="text-slate-400 font-medium">
+                    Balance Due
+                  </span>
                   <span
-                    className={`font-bold ${isFullyPaid ? "text-emerald-600" : "text-red-500"}`}
+                    className={`font-bold ${isFullyPaid ? "text-emerald-600" : "text-rose-500"}`}
                   >
                     {isFullyPaid ? "Nil" : fmt(agreed - totalPaid)}
                   </span>
@@ -661,7 +854,7 @@ export default function FeeTab({ caseId, onUpdate }) {
               )}
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

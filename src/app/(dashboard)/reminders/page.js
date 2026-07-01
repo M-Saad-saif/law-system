@@ -8,12 +8,9 @@ import { api } from "@/utils/api";
 import { formatDateTime, relativeDate } from "@/utils/helpers";
 import {
   EmptyState,
-  PageLoader,
   Modal,
   ConfirmDialog,
   PriorityBadge,
-  Spinner,
-  TabBar,
 } from "@/components/ui";
 import {
   Bell,
@@ -25,6 +22,9 @@ import {
   CalendarClock,
   CheckCircle2,
   AlertCircle,
+  Sparkles,
+  Zap,
+  Target,
 } from "lucide-react";
 import { isPast } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -85,6 +85,48 @@ const itemVariants = {
     transition: { duration: 0.2 },
   },
 };
+
+// Custom TabBar with animated underline
+function TabBar({ tabs, active, onChange }) {
+  return (
+    <div className="relative flex gap-1 bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/60 p-1 shadow-sm">
+      {tabs.map((tab) => {
+        const Icon = tab.icon;
+        const isActive = active === tab.id;
+        return (
+          <motion.button
+            key={tab.id}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onChange(tab.id)}
+            className={`
+              relative flex-1 flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl 
+              text-sm font-medium transition-all duration-300
+              ${
+                isActive
+                  ? "text-teal-700 bg-gradient-to-r from-teal-50/80 to-teal-50/40"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-50/60"
+              }
+            `}
+          >
+            <Icon
+              className={`w-4 h-4 transition-colors duration-300 ${isActive ? "text-teal-600" : "text-slate-400"}`}
+            />
+            <span className="hidden sm:inline">{tab.label}</span>
+            <span className="sm:hidden">{tab.label.charAt(0)}</span>
+            {isActive && (
+              <motion.div
+                layoutId="activeTab"
+                className="absolute bottom-1 left-1/2 -translate-x-1/2 w-8 sm:w-12 h-0.5 bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 rounded-full shadow-sm shadow-teal-500/30"
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              />
+            )}
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function RemindersPage() {
   const [reminders, setReminders] = useState([]);
@@ -187,23 +229,38 @@ export default function RemindersPage() {
 
   const priorityStyles = {
     high: {
-      border: "border-l-red-400",
-      bg: "bg-red-50/50",
-      badge: "bg-red-100 text-red-700 border-red-200",
-      icon: "text-red-500",
+      border: "border-l-red-500",
+      bg: "bg-gradient-to-r from-red-50/60 to-transparent",
+      glow: "shadow-red-500/10",
+      accent: "red",
     },
     medium: {
-      border: "border-l-amber-400",
-      bg: "bg-amber-50/50",
-      badge: "bg-amber-100 text-amber-700 border-amber-200",
-      icon: "text-amber-500",
+      border: "border-l-amber-500",
+      bg: "bg-gradient-to-r from-amber-50/60 to-transparent",
+      glow: "shadow-amber-500/10",
+      accent: "amber",
     },
     low: {
-      border: "border-l-slate-300",
-      bg: "bg-slate-50/50",
-      badge: "bg-slate-100 text-slate-600 border-slate-200",
-      icon: "text-slate-400",
+      border: "border-l-teal-500",
+      bg: "bg-gradient-to-r from-teal-50/60 to-transparent",
+      glow: "shadow-teal-500/10",
+      accent: "teal",
     },
+  };
+
+  const getTimeRemaining = (dateTime) => {
+    const now = new Date();
+    const target = new Date(dateTime);
+    const diff = target - now;
+    if (diff < 0) return null;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      return `${days}d ${hours % 24}h remaining`;
+    }
+    if (hours > 0) return `${hours}h ${minutes}m remaining`;
+    return `${minutes}m remaining`;
   };
 
   return (
@@ -211,32 +268,47 @@ export default function RemindersPage() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-3xl mx-auto space-y-5"
+      className="max-w-4xl mx-auto space-y-6 px-4 sm:px-0"
     >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="page-header mb-0">
-          <h1 className="page-title flex items-center gap-2">
-            <Bell className="w-5 h-5 text-teal-600" />
-            Reminders
-          </h1>
-          <p className="page-subtitle">Deadlines and scheduled alerts</p>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+      >
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-teal-50 to-teal-100 shadow-sm border border-teal-200/50">
+              <Bell className="w-6 h-6 text-teal-600" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent flex items-center gap-2">
+                Reminders
+                <Sparkles className="w-5 h-5 text-teal-500" />
+              </h1>
+              <p className="text-sm text-slate-400 font-medium">
+                Stay on top of your deadlines and tasks
+              </p>
+            </div>
+          </div>
         </div>
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
           onClick={openAdd}
-          className="btn-primary shadow-lg shadow-teal-500/20 hover:shadow-xl hover:shadow-teal-500/30 transition-all duration-200"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-teal-500/25 transition-all duration-300 font-medium text-sm group"
         >
-          <Plus className="w-4 h-4" /> Add Reminder
+          <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
+          Add Reminder
         </motion.button>
-      </div>
+      </motion.div>
 
-      {/* Tab Bar with animation */}
+      {/* Tab Bar */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1, duration: 0.3 }}
+        transition={{ delay: 0.15 }}
       >
         <TabBar tabs={FILTERS} active={filter} onChange={setFilter} />
       </motion.div>
@@ -250,8 +322,14 @@ export default function RemindersPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
+            className="flex items-center justify-center h-64"
           >
-            <PageLoader />
+            <div className="relative">
+              <div className="w-12 h-12 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-5 h-5 bg-teal-600 rounded-full animate-ping opacity-75" />
+              </div>
+            </div>
           </motion.div>
         ) : reminders.length === 0 ? (
           <motion.div
@@ -261,20 +339,22 @@ export default function RemindersPage() {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="card">
+            <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm p-12">
               <EmptyState
                 icon={Bell}
                 title={
                   filter === "upcoming"
-                    ? "No upcoming reminders"
+                    ? "All caught up!"
                     : filter === "overdue"
                       ? "No overdue reminders"
                       : "No completed reminders"
                 }
                 description={
                   filter === "upcoming"
-                    ? "Add a reminder to stay on top of deadlines."
-                    : ""
+                    ? "No upcoming reminders. Add one to stay organized."
+                    : filter === "overdue"
+                      ? "Great job! You have no overdue reminders."
+                      : "Complete reminders to track your progress."
                 }
                 action={
                   filter === "upcoming" && (
@@ -282,7 +362,7 @@ export default function RemindersPage() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={openAdd}
-                      className="btn-primary"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-teal-500/25 transition-all duration-300 font-medium text-sm"
                     >
                       <Plus className="w-4 h-4" /> Add Reminder
                     </motion.button>
@@ -297,13 +377,17 @@ export default function RemindersPage() {
             variants={containerVariants}
             initial="hidden"
             animate="show"
-            className="space-y-2"
+            className="space-y-3"
           >
             <AnimatePresence>
               {reminders.map((r) => {
                 const overdue = !r.isCompleted && isPast(new Date(r.dateTime));
                 const priorityStyle =
                   priorityStyles[r.priority] || priorityStyles.medium;
+                const timeRemaining =
+                  !r.isCompleted && !overdue
+                    ? getTimeRemaining(r.dateTime)
+                    : null;
 
                 return (
                   <motion.div
@@ -313,23 +397,60 @@ export default function RemindersPage() {
                     animate="show"
                     exit="exit"
                     layout
-                    className={`card p-4 flex gap-3 border-l-4 ${priorityStyle.border} ${r.isCompleted ? "opacity-60 hover:opacity-80" : ""} hover:shadow-lg transition-all duration-200 group relative overflow-hidden`}
+                    className={`
+                      relative bg-white border border-slate-200/60 rounded-2xl 
+                      p-4 sm:p-5 flex gap-4 border-l-[5px] ${priorityStyle.border} 
+                      ${r.isCompleted ? "opacity-50" : ""} 
+                      hover:shadow-xl hover:border-slate-200 transition-all duration-300 
+                      group overflow-hidden
+                    `}
                   >
-                    {/* Subtle background gradient */}
+                    {/* Animated gradient background on hover */}
                     <div
-                      className={`absolute inset-0 bg-gradient-to-r ${priorityStyle.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}
+                      className={`absolute inset-0 ${priorityStyle.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}
                     />
 
-                    {/* Complete button */}
+                    {/* Glow effect on hover */}
+                    <div
+                      className={`absolute -inset-px opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none ${priorityStyle.glow}`}
+                    />
+
+                    {/* Status indicators */}
+                    {overdue && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                        <span className="flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                        </span>
+                        <span className="text-[10px] font-bold text-red-600">
+                          OVERDUE
+                        </span>
+                      </div>
+                    )}
+
+                    {r.isCompleted && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
+                        <CheckCircle2 className="w-3 h-3 text-teal-600" />
+                        <span className="text-[10px] font-bold text-teal-600">
+                          DONE
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Complete toggle */}
                     <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.85 }}
                       onClick={() => toggleComplete(r)}
-                      className={`relative z-10 w-5 h-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-all duration-200 ${
-                        r.isCompleted
-                          ? "bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/30"
-                          : "border-slate-300 hover:border-emerald-400 hover:shadow-md"
-                      }`}
+                      className={`
+                        relative z-10 w-6 h-6 rounded-full border-2 shrink-0 mt-1 
+                        flex items-center justify-center transition-all duration-300
+                        ${
+                          r.isCompleted
+                            ? "bg-teal-500 border-teal-500 shadow-lg shadow-teal-500/30"
+                            : "border-slate-300 hover:border-teal-400 hover:shadow-md hover:shadow-teal-500/10"
+                        }
+                      `}
                     >
                       {r.isCompleted && (
                         <motion.div
@@ -341,73 +462,104 @@ export default function RemindersPage() {
                             damping: 30,
                           }}
                         >
-                          <Check className="w-3 h-3 text-white" />
+                          <Check className="w-3.5 h-3.5 text-white" />
                         </motion.div>
                       )}
                     </motion.button>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0 relative z-10">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3
-                          className={`font-semibold text-sm transition-all duration-200 ${
-                            r.isCompleted
-                              ? "line-through text-slate-400"
-                              : "text-slate-800 group-hover:text-slate-900"
-                          }`}
-                        >
-                          {r.title}
-                        </h3>
-                        <PriorityBadge priority={r.priority} />
+                    <div className="flex-1 min-w-0 relative z-10 space-y-1.5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2.5 flex-wrap min-w-0">
+                          <h3
+                            className={`
+                              font-semibold text-sm sm:text-base transition-all duration-200 truncate
+                              ${
+                                r.isCompleted
+                                  ? "line-through text-slate-400"
+                                  : "text-slate-800 group-hover:text-slate-900"
+                              }
+                            `}
+                          >
+                            {r.title}
+                          </h3>
+                          <PriorityBadge priority={r.priority} />
+                        </div>
                       </div>
+
                       {r.description && (
-                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
+                        <p className="text-xs sm:text-sm text-slate-500 line-clamp-2 leading-relaxed">
                           {r.description}
                         </p>
                       )}
-                      <div
-                        className={`flex items-center gap-1.5 mt-1.5 text-xs font-medium transition-colors duration-200 ${
-                          overdue
-                            ? "text-red-500"
-                            : "text-slate-400 group-hover:text-slate-500"
-                        }`}
-                      >
-                        {overdue ? (
-                          <AlertCircle className="w-3 h-3 animate-pulse" />
-                        ) : (
-                          <Clock className="w-3 h-3" />
-                        )}
-                        {overdue ? "Overdue · " : ""}
-                        {formatDateTime(r.dateTime)}
-                      </div>
-                      {r.linkedCase && (
-                        <motion.div
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          className="mt-2 text-xs text-teal-600 bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-lg inline-block font-medium"
+
+                      <div className="flex flex-wrap items-center gap-3 mt-1.5">
+                        {/* Date & time */}
+                        <div
+                          className={`
+                            flex items-center gap-1.5 text-xs font-medium transition-colors duration-200
+                            ${
+                              overdue
+                                ? "text-red-500"
+                                : r.isCompleted
+                                  ? "text-slate-400"
+                                  : "text-slate-400 group-hover:text-slate-500"
+                            }
+                          `}
                         >
-                          Case: {r.linkedCase.caseTitle}
-                        </motion.div>
-                      )}
+                          {overdue ? (
+                            <AlertCircle className="w-3.5 h-3.5 animate-pulse" />
+                          ) : r.isCompleted ? (
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          ) : (
+                            <Clock className="w-3.5 h-3.5" />
+                          )}
+                          {formatDateTime(r.dateTime)}
+                        </div>
+
+                        {/* Time remaining badge */}
+                        {timeRemaining && (
+                          <motion.span
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="text-[10px] font-semibold text-teal-600 bg-teal-50 border border-teal-200/60 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5"
+                          >
+                            <Zap className="w-3 h-3" />
+                            {timeRemaining}
+                          </motion.span>
+                        )}
+
+                        {/* Linked case */}
+                        {r.linkedCase && (
+                          <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="text-xs text-teal-600 bg-teal-50 border border-teal-200/60 px-2.5 py-1 rounded-lg inline-flex items-center gap-1.5 font-medium"
+                          >
+                            <Target className="w-3 h-3" />
+                            {r.linkedCase.caseTitle}
+                          </motion.div>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Action buttons */}
-                    <div className="flex gap-1 shrink-0 relative z-10 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    {/* Action buttons - improved visibility */}
+                    <div className="flex gap-1 shrink-0 relative z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => openEdit(r)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition-all duration-200"
+                        className="p-2 rounded-xl text-slate-400 hover:text-teal-600 hover:bg-teal-50 transition-all duration-200"
                       >
-                        <Pencil className="w-3.5 h-3.5" />
+                        <Pencil className="w-4 h-4" />
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => setDeleteTarget(r)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4" />
                       </motion.button>
                     </div>
                   </motion.div>
@@ -418,71 +570,78 @@ export default function RemindersPage() {
         )}
       </AnimatePresence>
 
-      {/* Add/Edit Modal */}
+      {/* Add/Edit Modal - Enhanced */}
       <Modal
         isOpen={showForm}
         onClose={() => setShowForm(false)}
         title={editTarget ? "Edit Reminder" : "New Reminder"}
         size="sm"
       >
-        <form onSubmit={handleSave} className="space-y-4">
-          <div className="form-group">
-            <label className="label">
+        <form onSubmit={handleSave} className="space-y-5">
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
               Title <span className="text-red-500">*</span>
             </label>
             <input
-              className="input focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
-              placeholder="e.g. File written arguments"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-200 outline-none text-sm placeholder:text-slate-400"
+              placeholder="What needs to be done?"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               required
             />
           </div>
-          <div className="form-group">
-            <label className="label">Description</label>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Description
+            </label>
             <textarea
-              className="textarea focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-200 outline-none text-sm resize-none placeholder:text-slate-400"
               rows={2}
-              placeholder="Optional details..."
+              placeholder="Add any additional details..."
               value={form.description}
               onChange={(e) =>
                 setForm({ ...form, description: e.target.value })
               }
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="form-group">
-              <label className="label">
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Date & Time <span className="text-red-500">*</span>
               </label>
               <input
                 type="datetime-local"
-                className="input focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-200 outline-none text-sm"
                 value={form.dateTime}
                 onChange={(e) => setForm({ ...form, dateTime: e.target.value })}
                 required
               />
             </div>
-            <div className="form-group">
-              <label className="label">Priority</label>
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Priority
+              </label>
               <select
-                className="select focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all duration-200 outline-none text-sm bg-white cursor-pointer"
                 value={form.priority}
                 onChange={(e) => setForm({ ...form, priority: e.target.value })}
               >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="low"> Low</option>
+                <option value="medium"> Medium</option>
+                <option value="high"> High</option>
               </select>
             </div>
           </div>
-          <div className="flex gap-2 justify-end pt-2">
+
+          <div className="flex gap-3 justify-end pt-3 border-t border-slate-100">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               type="button"
               onClick={() => setShowForm(false)}
-              className="btn-secondary"
+              className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all duration-200 text-sm font-medium"
             >
               Cancel
             </motion.button>
@@ -491,10 +650,13 @@ export default function RemindersPage() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={saving}
-              className="btn-primary shadow-lg shadow-teal-500/20"
+              className="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-teal-500/25 transition-all duration-300 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {saving ? (
-                <Spinner size="sm" className="text-white" />
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </>
               ) : editTarget ? (
                 "Save Changes"
               ) : (
@@ -505,14 +667,15 @@ export default function RemindersPage() {
         </form>
       </Modal>
 
-      {/* Delete Confirmation */}
+      {/* Delete Confirmation - Enhanced */}
       <ConfirmDialog
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleDelete}
         title="Delete Reminder"
-        message={`Delete "${deleteTarget?.title}"?`}
+        message={`Are you sure you want to delete "${deleteTarget?.title}"? This action cannot be undone.`}
         loading={deleting}
+        className="rounded-2xl"
       />
     </motion.div>
   );

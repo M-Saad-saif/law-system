@@ -14,16 +14,20 @@ import {
   AlertTriangle,
   Upload,
   RefreshCw,
-  Banknote,
   Info,
-  Shield,
-  FileText,
   ArrowRight,
   Calendar,
   Zap,
   Mail,
   Phone,
-  ExternalLink,
+  Layers,
+  History,
+  LayoutDashboard,
+  ShoppingBag,
+  Send,
+  ChevronRight,
+  Sparkles,
+  Crown,
 } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 
@@ -111,12 +115,15 @@ function StatusBadge({ status }) {
   );
 }
 
-function InfoRow({ label, value, highlight }) {
+function InfoRow({ label, value, highlight, icon: Icon }) {
   return (
-    <div className="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0 transition-colors duration-200 hover:bg-[#027675]/[0.02] rounded-lg px-1.5 -mx-1.5">
-      <span className="text-sm text-gray-500">{label}</span>
+    <div className="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0 transition-colors duration-200 hover:bg-[#026665]/[0.02] rounded-lg px-1.5 -mx-1.5">
+      <span className="flex items-center gap-2 text-sm text-gray-500">
+        {Icon && <Icon className="w-3.5 h-3.5 text-gray-400" />}
+        {label}
+      </span>
       <span
-        className={`text-sm font-semibold transition-colors duration-200 ${highlight ? "text-[#027675]" : "text-gray-800"}`}
+        className={`text-sm font-semibold transition-colors duration-200 ${highlight ? "text-[#026665]" : "text-gray-800"}`}
       >
         {value || "—"}
       </span>
@@ -133,13 +140,111 @@ function formatDate(d) {
   });
 }
 
+// Modern Tab Component with animations
+function ModernTabs({ tabs, activeTab, onChange }) {
+  return (
+    <div className="relative">
+      {/* Tab Bar Background */}
+      <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-1.5 shadow-[0_2px_16px_rgba(2,102,101,0.06)] border border-[#026665]/10">
+        {/* Animated Sliding Background */}
+        <div
+          className="absolute top-1.5 bottom-1.5 left-1.5 bg-gradient-to-r from-[#026665] to-[#0d8c81] rounded-xl shadow-lg shadow-[#026665]/25 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          style={{
+            width: `${100 / tabs.length}%`,
+            transform: `translateX(${activeTab * 100}%)`,
+          }}
+        />
+
+        {/* Tab Buttons */}
+        <div className="relative flex">
+          {tabs.map((tab, index) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === index;
+            return (
+              <button
+                key={index}
+                onClick={() => onChange(index)}
+                className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-300 ${
+                  isActive
+                    ? "text-white scale-[1.02]"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <div className={`relative z-10 flex items-center gap-2`}>
+                  {/* Step Number with Animation */}
+                  <span
+                    className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold transition-all duration-300 ${
+                      isActive
+                        ? "bg-white/20 rotate-0"
+                        : "bg-gray-100 text-gray-500 group-hover:bg-gray-200"
+                    }`}
+                  >
+                    {index + 1}
+                  </span>
+
+                  {/* Icon with Animation */}
+                  <Icon
+                    className={`w-4 h-4 transition-all duration-300 ${
+                      isActive ? "scale-110" : "scale-100"
+                    }`}
+                  />
+
+                  {/* Label */}
+                  <span className="hidden sm:inline">{tab.label}</span>
+
+                  {/* Active Indicator Arrow */}
+                  {isActive && (
+                    <ChevronRight className="w-3.5 h-3.5 opacity-70 animate-in slide-in-from-left-2 duration-200" />
+                  )}
+                </div>
+
+                {/* Ripple Effect on Hover */}
+                <div
+                  className={`absolute inset-0 rounded-xl transition-all duration-300 ${
+                    !isActive ? "group-hover:bg-gray-100/50" : ""
+                  }`}
+                />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Progress Steps */}
+      <div className="flex justify-between mt-3 px-2">
+        {tabs.map((tab, index) => (
+          <div
+            key={index}
+            className={`flex items-center gap-1.5 text-xs transition-all duration-300 ${
+              index <= activeTab
+                ? "text-[#026665] font-medium"
+                : "text-gray-400"
+            }`}
+          >
+            <div
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index < activeTab
+                  ? "bg-[#026665] scale-100"
+                  : index === activeTab
+                    ? "bg-[#026665] scale-125 animate-pulse"
+                    : "bg-gray-300"
+              }`}
+            />
+            {tab.label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PlanSelector({ selected, onChange }) {
   return (
-    <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10 transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(2,103,117,0.1)] animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-[#027675]/10 flex items-center justify-center transition-transform duration-300 hover:scale-105 hover:rotate-3">
-            <CreditCard className="w-5 h-5 text-[#027675]" />
+    <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,102,101,0.06)] border border-[#026665]/10 transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(2,102,101,0.1)]">
+      <div className="p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-[#026665]/10 flex items-center justify-center">
+            <Crown className="w-5 h-5 text-[#026665]" />
           </div>
           <div>
             <h2 className="font-bold text-lg text-gray-900">
@@ -148,10 +253,30 @@ function PlanSelector({ selected, onChange }) {
             <p className="text-xs text-gray-500">
               Select the subscription that works best for you
             </p>
+            <button
+              onClick={() => setActiveTab(1)}
+              className="group inline-flex items-center gap-2 text-sm font-semibold text-[#026665] transition-colors duration-300 hover:text-[#0d8c81]"
+            >
+              Submit Payment
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                />
+              </svg>
+            </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {PLAN_OPTIONS.map((plan, idx) => {
             const Icon = plan.icon;
             const isSelected = selected === plan.type;
@@ -161,41 +286,39 @@ function PlanSelector({ selected, onChange }) {
                 type="button"
                 onClick={() => onChange(plan.type)}
                 style={{ animationDelay: `${idx * 80}ms` }}
-                className={`relative text-left p-4 rounded-xl border-2 transition-all duration-300 ease-out animate-in fade-in slide-in-from-bottom-1 will-change-transform hover:-translate-y-0.5 active:scale-[0.98] ${
+                className={`relative text-left p-5 rounded-xl border-2 transition-all duration-300 ease-out animate-in fade-in slide-in-from-bottom-1 will-change-transform hover:-translate-y-0.5 active:scale-[0.98] ${
                   isSelected
-                    ? "border-[#027675] bg-[#027675]/5 shadow-md shadow-[#027675]/10 scale-[1.01]"
-                    : "border-gray-200 hover:border-[#027675]/40 hover:bg-gray-50 hover:shadow-sm"
+                    ? "border-[#026665] bg-[#026665]/5 shadow-md shadow-[#026665]/10 scale-[1.02]"
+                    : "border-gray-200 hover:border-[#026665]/40 hover:bg-gray-50 hover:shadow-sm"
                 }`}
               >
                 {plan.badge && (
-                  <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 bg-[#027675] text-white rounded-full shadow-sm shadow-[#027675]/30 animate-pulse">
+                  <span className="absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 bg-[#026665] text-white rounded-full shadow-sm shadow-[#026665]/30">
                     {plan.badge}
                   </span>
                 )}
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-3">
                   <div
-                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300 ${
                       isSelected
-                        ? "bg-[#027675] text-white shadow-sm shadow-[#027675]/30 scale-105"
+                        ? "bg-[#026665] text-white shadow-sm shadow-[#026665]/30 scale-105"
                         : "bg-gray-100 text-gray-500"
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4.5 h-4.5" />
                   </div>
                   <span className="font-semibold text-sm text-gray-900">
                     {plan.label}
                   </span>
                   {isSelected && (
-                    <CheckCircle className="w-4 h-4 text-[#027675] ml-auto animate-in zoom-in-50 duration-200" />
+                    <CheckCircle className="w-4 h-4 text-[#026665] ml-auto animate-in zoom-in-50 duration-200" />
                   )}
                 </div>
                 <p className="text-2xl font-bold text-gray-900 tracking-tight">
                   PKR {plan.price.toLocaleString()}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">{plan.duration}</p>
-                <p className="text-xs text-gray-400 mt-1.5">
-                  {plan.description}
-                </p>
+                <p className="text-xs text-gray-400 mt-2">{plan.description}</p>
               </button>
             );
           })}
@@ -267,12 +390,12 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
   ];
 
   return (
-    <div className="relative bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10 overflow-hidden transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(2,103,117,0.1)] animate-in fade-in slide-in-from-bottom-2 duration-500">
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#027675] via-[#019d8e] to-[#027675] bg-[length:200%_100%] animate-[shimmer_3s_linear_infinite]" />
-      <div className="p-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-[#027675]/10 flex items-center justify-center transition-transform duration-300 hover:scale-105 hover:-rotate-3">
-            <Banknote className="w-5 h-5 text-[#027675]" />
+    <div className="relative bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,102,101,0.06)] border border-[#026665]/10 overflow-hidden transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(2,102,101,0.1)]">
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#026665] via-[#0d8c81] to-[#026665] bg-[length:200%_100%] animate-[shimmer_3s_linear_infinite]" />
+      <div className="p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-[#026665]/10 flex items-center justify-center">
+            <Send className="w-5 h-5 text-[#026665]" />
           </div>
           <div>
             <h2 className="font-bold text-lg text-gray-900">Submit Payment</h2>
@@ -282,28 +405,26 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
           </div>
         </div>
 
-        {/* Selected plan summary */}
-        <div className="bg-[#027675]/5 border border-[#027675]/15 rounded-xl p-3.5 mb-4 flex items-center justify-between transition-all duration-300 hover:bg-[#027675]/[0.07]">
+        <div className="bg-[#026665]/5 border border-[#026665]/15 rounded-xl p-4 mb-5 flex items-center justify-between">
           <div>
             <p className="text-xs text-gray-500 font-medium">Selected Plan</p>
             <p className="text-sm font-bold text-gray-900">{plan.label}</p>
             <p className="text-xs text-gray-400">{plan.duration}</p>
           </div>
-          <p className="text-xl font-bold text-[#027675] transition-all duration-300">
+          <p className="text-xl font-bold text-[#026665]">
             PKR {plan.price.toLocaleString()}
           </p>
         </div>
 
-        {/* Payment instructions */}
-        <div className="bg-[#027675]/5 border border-[#027675]/10 rounded-xl p-4 mb-4 text-sm text-gray-700 space-y-1.5">
-          <p className="font-semibold flex items-center gap-1.5 text-[#027675]">
+        <div className="bg-[#026665]/5 border border-[#026665]/10 rounded-xl p-4 mb-5 text-sm text-gray-700 space-y-1.5">
+          <p className="font-semibold flex items-center gap-1.5 text-[#026665]">
             <Info className="w-4 h-4" /> Payment Instructions
           </p>
           <p className="text-xs">
             Send <strong>PKR {plan.price.toLocaleString()}</strong> (exact
             amount) to:
           </p>
-          <div className="mt-2 space-y-1.5 font-mono text-xs bg-white rounded-lg p-3 border border-[#027675]/10 transition-colors duration-300 hover:border-[#027675]/25">
+          <div className="mt-2 space-y-1.5 font-mono text-xs bg-white rounded-lg p-3 border border-[#026665]/10">
             <p>
               <strong>Raast ID:</strong>{" "}
               {process.env.NEXT_PUBLIC_RAAST_ID || "03XX-XXXXXXX"}
@@ -317,9 +438,8 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
               {process.env.NEXT_PUBLIC_ACCOUNT_NAME || "LawPortal"}
             </p>
           </div>
-          <p className="text-xs text-[#027675] mt-1">
-            ⚠ Use the <em>unique amount</em> from your invoice — it helps
-            identify your payment.
+          <p className="text-xs text-[#026665] mt-1">
+            ⚠ Use the <em>unique amount</em> from your invoice
           </p>
         </div>
 
@@ -329,7 +449,7 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
               Payment Method
             </label>
             <select
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-800 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-200 text-sm hover:border-[#027675]/40"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-800 focus:border-[#026665] focus:ring-4 focus:ring-[#026665]/10 transition-all duration-200 text-sm"
               value={form.payment_method}
               onChange={(e) =>
                 setForm({ ...form, payment_method: e.target.value })
@@ -348,7 +468,7 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
               Transaction / Reference ID <span className="text-red-500">*</span>
             </label>
             <input
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-200 text-sm hover:border-[#027675]/40"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-800 placeholder-gray-400 focus:border-[#026665] focus:ring-4 focus:ring-[#026665]/10 transition-all duration-200 text-sm"
               placeholder="e.g. TXN-123456789"
               value={form.reference_id}
               onChange={(e) =>
@@ -362,7 +482,7 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
             <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
               Payment Screenshot (optional)
             </label>
-            <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#027675] hover:bg-[#027675]/[0.03] transition-all duration-300 bg-gray-50/50 group">
+            <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#026665] hover:bg-[#026665]/[0.03] transition-all duration-300 bg-gray-50/50 group">
               {preview ? (
                 <img
                   src={preview}
@@ -370,7 +490,7 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
                   className="h-full object-contain rounded-xl p-1 transition-transform duration-300 group-hover:scale-[1.03]"
                 />
               ) : (
-                <div className="flex flex-col items-center text-gray-400 transition-colors duration-300 group-hover:text-[#027675]">
+                <div className="flex flex-col items-center text-gray-400 transition-colors duration-300 group-hover:text-[#026665]">
                   <Upload className="w-5 h-5 mb-1 transition-transform duration-300 group-hover:-translate-y-0.5" />
                   <span className="text-xs">Click to upload screenshot</span>
                 </div>
@@ -387,7 +507,7 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-3 bg-[#027675] text-white font-semibold rounded-xl shadow-lg shadow-[#027675]/20 hover:bg-[#015f5d] hover:shadow-xl hover:shadow-[#027675]/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2"
+            className="w-full px-4 py-3 bg-gradient-to-r from-[#026665] to-[#0d8c81] text-white font-semibold rounded-xl shadow-lg shadow-[#026665]/20 hover:shadow-xl hover:shadow-[#026665]/30 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2 group"
           >
             {loading ? (
               <>
@@ -396,6 +516,7 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
               </>
             ) : (
               <>
+                <Sparkles className="w-4 h-4 transition-transform duration-200 group-hover:rotate-12" />
                 Submit Payment Request — PKR {plan.price.toLocaleString()}
                 <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
               </>
@@ -410,20 +531,39 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
 function PaymentHistory({ payments }) {
   const [selectedScreenshot, setSelectedScreenshot] = useState(null);
 
-  if (!payments?.length) return null;
+  if (!payments?.length) {
+    return (
+      <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,102,101,0.06)] border border-[#026665]/10 p-8 text-center">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
+          <History className="w-8 h-8 text-gray-300" />
+        </div>
+        <h3 className="text-sm font-semibold text-gray-600">No Payments Yet</h3>
+        <p className="text-xs text-gray-400 mt-1">
+          Your payment history will appear here
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
-      <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10 transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(2,103,117,0.1)] animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <div className="p-5">
+      <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,102,101,0.06)] border border-[#026665]/10">
+        <div className="p-6">
           <div className="flex items-center gap-2 mb-5">
-            <div className="p-2 bg-[#027675]/10 rounded-lg transition-transform duration-300 hover:scale-105">
-              <FileText className="w-4 h-4 text-[#027675]" />
+            <div className="p-2 bg-[#026665]/10 rounded-lg">
+              <History className="w-4 h-4 text-[#026665]" />
             </div>
-            <h2 className="font-bold text-lg text-gray-900">Payment History</h2>
+            <div>
+              <h2 className="font-bold text-lg text-gray-900">
+                Payment History
+              </h2>
+              <p className="text-xs text-gray-500">
+                {payments.length} transaction{payments.length > 1 ? "s" : ""}
+              </p>
+            </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1 custom-scrollbar">
             {payments.map((p, idx) => {
               const cfg =
                 PAYMENT_STATUS_CONFIG[p.status] ||
@@ -436,16 +576,15 @@ function PaymentHistory({ payments }) {
                 <div
                   key={p._id}
                   style={{ animationDelay: `${idx * 60}ms` }}
-                  className="group p-4 bg-gray-50/50 rounded-xl border border-gray-100 hover:border-[#027675]/20 hover:shadow-md hover:shadow-[#027675]/5 hover:-translate-y-0.5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-1"
+                  className="group p-4 bg-gray-50/50 rounded-xl border border-gray-100 hover:border-[#026665]/20 hover:shadow-md hover:shadow-[#026665]/5 hover:-translate-y-0.5 transition-all duration-300 animate-in fade-in slide-in-from-bottom-1"
                 >
                   <div className="flex gap-4">
-                    {/* Left: Screenshot Thumbnail */}
                     {p.screenshot_url && (
                       <button
                         onClick={() => setSelectedScreenshot(p.screenshot_url)}
                         className="shrink-0 group/thumb"
                       >
-                        <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 group-hover/thumb:border-[#027675]/40 transition-colors">
+                        <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 group-hover/thumb:border-[#026665]/40 transition-colors">
                           <img
                             src={p.screenshot_url}
                             alt="Payment proof"
@@ -470,7 +609,6 @@ function PaymentHistory({ payments }) {
                       </button>
                     )}
 
-                    {/* Right: Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
@@ -534,7 +672,6 @@ function PaymentHistory({ payments }) {
         </div>
       </div>
 
-      {/* Screenshot Modal */}
       {selectedScreenshot && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
@@ -544,7 +681,6 @@ function PaymentHistory({ payments }) {
             className="relative max-w-4xl w-full max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-4 duration-300"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-100">
               <h3 className="font-semibold text-gray-900">Payment Proof</h3>
               <button
@@ -566,8 +702,6 @@ function PaymentHistory({ payments }) {
                 </svg>
               </button>
             </div>
-
-            {/* Modal content */}
             <div className="p-4 overflow-auto max-h-[calc(90vh-80px)]">
               <img
                 src={selectedScreenshot}
@@ -575,20 +709,18 @@ function PaymentHistory({ payments }) {
                 className="w-full rounded-lg"
               />
             </div>
-
-            {/* Modal footer */}
             <div className="p-4 border-t border-gray-100 flex justify-end gap-3">
               <a
                 href={selectedScreenshot}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 text-sm text-[#027675] hover:bg-[#027675]/5 rounded-lg transition-colors font-medium"
+                className="px-4 py-2 text-sm text-[#026665] hover:bg-[#026665]/5 rounded-lg transition-colors font-medium"
               >
                 Open in new tab
               </a>
               <button
                 onClick={() => setSelectedScreenshot(null)}
-                className="px-4 py-2 text-sm bg-[#027675] text-white rounded-lg hover:bg-[#02605e] hover:shadow-md transition-all duration-200 font-medium"
+                className="px-4 py-2 text-sm bg-[#026665] text-white rounded-lg hover:bg-[#014f4e] hover:shadow-md transition-all duration-200 font-medium"
               >
                 Close
               </button>
@@ -600,11 +732,134 @@ function PaymentHistory({ payments }) {
   );
 }
 
+// Subscription Status Component
+function SubscriptionStatusContent({
+  chamber,
+  subscription,
+  subStatus,
+  statusCfg,
+  pendingRequest,
+}) {
+  const isSenior = chamber?.seniority === "senior";
+  return (
+    <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,102,101,0.06)] border border-[#026665]/10">
+      <div className="p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-xl bg-[#026665]/10 flex items-center justify-center">
+            <LayoutDashboard className="w-5 h-5 text-[#026665]" />
+          </div>
+          <div>
+            <h2 className="font-bold text-lg text-gray-900">
+              Subscription Status
+            </h2>
+            <p className="text-xs text-gray-500">
+              Current plan and validity details
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-4 pb-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-[#026665]/10 flex items-center justify-center">
+              <Layers className="w-4 h-4 text-[#026665]" />
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">Chamber</p>
+              <p className="text-sm font-semibold text-gray-800">
+                {chamber?.name || "—"}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <StatusBadge status={subStatus} />
+        </div>
+
+        <div className="mb-4 p-3 bg-gray-50 rounded-xl border border-gray-100">
+          <p className="text-xs text-gray-600 leading-relaxed">
+            {statusCfg.description}
+          </p>
+        </div>
+
+        <div className="space-y-0.5">
+          {subscription?.trial_ends_at && (
+            <InfoRow
+              label="Trial Expires"
+              value={formatDate(subscription.trial_ends_at)}
+              icon={Clock}
+            />
+          )}
+          {subscription?.subscription_ends_at && (
+            <InfoRow
+              label="Subscription Expires"
+              value={formatDate(subscription.subscription_ends_at)}
+              highlight
+              icon={Calendar}
+            />
+          )}
+          {subscription?.temp_access_ends_at &&
+            subStatus === "temporary_active" && (
+              <InfoRow
+                label="Temporary Access Until"
+                value={formatDate(subscription.temp_access_ends_at)}
+                highlight
+                icon={Clock}
+              />
+            )}
+        </div>
+
+        {subscription?.plan_type && (
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-400">Current Plan</span>
+              <span className="text-sm font-semibold text-[#026665]">
+                {PLAN_OPTIONS.find((p) => p.type === subscription.plan_type)
+                  ?.label || subscription.plan_type}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {!isSenior && pendingRequest && (
+          <div className="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4 text-amber-600 animate-[spin_4s_linear_infinite]" />
+              <span className="text-sm font-semibold text-amber-800">
+                Payment Under Review
+              </span>
+            </div>
+            <div className="space-y-1">
+              <InfoRow
+                label="Invoice"
+                value={pendingRequest.invoice_id}
+                highlight
+              />
+              <InfoRow
+                label="Plan"
+                value={
+                  PLAN_OPTIONS.find((p) => p.type === pendingRequest.plan_type)
+                    ?.label || pendingRequest.plan_type
+                }
+              />
+              <InfoRow
+                label="Amount"
+                value={`PKR ${getPaymentAmount(pendingRequest)?.toLocaleString()}`}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function BillingPage() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState("monthly");
+  const [activeTab, setActiveTab] = useState(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -622,12 +877,34 @@ export default function BillingPage() {
     load();
   }, [load]);
 
+  // Custom scrollbar styles
+  useEffect(() => {
+    const style = document.createElement("style");
+    style.textContent = `
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #02666540;
+        border-radius: 20px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #02666560;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => document.head.removeChild(style);
+  }, []);
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3 animate-in fade-in duration-300">
         <div className="relative w-10 h-10">
-          <div className="absolute inset-0 rounded-full border-3 border-[#027675]/15" />
-          <div className="absolute inset-0 rounded-full border-3 border-[#027675] border-t-transparent animate-spin" />
+          <div className="absolute inset-0 rounded-full border-3 border-[#026665]/15" />
+          <div className="absolute inset-0 rounded-full border-3 border-[#026665] border-t-transparent animate-spin" />
         </div>
         <p className="text-sm text-gray-400 animate-pulse">
           Loading billing details...
@@ -645,6 +922,15 @@ export default function BillingPage() {
     subStatus,
   );
   const isSenior = user?.seniority === "senior";
+  const isActive = !isExpired;
+
+  const showTabs = isSenior && isExpired && !pendingRequest;
+
+  const tabs = [
+    { label: "Status", icon: LayoutDashboard, content: "status" },
+    { label: "Choose Plan", icon: ShoppingBag, content: "plan" },
+    { label: "Submit Payment", icon: Send, content: "payment" },
+  ];
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br bg-[#eef5f3] overflow-hidden">
@@ -667,33 +953,38 @@ export default function BillingPage() {
           }
         }
       `}</style>
+
       {/* Ambient background accents */}
       <div
-        className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#027675]/10 blur-3xl"
+        className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#026665]/10 blur-3xl"
         style={{ animation: "float-blob 12s ease-in-out infinite" }}
       />
       <div
-        className="pointer-events-none absolute top-1/3 -left-24 w-72 h-72 rounded-full bg-[#019d8e]/10 blur-3xl"
+        className="pointer-events-none absolute top-1/3 -left-24 w-72 h-72 rounded-full bg-[#0d8c81]/10 blur-3xl"
         style={{ animation: "float-blob 14s ease-in-out infinite reverse" }}
       />
 
-      <div className="relative max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8 space-y-5">
+      <div className="relative max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-2 animate-in fade-in slide-in-from-top-2 duration-500">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#027675] to-[#015f5d] flex items-center justify-center shadow-lg shadow-[#027675]/20 transition-transform duration-300 hover:scale-105 hover:rotate-3">
+        <div className="flex items-center gap-3 mb-6 animate-in fade-in slide-in-from-top-2 duration-500">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#026665] to-[#014f4e] flex items-center justify-center shadow-lg shadow-[#026665]/20 transition-transform duration-300 hover:scale-105 hover:rotate-3">
             <CreditCard className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1 className="text-3xl font-bold text-gray-900 font-display tracking-tight">
               Billing & Subscription
             </h1>
-            <p className="text-sm text-gray-500 mt-0.5">{chamber?.name}</p>
+            <p className="text-sm text-gray-500 mt-0.5">
+              {isActive
+                ? "Manage your chamber's subscription"
+                : "Renew your subscription to restore access"}
+            </p>
           </div>
         </div>
 
-        {/* Expired banner */}
+        {/* Expired Banner */}
         {isExpired && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500 shadow-sm">
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500 shadow-sm">
             <div className="w-9 h-9 rounded-lg bg-red-100 flex items-center justify-center flex-shrink-0 animate-pulse">
               <AlertTriangle className="w-5 h-5 text-red-600" />
             </div>
@@ -703,8 +994,7 @@ export default function BillingPage() {
               </p>
               {isSenior && !pendingRequest && (
                 <p className="text-xs text-red-600 mt-1">
-                  Choose a plan below and complete payment to restore access for
-                  your entire team.
+                  Follow the steps below to renew your subscription.
                 </p>
               )}
               {pendingRequest && (
@@ -717,183 +1007,213 @@ export default function BillingPage() {
           </div>
         )}
 
-        {/* Subscription status card */}
-        <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10 transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(2,103,117,0.1)] animate-in fade-in slide-in-from-bottom-2 duration-500">
-          <div className="p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-[#027675]/10 flex items-center justify-center transition-transform duration-300 hover:scale-105 hover:rotate-3">
-                <Shield className="w-5 h-5 text-[#027675]" />
-              </div>
-              <div>
-                <h2 className="font-bold text-lg text-gray-900">
-                  Subscription Status
-                </h2>
-                <p className="text-xs text-gray-500">
-                  Current plan and validity details
-                </p>
-              </div>
-            </div>
+        {isSenior && isExpired && !pendingRequest ? (
+          <div className="space-y-6">
+            {/* Modern Tabs */}
+            <ModernTabs
+              tabs={tabs}
+              activeTab={activeTab}
+              onChange={setActiveTab}
+            />
 
-            <div className="mb-4">
-              <StatusBadge status={subStatus} />
-            </div>
+            {/* Content Area - Left/Right Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              {/* Left Side - Context/Info */}
+              <div className="lg:col-span-1">
+                <SubscriptionStatusContent
+                  chamber={chamber}
+                  subscription={subscription}
+                  subStatus={subStatus}
+                  statusCfg={statusCfg}
+                  pendingRequest={pendingRequest}
+                  user={user}
+                />
+              </div>
 
-            <div className="divide-y divide-gray-100">
-              <InfoRow label="Chamber" value={chamber?.name} />
-              <InfoRow
-                label="Status"
-                value={subStatus.replace("_", " ").toUpperCase()}
-              />
-              {subscription?.trial_ends_at && (
-                <InfoRow
-                  label="Trial Expires"
-                  value={formatDate(subscription.trial_ends_at)}
-                />
-              )}
-              {subscription?.subscription_ends_at && (
-                <InfoRow
-                  label="Subscription Expires"
-                  value={formatDate(subscription.subscription_ends_at)}
-                  highlight
-                />
-              )}
-              {subscription?.temp_access_ends_at &&
-                subStatus === "temporary_active" && (
-                  <InfoRow
-                    label="Temporary Access Until"
-                    value={formatDate(subscription.temp_access_ends_at)}
-                    highlight
+              {/* Right Side - Main Content */}
+              <div className="lg:col-span-2">
+                {activeTab === 0 && (
+                  <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,102,101,0.06)] border border-[#026665]/10 p-8 text-center">
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#026665]/5 flex items-center justify-center">
+                      <LayoutDashboard className="w-10 h-10 text-[#026665]" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                      Review Your Plans
+                    </h3>
+                    <p className="text-sm text-gray-500 max-w-md mx-auto">
+                      Your subscription Plans are shown on the left. Please
+                      proceed to select a plan and make payment.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab(1)}
+                      className="group inline-flex items-center gap-2 text-sm font-semibold text-[#026665] transition-colors duration-300 hover:text-[#0d8c81]"
+                    >
+                      Continue to Payment
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+
+                {activeTab === 1 && (
+                  <PlanSelector
+                    selected={selectedPlan}
+                    onChange={setSelectedPlan}
                   />
                 )}
-            </div>
-          </div>
-        </div>
 
-        {/* Latest pending request info */}
-        {pendingRequest && (
-          <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-amber-200 transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(217,119,6,0.08)] animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Clock className="w-4 h-4 text-amber-600 animate-[spin_4s_linear_infinite]" />
-                <h2 className="font-bold text-lg text-gray-900">
-                  Payment Under Review
-                </h2>
-              </div>
-              <InfoRow
-                label="Invoice ID"
-                value={pendingRequest.invoice_id}
-                highlight
-              />
-              <InfoRow
-                label="Plan"
-                value={
-                  PLAN_OPTIONS.find((p) => p.type === pendingRequest.plan_type)
-                    ?.label || pendingRequest.plan_type
-                }
-              />
-              <InfoRow
-                label="Amount"
-                value={`PKR ${getPaymentAmount(pendingRequest)?.toLocaleString()}`}
-              />
-              <InfoRow label="Method" value={pendingRequest.payment_method} />
-              <InfoRow
-                label="Submitted"
-                value={formatDate(pendingRequest.submitted_at)}
-              />
-              <InfoRow
-                label="Reference ID"
-                value={pendingRequest.reference_id || "—"}
-              />
-            </div>
-          </div>
-        )}
-
-        {isSenior && isExpired && !pendingRequest && (
-          <>
-            <PlanSelector selected={selectedPlan} onChange={setSelectedPlan} />
-            <PaymentForm
-              chamber={chamber}
-              selectedPlan={selectedPlan}
-              onSuccess={load}
-            />
-          </>
-        )}
-
-        {/* Junior lawyer message */}
-        {!isSenior && isExpired && (
-          <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,103,117,0.06)] border border-[#027675]/10 p-6 text-center animate-in fade-in slide-in-from-bottom-2 duration-500 transition-shadow hover:shadow-[0_4px_24px_rgba(2,103,117,0.1)]">
-            {/* Status Indicator */}
-            <div className="relative w-16 h-16 mx-auto mb-4">
-              <div className="absolute inset-0 rounded-full bg-[#027675]/5 animate-pulse" />
-              <div className="relative w-16 h-16 rounded-full bg-[#027675]/5 flex items-center justify-center ring-2 ring-[#027675]/10">
-                <Info className="w-7 h-7 text-[#027675]/40" />
-              </div>
-            </div>
-
-            {/* Message */}
-            <div className="space-y-2 mb-5">
-              <h3 className="text-lg font-semibold text-slate-800">
-                Access Expired
-              </h3>
-              <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto">
-                Please ask your Senior Lawyer to submit a payment to restore
-                access.
-              </p>
-            </div>
-
-            {/* Contact Card */}
-            {user?.createdBy && (
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#027675]/5 to-transparent rounded-2xl" />
-                <div className="relative inline-flex flex-col items-center gap-3 px-6 py-5 rounded-2xl bg-[#027675]/5 border border-[#027675]/10 w-full hover:border-[#027675]/20 hover:shadow-md hover:shadow-[#027675]/5 transition-all duration-300">
-                  <UserAvatar
-                    user={user.createdBy}
-                    size="xl"
-                    className="shadow-lg shadow-[#027675]/20 ring-2 ring-white transition-transform duration-300 hover:scale-105"
+                {activeTab === 2 && (
+                  <PaymentForm
+                    chamber={chamber}
+                    selectedPlan={selectedPlan}
+                    onSuccess={load}
                   />
+                )}
+              </div>
+            </div>
 
-                  {/* Name & Role */}
-                  <div className="text-center">
-                    <p className="text-[10px] font-bold text-[#027675]/70 uppercase tracking-widest mb-1">
-                      Your Senior Lawyer
-                    </p>
-                    <p className="text-sm font-semibold text-gray-800">
-                      {user.createdBy.name}
+            <div className="mt-6">
+              <PaymentHistory payments={payments} />
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1">
+              <SubscriptionStatusContent
+                chamber={chamber}
+                subscription={subscription}
+                subStatus={subStatus}
+                statusCfg={statusCfg}
+                pendingRequest={pendingRequest}
+                user={user}
+              />
+
+              {!isSenior && isExpired && (
+                <div className="mt-4 bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,102,101,0.06)] border border-[#026665]/10 p-6 text-center">
+                  <div className="relative w-16 h-16 mx-auto mb-4">
+                    <div className="absolute inset-0 rounded-full bg-[#026665]/5 animate-pulse" />
+                    <div className="relative w-16 h-16 rounded-full bg-[#026665]/5 flex items-center justify-center ring-2 ring-[#026665]/10">
+                      <Info className="w-7 h-7 text-[#026665]/40" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 mb-5">
+                    <h3 className="text-lg font-semibold text-slate-800">
+                      Access Expired
+                    </h3>
+                    <p className="text-sm text-gray-500 leading-relaxed max-w-sm mx-auto">
+                      Please ask your Senior Lawyer to submit a payment to
+                      restore access.
                     </p>
                   </div>
 
-                  {/* Contact Links */}
-                  <div className="flex flex-col items-center gap-2 w-full pt-1 border-t border-[#027675]/10">
-                    {user.createdBy.email && (
-                      <a
-                        href={`mailto:${user.createdBy.email}`}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/50 transition-all duration-200 group w-full justify-center"
-                      >
-                        <Mail className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#027675] transition-colors" />
-                        <span className="text-[15px] text-gray-500 group-hover:text-[#027675] transition-colors">
-                          {user.createdBy.email}
-                        </span>
-                      </a>
-                    )}
-                    {user.createdBy.phone && (
-                      <a
-                        href={`tel:${user.createdBy.phone}`}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/50 transition-all duration-200 group w-full justify-center"
-                      >
-                        <Phone className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#027675] transition-colors" />
-                        <span className="text-[15px] text-gray-500 group-hover:text-[#027675] transition-colors">
-                          {user.createdBy.phone}
-                        </span>
-                      </a>
-                    )}
+                  {user?.createdBy && (
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#026665]/5 to-transparent rounded-2xl" />
+                      <div className="relative inline-flex flex-col items-center gap-3 px-6 py-5 rounded-2xl bg-[#026665]/5 border border-[#026665]/10 w-full">
+                        <UserAvatar
+                          user={user.createdBy}
+                          size="xl"
+                          className="shadow-lg shadow-[#026665]/20 ring-2 ring-white transition-transform duration-300 hover:scale-105"
+                        />
+                        <div className="text-center">
+                          <p className="text-[10px] font-bold text-[#026665]/70 uppercase tracking-widest mb-1">
+                            Your Senior Lawyer
+                          </p>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {user.createdBy.name}
+                          </p>
+                        </div>
+                        <div className="flex flex-col items-center gap-2 w-full pt-1 border-t border-[#026665]/10">
+                          {user.createdBy.email && (
+                            <a
+                              href={`mailto:${user.createdBy.email}`}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/50 transition-all duration-200 group w-full justify-center"
+                            >
+                              <Mail className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#026665] transition-colors" />
+                              <span className="text-[15px] text-gray-500 group-hover:text-[#026665] transition-colors">
+                                {user.createdBy.email}
+                              </span>
+                            </a>
+                          )}
+                          {user.createdBy.phone && (
+                            <a
+                              href={`tel:${user.createdBy.phone}`}
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/50 transition-all duration-200 group w-full justify-center"
+                            >
+                              <Phone className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#026665] transition-colors" />
+                              <span className="text-[15px] text-gray-500 group-hover:text-[#026665] transition-colors">
+                                {user.createdBy.phone}
+                              </span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="lg:col-span-2 space-y-6">
+              {isSenior && pendingRequest && (
+                <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(217,119,6,0.06)] border border-amber-200 p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-amber-100 rounded-lg">
+                      <Clock className="w-5 h-5 text-amber-600 animate-[spin_4s_linear_infinite]" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">
+                        Payment Under Review
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        Awaiting admin verification
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <InfoRow
+                      label="Invoice"
+                      value={pendingRequest.invoice_id}
+                      highlight
+                    />
+                    <InfoRow
+                      label="Plan"
+                      value={
+                        PLAN_OPTIONS.find(
+                          (p) => p.type === pendingRequest.plan_type,
+                        )?.label || pendingRequest.plan_type
+                      }
+                    />
+                    <InfoRow
+                      label="Amount"
+                      value={`PKR ${getPaymentAmount(pendingRequest)?.toLocaleString()}`}
+                    />
+                    <InfoRow
+                      label="Submitted"
+                      value={formatDate(pendingRequest.submitted_at)}
+                      icon={Calendar}
+                    />
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              <PaymentHistory payments={payments} />
+            </div>
           </div>
         )}
-        {/* Payment history */}
-        <PaymentHistory payments={payments} />
       </div>
     </div>
   );

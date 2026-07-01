@@ -13,16 +13,19 @@ const bailLabel = (s) =>
   ({
     granted: {
       label: "Granted",
-      cls: "bg-emerald-50 text-emerald-700 border-emerald-100",
+      cls: "bg-[#ccebdb] text-[#026665] border-[#a9ddc7]",
     },
-    refused: { label: "Refused", cls: "bg-red-50 text-red-700 border-red-100" },
+    refused: {
+      label: "Refused",
+      cls: "bg-red-50 text-red-600 border-red-100",
+    },
     pending: {
       label: "Pending",
       cls: "bg-amber-50 text-amber-700 border-amber-100",
     },
     not_applicable: {
       label: "N/A",
-      cls: "bg-slate-100 text-slate-600 border-slate-200",
+      cls: "bg-slate-50 text-[#5b7a77] border-slate-200",
     },
   })[s] || { label: s, cls: "bg-slate-100 text-slate-500 border-slate-200" };
 
@@ -89,7 +92,7 @@ export default function AccusedTab({ caseId, accused, onUpdate }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-bold text-slate-700">Accused / Bail Information</h3>
+        <h3 className="font-bold text-[#1c3d3b]">Accused / Bail Information</h3>
         <button onClick={() => setShowForm(true)} className="btn-primary">
           <Plus className="w-4 h-4" /> Add Accused
         </button>
@@ -105,16 +108,20 @@ export default function AccusedTab({ caseId, accused, onUpdate }) {
         </div>
       ) : (
         <div className="space-y-3">
-          {accused.map((a) => {
+          {accused.map((a, i) => {
             const bail = bailLabel(a.bailStatus);
             return (
-              <div key={a._id} className="card p-4 flex gap-4">
-                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                  <User className="w-5 h-5 text-slate-500" />
+              <div
+                key={a._id}
+                className="card p-4 flex gap-4 animate-fade-in-up"
+                style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
+              >
+                <div className="w-10 h-10 rounded-full bg-[#ccebdb] flex items-center justify-center shrink-0">
+                  <User className="w-5 h-5 text-[#026665]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-semibold text-slate-800">{a.name}</h4>
+                    <h4 className="font-semibold text-[#1c3d3b]">{a.name}</h4>
                     <button
                       onClick={() => setDeleteTarget(a)}
                       className="p-1 rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors"
@@ -127,18 +134,20 @@ export default function AccusedTab({ caseId, accused, onUpdate }) {
                       Bail: {bail.label}
                     </span>
                     {a.bailAmount && (
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[#5b7a77]">
                         Amount: PKR {Number(a.bailAmount).toLocaleString()}
                       </span>
                     )}
                     {a.bailApplicationDate && (
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-[#5b7a77]">
                         Applied: {formatDate(a.bailApplicationDate)}
                       </span>
                     )}
                   </div>
                   {a.notes && (
-                    <p className="text-sm text-slate-600 mt-1.5">{a.notes}</p>
+                    <p className="text-sm text-[#1c3d3b]/75 mt-1.5">
+                      {a.notes}
+                    </p>
                   )}
                 </div>
               </div>

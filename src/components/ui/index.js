@@ -48,24 +48,52 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#1c3d3b]/40 backdrop-blur-[2px] p-4 animate-[fadeIn_0.15s_ease-out]"
+      onClick={onClose}
+    >
       <div
-        className={cn("modal w-full", sizes[size])}
+        className={cn(
+          "w-full rounded-2xl bg-white shadow-xl shadow-[#1c3d3b]/10 ring-1 ring-[#ccebdb] animate-[modalIn_0.18s_ease-out] max-h-[90vh] overflow-y-auto",
+          sizes[size],
+        )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-header">
-          <h2 className="text-lg font-bold text-slate-800 font-display">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#ccebdb]">
+          <h2 className="text-base font-bold text-[#1c3d3b] tracking-tight">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+            className="p-1.5 rounded-lg text-[#1c3d3b]/35 hover:bg-[#ccebdb]/50 hover:text-[#1c3d3b] transition-colors duration-150"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
         <div className="p-6">{children}</div>
       </div>
+
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes modalIn {
+          from {
+            opacity: 0;
+            transform: translateY(8px) scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -82,29 +110,29 @@ export function ConfirmDialog({
 }) {
   if (!isOpen) return null;
   return (
-    <div className="modal-overlay">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#1c3d3b]/40 backdrop-blur-[2px] p-4">
+      <div className="bg-white rounded-2xl shadow-xl shadow-[#1c3d3b]/10 ring-1 ring-[#ccebdb] w-full max-w-sm p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 text-rose-500" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">{title}</h3>
-            <p className="text-sm text-slate-500 mt-0.5">{message}</p>
+            <h3 className="font-bold text-[#1c3d3b]">{title}</h3>
+            <p className="text-sm text-[#1c3d3b]/55 mt-0.5">{message}</p>
           </div>
         </div>
         <div className="flex gap-2 justify-end">
           <button
             onClick={onClose}
-            className="btn-secondary"
             disabled={loading}
+            className="rounded-xl border border-[#ccebdb] px-4 py-2.5 text-sm font-semibold text-[#1c3d3b]/70 transition-colors duration-150 hover:bg-[#ccebdb]/30 disabled:opacity-60"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="btn bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors duration-150 hover:bg-rose-700 disabled:opacity-60 min-w-[88px]"
           >
             {loading ? (
               <Spinner size="sm" className="text-white" />
@@ -139,14 +167,20 @@ export function EmptyState({ icon: Icon, title, description, action }) {
 // ----------------- Badge ----------------------------------
 export function StatusBadge({ status }) {
   const classes = {
-    Active: "bg-emerald-50 text-emerald-700 border border-emerald-100",
+    Active: "bg-[#ccebdb]/70 text-[#026665] border border-[#ccebdb]",
     Closed: "bg-slate-100 text-slate-600 border border-slate-200",
     Pending: "bg-amber-50 text-amber-700 border border-amber-100",
     Adjourned: "bg-orange-50 text-orange-700 border border-orange-100",
     Disposed: "bg-slate-100 text-slate-500 border border-slate-200",
   };
   return (
-    <span className={cn("badge", classes[status] || "badge-pending")}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold",
+        classes[status] ||
+          "bg-[#ccebdb]/70 text-[#026665] border border-[#ccebdb]",
+      )}
+    >
       {status}
     </span>
   );
