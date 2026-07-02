@@ -6,8 +6,20 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Scale, ShieldCheck, Eye, EyeOff, User, Lock, Mail, Phone, Gavel, Menu } from "lucide-react";
+import {
+  Scale,
+  ShieldCheck,
+  Eye,
+  EyeOff,
+  User,
+  Lock,
+  Mail,
+  Phone,
+  Gavel,
+  Menu,
+} from "lucide-react";
 import { api } from "@/utils/api";
+import BackgroundPattern from "@/components/auth/BackgroundPattern";
 
 function Field({
   label,
@@ -22,7 +34,12 @@ function Field({
     <div className="form-group transform transition-all duration-300 hover:translate-x-1">
       <div className="relative group">
         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-[#0d9488] group-focus-within:scale-110">
-          {Icon && <Icon size={14} className="opacity-50 group-focus-within:opacity-100 transition-opacity" />}
+          {Icon && (
+            <Icon
+              size={14}
+              className="opacity-50 group-focus-within:opacity-100 transition-opacity"
+            />
+          )}
         </span>
         <input
           type={type}
@@ -48,11 +65,8 @@ export default function RegisterPage() {
   });
   const [loading, setLoading] = useState(false);
   const [showpass, setShowpass] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
-  const set =
-    (field) => (e) =>
-      setForm({ ...form, [field]: e.target.value });
+  const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,7 +86,6 @@ export default function RegisterPage() {
 
   return (
     <main className="min-h-screen w-full flex items-center justify-center bg-white overflow-hidden font-sans relative">
-      
       {/* Animations */}
       <style jsx global>{`
         @keyframes floatDevice {
@@ -166,49 +179,11 @@ export default function RegisterPage() {
         }
       `}</style>
 
-      {/* BACKGROUND VECTOR GRAPHIC PANEL */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none z-0 hidden lg:block">
-        <svg
-          className="absolute right-0 top-0 h-full w-[60%] object-cover"
-          viewBox="0 0 800 900"
-          preserveAspectRatio="none"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M180 0C320 180 200 420 480 620C680 760 520 900 800 900V0H180Z"
-            fill="#042f2e"
-            className="opacity-0 animate-sweep-1"
-            style={{ opacity: 0.2 }}
-            transform="translate(-40, 20)"
-          />
-          <path
-            d="M180 0C320 180 200 420 480 620C680 760 520 900 800 900V0H180Z"
-            fill="#0d9488"
-            className="opacity-0 animate-sweep-2"
-            style={{ opacity: 0.4 }}
-            transform="translate(-20, 10)"
-          />
-          <path
-            d="M180 0C320 180 200 420 480 620C680 760 520 900 800 900V0H180Z"
-            fill="url(#tealGradient)"
-            className="animate-sweep-3"
-          />
-          <defs>
-            <linearGradient id="tealGradient" x1="180" y1="0" x2="800" y2="900" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#0d9488" />
-              <stop offset="0.6" stopColor="#0f766e" />
-              <stop offset="1" stopColor="#042f2e" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
+      <BackgroundPattern />
 
       <div className="w-full max-w-7xl min-h-screen lg:min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-8 lg:px-24 py-12 relative z-10">
-        
         {/* LEFT SIDE: REGISTRATION FORM */}
         <div className="lg:col-span-5 flex flex-col justify-center">
-          
           {/* Logo with Animation */}
           <div className="flex items-center gap-2.5 mb-16 group cursor-pointer animate-scale-in">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f766e] to-[#0d9488] flex items-center justify-center shadow-lg transform group-hover:rotate-180 transition-all duration-700 animate-gradient-shift">
@@ -233,13 +208,21 @@ export default function RegisterPage() {
           <div className="flex items-start gap-2 bg-[#0d9488]/5 border border-[#0d9488]/10 rounded-xl p-3 mb-6 transform transition-transform duration-300 animate-border-glow">
             <ShieldCheck className="w-4 h-4 text-[#0f766e] shrink-0 mt-0.5 animate-pulse-slow" />
             <p className="text-[11px] text-[#042f2e]/80 leading-normal">
-              Registering a <span className="font-semibold text-[#0f766e]">Senior Lawyer</span> . Junior profiles are integrated exclusively inside the secure management console dashboard.
+              Registering a{" "}
+              <span className="font-semibold text-[#0f766e]">
+                Senior Lawyer
+              </span>{" "}
+              . Junior profiles are integrated exclusively inside the secure
+              management console dashboard.
             </p>
           </div>
 
           {/* Form with Staggered Animation */}
           <form onSubmit={handleSubmit} className="space-y-3.5">
-            <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
+            <div
+              className="animate-slide-up"
+              style={{ animationDelay: "200ms" }}
+            >
               <Field
                 label="Full Name"
                 placeholder="Full name"
@@ -249,8 +232,11 @@ export default function RegisterPage() {
                 icon={User}
               />
             </div>
-            
-            <div className="animate-slide-up" style={{ animationDelay: "300ms" }}>
+
+            <div
+              className="animate-slide-up"
+              style={{ animationDelay: "300ms" }}
+            >
               <Field
                 label="Email Address"
                 type="email"
@@ -262,11 +248,17 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div className="animate-slide-up" style={{ animationDelay: "400ms" }}>
+            <div
+              className="animate-slide-up"
+              style={{ animationDelay: "400ms" }}
+            >
               <div className="form-group transform transition-all duration-300 hover:translate-x-1">
                 <div className="relative group">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-[#0d9488] group-focus-within:scale-110">
-                    <Lock size={14} className="opacity-50 group-focus-within:opacity-100 transition-opacity" />
+                    <Lock
+                      size={14}
+                      className="opacity-50 group-focus-within:opacity-100 transition-opacity"
+                    />
                   </span>
                   <input
                     type={showpass ? "text" : "password"}
@@ -282,9 +274,15 @@ export default function RegisterPage() {
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-all duration-300 hover:scale-110 active:scale-95"
                   >
                     {showpass ? (
-                      <EyeOff size={14} className="transition-transform duration-300" />
+                      <EyeOff
+                        size={14}
+                        className="transition-transform duration-300"
+                      />
                     ) : (
-                      <Eye size={14} className="transition-transform duration-300" />
+                      <Eye
+                        size={14}
+                        className="transition-transform duration-300"
+                      />
                     )}
                   </button>
                 </div>
@@ -292,7 +290,10 @@ export default function RegisterPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="animate-slide-up" style={{ animationDelay: "500ms" }}>
+              <div
+                className="animate-slide-up"
+                style={{ animationDelay: "500ms" }}
+              >
                 <Field
                   label="Phone"
                   placeholder="+92-300-0000000"
@@ -301,7 +302,10 @@ export default function RegisterPage() {
                   icon={Phone}
                 />
               </div>
-              <div className="animate-slide-up" style={{ animationDelay: "600ms" }}>
+              <div
+                className="animate-slide-up"
+                style={{ animationDelay: "600ms" }}
+              >
                 <Field
                   label="Bar Council No."
                   placeholder="LHC-XXXX-XXXX"
@@ -312,8 +316,11 @@ export default function RegisterPage() {
               </div>
             </div>
 
-                    {/* Submit Buttons with Enhanced Animations */}
-            <div className="flex items-center gap-8 pt-4 pl-1 animate-slide-up" style={{ animationDelay: "800ms" }}>
+            {/* Submit Buttons with Enhanced Animations */}
+            <div
+              className="flex items-center gap-8 pt-4 pl-1 animate-slide-up"
+              style={{ animationDelay: "800ms" }}
+            >
               <button
                 type="submit"
                 disabled={loading}
@@ -346,12 +353,12 @@ export default function RegisterPage() {
 
         {/* RIGHT SIDE: 3D DEVICE MOCKUP */}
         <div className="hidden lg:block lg:col-span-7 h-full w-full relative">
-          <div 
+          <div
             className="absolute right-[-10%] top-[28%] w-[580px] h-[360px] preserve-3d transition-all duration-1000 ease-out animate-scale-in"
             style={{
               transform: "rotateX(54deg) rotateZ(-40deg) skewX(4deg)",
               transformStyle: "preserve-3d",
-              animation: "rotate3d 8s ease-in-out infinite"
+              animation: "rotate3d 8s ease-in-out infinite",
             }}
           >
             {/* Floating Shadow */}
@@ -363,7 +370,10 @@ export default function RegisterPage() {
               {/* Keyboard Area */}
               <div className="absolute bottom-4 left-6 right-6 top-24 bg-gradient-to-br from-[#0f766e]/40 to-[#042f2e]/20 rounded-lg p-2 grid grid-cols-5 gap-1">
                 {Array.from({ length: 15 }).map((_, i) => (
-                  <div key={i} className="bg-white/10 rounded-sm border border-white/5 hover:bg-white/20 transition-colors duration-300" />
+                  <div
+                    key={i}
+                    className="bg-white/10 rounded-sm border border-white/5 hover:bg-white/20 transition-colors duration-300"
+                  />
                 ))}
               </div>
               {/* Trackpad */}
@@ -371,15 +381,19 @@ export default function RegisterPage() {
             </div>
 
             {/* Floating Display Screen */}
-            <div 
-              className="absolute inset-x-0 top-0 h-full bg-white/95 rounded-xl shadow-2xl border border-white flex flex-col justify-between p-6 animate-float-device backdrop-blur-sm"
-            >
+            <div className="absolute inset-x-0 top-0 h-full bg-white/95 rounded-xl shadow-2xl border border-white flex flex-col justify-between p-6 animate-float-device backdrop-blur-sm">
               {/* Window Controls */}
               <div className="flex justify-between items-center opacity-80">
                 <div className="flex gap-1.5">
                   <div className="w-2.5 h-2.5 rounded-full bg-red-400/80 animate-pulse-slow" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-400/80 animate-pulse-slow" style={{ animationDelay: "0.5s" }} />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-400/80 animate-pulse-slow" style={{ animationDelay: "1s" }} />
+                  <div
+                    className="w-2.5 h-2.5 rounded-full bg-yellow-400/80 animate-pulse-slow"
+                    style={{ animationDelay: "0.5s" }}
+                  />
+                  <div
+                    className="w-2.5 h-2.5 rounded-full bg-green-400/80 animate-pulse-slow"
+                    style={{ animationDelay: "1s" }}
+                  />
                 </div>
                 <div className="w-24 h-1.5 bg-slate-200 rounded-full" />
               </div>
@@ -395,7 +409,7 @@ export default function RegisterPage() {
                     <div className="h-2 w-1/2 bg-[#0d9488]/60 rounded-md" />
                   </div>
                 </div>
-                
+
                 {/* Progress Indicators */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-[10px] text-slate-400">
@@ -403,7 +417,7 @@ export default function RegisterPage() {
                     <span>85%</span>
                   </div>
                   <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                    <div 
+                    <div
                       className="h-full bg-gradient-to-r from-[#0f766e] to-[#0d9488] rounded-full animate-shimmer"
                       style={{ width: "85%" }}
                     />
@@ -427,14 +441,15 @@ export default function RegisterPage() {
               <div className="flex justify-between items-center pt-4 border-t border-slate-100">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse-slow" />
-                  <span className="text-[10px] text-slate-400">System Online</span>
+                  <span className="text-[10px] text-slate-400">
+                    System Online
+                  </span>
                 </div>
                 <div className="w-8 h-2 bg-slate-200 rounded-full" />
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </main>
   );

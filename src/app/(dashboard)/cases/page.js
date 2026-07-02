@@ -131,9 +131,14 @@ export default function CasesPage() {
         </div>
         <Link
           href="/cases/new"
-          className="btn-primary shrink-0 w-full sm:w-auto"
         >
-          <Plus className="w-4 h-4" /> New Case
+          <button className="group relative px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl text-sm font-semibold text-white shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 transition-all duration-300 hover:scale-105 overflow-hidden">
+            <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <span className="relative flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              New Case
+            </span>
+          </button>
         </Link>
       </div>
 
@@ -308,8 +313,9 @@ export default function CasesPage() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between px-4 py-3.5 border-t border-[#eef6f3] bg-[#f5faf8]">
                 <p className="text-sm text-[#4d6b68]">
-                  Page <span className="font-semibold text-[#1c3d3b]">{page}</span> of{" "}
-                  {totalPages} · {total} cases
+                  Page{" "}
+                  <span className="font-semibold text-[#1c3d3b]">{page}</span>{" "}
+                  of {totalPages} · {total} cases
                 </p>
                 <div className="flex gap-1.5">
                   <button

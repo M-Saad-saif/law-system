@@ -68,12 +68,16 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <Link
-            href="/cases/new"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[#0f766e] hover:bg-[#0d9488] text-white font-semibold text-sm shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 hover:-translate-y-0.5 transition-all duration-200"
-          >
-            <Plus className="w-5 h-5" />
-            New Case
+          <Link href="/cases/new">
+            <button
+              className="group relative px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl text-sm font-semibold text-white shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 transition-all duration-300 hover:scale-105 overflow-hidden"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              <span className="relative flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                New Case
+              </span>
+            </button>
           </Link>
         </div>
 

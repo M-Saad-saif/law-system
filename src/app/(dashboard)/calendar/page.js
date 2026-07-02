@@ -226,11 +226,14 @@ export default function CalendarPage() {
             Hearings, proceedings, meetings and deadlines
           </p>
         </div>
-        <button
-          onClick={() => openAddForm(new Date())}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#026665] px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-[#026665]/20 transition-all duration-200 hover:bg-[#0d8e83] hover:shadow-md hover:shadow-[#0d8e83]/25 active:scale-[0.98] self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" /> Add Event
+        <button onClick={() => openAddForm(new Date())}>
+          <button className="group relative px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl text-sm font-semibold text-white shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 transition-all duration-300 hover:scale-105 overflow-hidden">
+            <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+            <span className="relative flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Add Event
+            </span>
+          </button>
         </button>
       </div>
 

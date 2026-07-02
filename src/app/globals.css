@@ -235,7 +235,7 @@ body {
 }
 
 /* Make sure content appears above pseudo-elements */
-.auth-bg > * {
+.auth-bg>* {
   position: relative;
   z-index: 2;
 }
@@ -314,3 +314,4 @@ body {
   animation: shimmer 1.5s infinite;
   border-radius: 6px;
 }
+

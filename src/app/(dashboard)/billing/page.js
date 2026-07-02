@@ -253,26 +253,6 @@ function PlanSelector({ selected, onChange }) {
             <p className="text-xs text-gray-500">
               Select the subscription that works best for you
             </p>
-            <button
-              onClick={() => setActiveTab(1)}
-              className="group inline-flex items-center gap-2 text-sm font-semibold text-[#026665] transition-colors duration-300 hover:text-[#0d8c81]"
-            >
-              Submit Payment
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
-                />
-              </svg>
-            </button>
           </div>
         </div>
 
@@ -351,6 +331,11 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
     e.preventDefault();
     if (!form.reference_id.trim()) {
       toast.error("Please enter your payment reference ID.");
+      return;
+    }
+
+    if (!file) {
+      toast.error("Please upload a payment screenshot as a proof.");
       return;
     }
 
@@ -480,7 +465,7 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
 
           <div>
             <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
-              Payment Screenshot (optional)
+              Payment Screenshot <span className="text-red-500">*</span>
             </label>
             <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#026665] hover:bg-[#026665]/[0.03] transition-all duration-300 bg-gray-50/50 group">
               {preview ? (

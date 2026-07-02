@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import toast from "react-hot-toast";
 import { api } from "@/utils/api";
 import {
@@ -11,7 +11,6 @@ import {
   SearchInput,
   Modal,
   ConfirmDialog,
-  StatusBadge,
 } from "@/components/ui";
 import {
   Star,
@@ -34,6 +33,17 @@ import {
   Share2,
   Link as LinkIcon,
   Copy,
+  Sparkles,
+  Search,
+  SlidersHorizontal,
+  BookOpen,
+  Calendar,
+  ArrowUpRight,
+  MoreHorizontal,
+  CheckCircle2,
+  Zap,
+  Layers,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,7 +61,7 @@ const COURTS = [
 ];
 
 export default function LibraryPage() {
-  const [mainTab, setMainTab] = useState("judgements"); // "judgements" | "cases"
+  const [mainTab, setMainTab] = useState("judgements");
   const [entries, setEntries] = useState([]);
   const [tags, setTags] = useState([]);
   const [total, setTotal] = useState(0);
@@ -66,25 +76,25 @@ export default function LibraryPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState(null);
 
-const handleExport = async (mode = "all") => {
-  try {
-    const url = mode === "all"
-      ? "/api/library/export?ids=all"
-      : `/api/library/export?ids=${entries.map((e) => e._id).join(",")}`;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "judgement-library.json";
-    a.click();
-    toast.success("Export started.");
-  } catch {
-    toast.error("Export failed.");
-  }
-};
+  const handleExport = async (mode = "all") => {
+    try {
+      const url =
+        mode === "all"
+          ? "/api/library/export?ids=all"
+          : `/api/library/export?ids=${entries.map((e) => e._id).join(",")}`;
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "judgement-library.json";
+      a.click();
+      toast.success("Export started.");
+    } catch {
+      toast.error("Export failed.");
+    }
+  };
 
-
-
-  // ----- Saved Cases state -----
   const [savedCases, setSavedCases] = useState([]);
   const [casesLoading, setCasesLoading] = useState(false);
   const [caseSearch, setCaseSearch] = useState("");
@@ -194,75 +204,109 @@ const handleExport = async (mode = "all") => {
   const hasFilters = filterTag || filterCourt || filterImportant;
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-display">
-            Library
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {mainTab === "judgements"
-              ? `${total} saved judgement${total !== 1 ? "s" : ""}`
-              : `${savedCases.length} saved case${savedCases.length !== 1 ? "s" : ""}`}
-          </p>
-        </div>
-        {mainTab === "judgements" && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleExport("all")}
-              className="btn-secondary shrink-0"
-              title="Export all judgements as JSON"
-            >
-              <Download className="w-4 h-4" />
-              Export
-            </button>
-            <button
-              onClick={() => setAddOpen(true)}
-              className="btn-primary shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              Add Judgement
-            </button>
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-[#eef5f3]">
+      {/* Animated Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-primary-50/30 -z-10" />
+
+      {/* Header with Glass Effect */}
+      <div className="relative">
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-primary-400/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-400/10 rounded-full blur-3xl animate-pulse delay-1000" />
+
+        <div className="relative backdrop-blur-sm bg-white/80 rounded-2xl p-6 shadow-lg border border-slate-200/60 transition-all duration-300 hover:shadow-xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl shadow-lg shadow-primary-500/20 animate-float">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                  Library
+                </h1>
+                <p className="text-sm text-slate-500 mt-1 flex items-center gap-2">
+                  <Layers className="w-3.5 h-3.5" />
+                  {mainTab === "judgements"
+                    ? `${total} saved judgement${total !== 1 ? "s" : ""}`
+                    : `${savedCases.length} saved case${savedCases.length !== 1 ? "s" : ""}`}
+                </p>
+              </div>
+            </div>
+            {mainTab === "judgements" && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleExport("all")}
+                  className="group relative px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:border-slate-300 hover:bg-slate-50 transition-all duration-300 hover:shadow-md overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-primary-500/0 via-primary-500/5 to-primary-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <span className="relative flex items-center gap-2">
+                    <Download className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                    Export
+                  </span>
+                </button>
+                <button
+                  onClick={() => setAddOpen(true)}
+                  className="group relative px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-xl text-sm font-semibold text-white shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 transition-all duration-300 hover:scale-105 overflow-hidden"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                  <span className="relative flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Judgement
+                  </span>
+                </button>
+              </div>
+            )}
+            {mainTab === "cases" && (
+              <Link
+                href="/cases"
+                className="group relative px-5 py-2.5 bg-gradient-to-r from-slate-700 to-slate-600 rounded-xl text-sm font-semibold text-white shadow-lg shadow-slate-500/25 hover:shadow-xl hover:shadow-slate-500/30 transition-all duration-300 hover:scale-105 overflow-hidden"
+              >
+                <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                <span className="relative flex items-center gap-2">
+                  <FolderOpen className="w-4 h-4" />
+                  Manage Cases
+                </span>
+              </Link>
+            )}
           </div>
-        )}
-        {mainTab === "cases" && (
-          <Link href="/cases" className="btn-secondary shrink-0">
-            <FolderOpen className="w-4 h-4" />
-            Manage Cases
-          </Link>
-        )}
+        </div>
       </div>
 
-      {/* Main Tab Switcher */}
-      <div className="flex gap-1 p-1 bg-slate-100 rounded-xl w-fit">
+      {/* Enhanced Tab Switcher */}
+      <div className="flex gap-1 p-1.5 bg-slate-100/80 backdrop-blur-sm rounded-2xl w-fit shadow-inner">
         <button
           onClick={() => setMainTab("judgements")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          className={`relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
             mainTab === "judgements"
-              ? "bg-white text-slate-800 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-white text-slate-800 shadow-lg shadow-slate-200/50 scale-105"
+              : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
           }`}
         >
           <span className="flex items-center gap-2">
-            <Trophy className="w-4 h-4" />
+            <Trophy
+              className={`w-4 h-4 transition-all duration-300 ${mainTab === "judgements" ? "text-amber-500 rotate-0" : "rotate-12"}`}
+            />
             Judgements
           </span>
         </button>
         <button
           onClick={() => setMainTab("cases")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+          className={`relative px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
             mainTab === "cases"
-              ? "bg-white text-slate-800 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-white text-slate-800 shadow-lg shadow-slate-200/50 scale-105"
+              : "text-slate-500 hover:text-slate-700 hover:bg-white/50"
           }`}
         >
           <span className="flex items-center gap-2">
-            <Star className="w-4 h-4" />
+            <Star
+              className={`w-4 h-4 transition-all duration-300 ${mainTab === "cases" ? "text-yellow-400 fill-yellow-400 scale-110" : ""}`}
+            />
             Saved Cases
-            {savedCases.length > 0 && mainTab !== "cases" && (
-              <span className="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                {savedCases.length}
+            {savedCases.length > 0 && (
+              <span className="relative ml-1.5">
+                <span className="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-75" />
+                <span className="relative bg-gradient-to-r from-yellow-400 to-amber-400 text-yellow-900 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                  {savedCases.length}
+                </span>
               </span>
             )}
           </span>
@@ -271,13 +315,16 @@ const handleExport = async (mode = "all") => {
 
       {/* ----- SAVED CASES TAB ----- */}
       {mainTab === "cases" && (
-        <div className="space-y-4">
-          <SearchInput
-            value={caseSearch}
-            onChange={setCaseSearch}
-            placeholder="Search saved cases..."
-            className="max-w-md"
-          />
+        <div className="space-y-6 animate-fadeIn">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <SearchInput
+              value={caseSearch}
+              onChange={setCaseSearch}
+              placeholder="Search saved cases..."
+              className="max-w-md pl-10"
+            />
+          </div>
           {casesLoading ? (
             <PageLoader />
           ) : savedCases.length === 0 ? (
@@ -292,13 +339,14 @@ const handleExport = async (mode = "all") => {
               }
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 stagger-children">
               {savedCases.map((c) => (
-                <SavedCaseCard
-                  key={c._id}
-                  c={c}
-                  onRemove={() => removeCaseFromLibrary(c)}
-                />
+                <div key={c._id} className="animate-slideUp">
+                  <SavedCaseCard
+                    c={c}
+                    onRemove={() => removeCaseFromLibrary(c)}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -307,121 +355,192 @@ const handleExport = async (mode = "all") => {
 
       {/* ----- JUDGEMENTS TAB ----- */}
       {mainTab === "judgements" && (
-        <>
-          {/* Most Important Banner */}
+        <div className="animate-fadeIn">
+          {/* Enhanced Most Important Banner */}
           {!filterImportant && (
             <button
               onClick={() => setFilterImportant(true)}
-              className="w-full flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium hover:bg-amber-100 transition-colors"
+              className="group w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200/60 text-amber-800 text-sm font-medium hover:border-amber-300 hover:shadow-lg hover:shadow-amber-200/50 transition-all duration-500 hover:scale-[1.02]"
             >
-              <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
-              View Most Important Judgements
+              <div className="relative">
+                <div className="absolute inset-0 bg-amber-400 rounded-full blur-md animate-pulse" />
+                <div className="relative p-2 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl shadow-lg">
+                  <Trophy className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-bold text-amber-900">
+                  Most Important Judgements
+                </p>
+                <p className="text-xs text-amber-600/80">
+                  Click to view your curated collection of landmark decisions
+                </p>
+              </div>
+              <ArrowUpRight className="w-5 h-5 text-amber-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
             </button>
           )}
 
-          {/* Search + Filters */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <SearchInput
-              value={search}
-              onChange={setSearch}
-              placeholder="Search by title, citation, offence, tags..."
-              className="flex-1"
-            />
-            <select
-              value={filterCourt}
-              onChange={(e) => setFilterCourt(e.target.value)}
-              className="select w-full sm:w-52"
-            >
-              <option value="">All Courts</option>
-              {COURTS.filter(Boolean).map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-            {tags.length > 0 && (
-              <select
-                value={filterTag}
-                onChange={(e) => setFilterTag(e.target.value)}
-                className="select w-full sm:w-44"
+          {/* Enhanced Search + Filters */}
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 transition-all duration-300" />
+                <SearchInput
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Search by title, citation, offence, tags..."
+                  className="flex-1 pl-10 pr-4 py-3 border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300 rounded-xl"
+                />
+              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-all duration-300 ${
+                  showFilters || hasFilters
+                    ? "bg-primary-50 border-primary-300 text-primary-700"
+                    : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                }`}
               >
-                <option value="">All Tags</option>
-                {tags.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
+                <SlidersHorizontal className="w-4 h-4" />
+                <span className="text-sm font-medium">Filters</span>
+                {hasFilters && (
+                  <span className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" />
+                )}
+              </button>
+            </div>
+
+            {/* Expandable Filters */}
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-3 gap-3 transition-all duration-500 ease-in-out ${
+                showFilters
+                  ? "max-h-40 opacity-100"
+                  : "max-h-0 opacity-0 overflow-hidden"
+              }`}
+            >
+              <select
+                value={filterCourt}
+                onChange={(e) => setFilterCourt(e.target.value)}
+                className="select w-full rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+              >
+                <option value="">All Courts</option>
+                {COURTS.filter(Boolean).map((c) => (
+                  <option key={c} value={c}>
+                    {c}
                   </option>
                 ))}
               </select>
-            )}
-            {hasFilters && (
-              <button
-                onClick={clearFilters}
-                className="btn-ghost text-red-500 hover:bg-red-50 shrink-0"
-              >
-                <X className="w-4 h-4" />
-                Clear
-              </button>
-            )}
+              {tags.length > 0 && (
+                <select
+                  value={filterTag}
+                  onChange={(e) => setFilterTag(e.target.value)}
+                  className="select w-full rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                >
+                  <option value="">All Tags</option>
+                  {tags.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {hasFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-medium transition-all duration-300 hover:shadow-md"
+                >
+                  <X className="w-4 h-4" />
+                  Clear Filters
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Active filter pills */}
+          {/* Enhanced Active Filter Pills */}
           {filterImportant && (
-            <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">
-                <Trophy className="w-3 h-3" />
+            <div className="flex items-center gap-2 animate-slideIn">
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 text-xs font-semibold border border-amber-200 shadow-sm">
+                <Trophy className="w-3.5 h-3.5 text-amber-500" />
                 Most Important
-                <button onClick={() => setFilterImportant(false)}>
+                <button
+                  onClick={() => setFilterImportant(false)}
+                  className="ml-1 p-0.5 hover:bg-amber-200 rounded-full transition-colors duration-200"
+                >
                   <X className="w-3 h-3" />
                 </button>
               </span>
             </div>
           )}
 
-          {/* Grid */}
+          {/* Enhanced Grid with Animations */}
           {loading ? (
-            <PageLoader />
+            <div className="animate-fadeIn">
+              <PageLoader />
+            </div>
           ) : entries.length === 0 ? (
-            <EmptyState
-              icon={Bookmark}
-              title="No judgements in library"
-              description="Save important judgements here for quick access, tagging, and annotations."
-            />
+            <div className="animate-fadeIn">
+              <EmptyState
+                icon={Bookmark}
+                title="No judgements in library"
+                description="Save important judgements here for quick access, tagging, and annotations."
+              />
+            </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {entries.map((entry) => (
-                  <LibraryCard
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 stagger-children">
+                {entries.map((entry, index) => (
+                  <div
                     key={entry._id}
-                    entry={entry}
-                    onView={() => setViewEntry(entry)}
-                    onToggleFavourite={() => toggleFlag(entry, "isFavourite")}
-                    onToggleImportant={() =>
-                      toggleFlag(entry, "isMostImportant")
-                    }
-                    onDelete={() => setDeleteTarget(entry)}
-                  />
+                    className="animate-slideUp"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                    onMouseEnter={() => setHoveredCard(entry._id)}
+                    onMouseLeave={() => setHoveredCard(null)}
+                  >
+                    <LibraryCard
+                      entry={entry}
+                      onView={() => setViewEntry(entry)}
+                      onToggleFavourite={() => toggleFlag(entry, "isFavourite")}
+                      onToggleImportant={() =>
+                        toggleFlag(entry, "isMostImportant")
+                      }
+                      onDelete={() => setDeleteTarget(entry)}
+                      isHovered={hoveredCard === entry._id}
+                    />
+                  </div>
                 ))}
               </div>
 
-              {/* Pagination */}
+              {/* Enhanced Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-3 pt-2">
+                <div className="flex items-center justify-center gap-4 pt-6 animate-fadeIn">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="btn-secondary disabled:opacity-40"
+                    className="group p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-300 hover:shadow-md disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:shadow-none transition-all duration-300"
                   >
-                    <ChevronLeft className="w-4 h-4" />
+                    <ChevronLeft className="w-5 h-5 text-slate-600 group-hover:text-primary-600 transition-colors duration-300" />
                   </button>
-                  <span className="text-sm text-slate-600">
-                    Page {page} of {totalPages}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (pageNum) => (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum)}
+                          className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                            page === pageNum
+                              ? "bg-gradient-to-r from-primary-600 to-primary-500 text-white shadow-lg shadow-primary-500/25 scale-110"
+                              : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 hover:border-primary-200"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      ),
+                    )}
+                  </div>
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="btn-secondary disabled:opacity-40"
+                    className="group p-2 rounded-xl bg-white border border-slate-200 hover:border-primary-300 hover:shadow-md disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:shadow-none transition-all duration-300"
                   >
-                    <ChevronRight className="w-4 h-4" />
+                    <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-primary-600 transition-colors duration-300" />
                   </button>
                 </div>
               )}
@@ -461,89 +580,215 @@ const handleExport = async (mode = "all") => {
             confirmLabel="Remove"
             loading={deleting}
           />
-        </>
+        </div>
       )}
+
+      {/* Add custom animations to global styles */}
+      <style jsx global>{`
+        @keyframes float {
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes ping {
+          75%,
+          100% {
+            transform: scale(2);
+            opacity: 0;
+          }
+        }
+
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+
+        .animate-slideUp {
+          animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .animate-slideIn {
+          animation: slideIn 0.4s ease-out forwards;
+        }
+
+        .animate-fadeIn {
+          animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .stagger-children > *:nth-child(1) {
+          animation-delay: 0ms;
+        }
+        .stagger-children > *:nth-child(2) {
+          animation-delay: 100ms;
+        }
+        .stagger-children > *:nth-child(3) {
+          animation-delay: 200ms;
+        }
+        .stagger-children > *:nth-child(4) {
+          animation-delay: 300ms;
+        }
+        .stagger-children > *:nth-child(5) {
+          animation-delay: 400ms;
+        }
+        .stagger-children > *:nth-child(6) {
+          animation-delay: 500ms;
+        }
+
+        .delay-1000 {
+          animation-delay: 1s;
+        }
+      `}</style>
     </div>
   );
 }
 
-// ----- Saved Case Card -----
+// ----- Enhanced Saved Case Card -----
 
 function SavedCaseCard({ c, onRemove }) {
+  const [isHovered, setIsHovered] = useState(false);
+
   const statusColors = {
-    Active: "bg-green-100 text-green-700",
-    Closed: "bg-slate-100 text-slate-600",
-    Pending: "bg-yellow-100 text-yellow-700",
-    Adjourned: "bg-orange-100 text-orange-700",
-    Disposed: "bg-blue-100 text-blue-700",
+    Active: "bg-green-100 text-green-700 border-green-200",
+    Closed: "bg-slate-100 text-slate-600 border-slate-200",
+    Pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
+    Adjourned: "bg-orange-100 text-orange-700 border-orange-200",
+    Disposed: "bg-blue-100 text-blue-700 border-blue-200",
   };
 
   return (
-    <div className="card p-5 flex flex-col gap-3 group ring-2 ring-yellow-200/60 bg-yellow-50/20">
-      {/* Top row */}
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-slate-400 font-mono mb-0.5 truncate">
-            {c.caseNumber || c.suitNo || "—"}
-          </p>
-          <h3 className="font-semibold text-slate-800 text-sm leading-snug line-clamp-2">
-            {c.caseTitle}
-          </h3>
+    <div
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="group relative bg-white rounded-2xl p-6 flex flex-col gap-3 shadow-lg hover:shadow-2xl transition-all duration-500 border border-yellow-200/60 hover:border-yellow-300 overflow-hidden"
+    >
+      {/* Animated Background */}
+      <div
+        className={`absolute inset-0 bg-gradient-to-br from-yellow-400/0 via-yellow-300/0 to-amber-400/0 transition-all duration-700 ${
+          isHovered ? "from-yellow-400/5 via-yellow-300/5 to-amber-400/5" : ""
+        }`}
+      />
+
+      {/* Floating stars on hover */}
+      {isHovered && (
+        <>
+          <div
+            className="absolute top-4 right-4 w-2 h-2 bg-yellow-400 rounded-full animate-float opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{ animationDelay: "0ms" }}
+          />
+          <div
+            className="absolute top-8 right-8 w-1.5 h-1.5 bg-amber-400 rounded-full animate-float opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            style={{ animationDelay: "200ms" }}
+          />
+        </>
+      )}
+
+      <div className="relative">
+        {/* Top row */}
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-slate-400 font-mono mb-1 truncate group-hover:text-slate-500 transition-colors duration-300">
+              {c.caseNumber || c.suitNo || "—"}
+            </p>
+            <h3 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 group-hover:text-slate-900 transition-colors duration-300">
+              {c.caseTitle}
+            </h3>
+          </div>
+          <div className="relative">
+            <Star className="w-5 h-5 text-yellow-400 fill-yellow-400 shrink-0 mt-0.5 transition-all duration-300 group-hover:scale-125 group-hover:rotate-12" />
+            <div className="absolute inset-0 bg-yellow-400 rounded-full blur-sm animate-pulse opacity-50" />
+          </div>
         </div>
-        <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 shrink-0 mt-0.5" />
-      </div>
 
-      {/* Meta */}
-      <div className="flex flex-wrap gap-1.5 text-xs">
-        <span
-          className={`px-2 py-0.5 rounded-full font-medium ${
-            statusColors[c.status] || "bg-slate-100 text-slate-600"
-          }`}
-        >
-          {c.status}
-        </span>
-        <span className="px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 font-medium">
-          {c.caseType}
-        </span>
-      </div>
-
-      {/* Court */}
-      {(c.courtType || c.courtName) && (
-        <div className="flex items-center gap-1.5 text-xs text-slate-500">
-          <Gavel className="w-3 h-3 shrink-0" />
-          <span className="truncate">
-            {[c.courtType, c.courtName].filter(Boolean).join(" — ")}
+        {/* Meta */}
+        <div className="flex flex-wrap gap-1.5 text-xs mt-3">
+          <span
+            className={`px-2.5 py-1 rounded-full font-semibold border transition-all duration-300 group-hover:shadow-sm ${
+              statusColors[c.status] ||
+              "bg-slate-100 text-slate-600 border-slate-200"
+            }`}
+          >
+            {c.status}
+          </span>
+          <span className="px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 font-semibold border border-primary-200">
+            {c.caseType}
           </span>
         </div>
-      )}
 
-      {/* Client */}
-      {c.clientName && (
-        <p className="text-xs text-slate-500">Client: {c.clientName}</p>
-      )}
+        {/* Court */}
+        {(c.courtType || c.courtName) && (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-2 group-hover:text-slate-600 transition-colors duration-300">
+            <Gavel className="w-3.5 h-3.5 shrink-0" />
+            <span className="truncate">
+              {[c.courtType, c.courtName].filter(Boolean).join(" — ")}
+            </span>
+          </div>
+        )}
 
-      {/* Actions */}
-      <div className="flex items-center gap-1 pt-1 border-t border-slate-100">
-        <Link
-          href={`/cases/${c._id}`}
-          className="btn-ghost flex-1 text-xs justify-center"
-        >
-          <Eye className="w-3.5 h-3.5" />
-          Open Case
-        </Link>
-        <button
-          onClick={onRemove}
-          title="Remove from Library"
-          className="btn-ghost px-2.5 text-slate-400 hover:text-red-500"
-        >
-          <StarOff className="w-4 h-4" />
-        </button>
+        {/* Client */}
+        {c.clientName && (
+          <p className="text-xs text-slate-500 mt-1 group-hover:text-slate-600 transition-colors duration-300">
+            Client: {c.clientName}
+          </p>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-1 pt-3 mt-2 border-t border-slate-100 group-hover:border-slate-200 transition-colors duration-300">
+          <Link
+            href={`/cases/${c._id}`}
+            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-primary-50 rounded-xl text-xs font-semibold text-slate-600 hover:text-primary-600 transition-all duration-300 group/link"
+          >
+            <Eye className="w-3.5 h-3.5 group-hover/link:scale-110 transition-transform duration-300" />
+            Open Case
+          </Link>
+          <button
+            onClick={onRemove}
+            title="Remove from Library"
+            className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all duration-300 hover:scale-110"
+          >
+            <StarOff className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
-// ── Library Card ─────────────────────────────────────────────────────────────
+// ── Enhanced Library Card ─────────────────────────────────────────────────────────────
 
 function LibraryCard({
   entry,
@@ -551,38 +796,57 @@ function LibraryCard({
   onToggleFavourite,
   onToggleImportant,
   onDelete,
+  isHovered,
 }) {
   return (
     <div
-      className={`card p-5 flex flex-col gap-3 group ${
-        entry.isMostImportant ? "ring-2 ring-amber-400/50 bg-amber-50/30" : ""
-      }`}
+      className={`group relative bg-white rounded-2xl p-6 flex flex-col gap-3 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden ${
+        entry.isMostImportant
+          ? "ring-2 ring-amber-400/50 bg-gradient-to-br from-amber-50/50 to-yellow-50/50"
+          : ""
+      } ${isHovered ? "scale-105 translate-y-[-4px]" : ""}`}
     >
+      {/* Glow Effect on Important Cards */}
+      {entry.isMostImportant && (
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-amber-400/0 via-amber-400/5 to-amber-400/0 animate-shine"
+          aria-hidden="true"
+        />
+      )}
+
       {/* Top row */}
-      <div className="flex items-start justify-between gap-2">
+      <div className="relative flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           {entry.citation && (
-            <p className="text-xs font-mono text-teal-600 font-semibold mb-0.5 truncate">
-              {entry.citation}
+            <p className="text-xs font-mono text-teal-600 font-bold mb-1 truncate group-hover:text-teal-700 transition-colors duration-300">
+              <span className="inline-block px-2 py-0.5 bg-teal-50 rounded-md border border-teal-200">
+                {entry.citation}
+              </span>
             </p>
           )}
-          <h3 className="font-semibold text-slate-800 text-sm leading-snug line-clamp-2">
+          <h3 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 group-hover:text-slate-900 transition-colors duration-300">
             {entry.title}
           </h3>
         </div>
         {entry.isMostImportant && (
-          <Trophy className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+          <div className="relative">
+            <div className="absolute inset-0 bg-amber-400 rounded-full blur-sm animate-pulse" />
+            <Trophy className="relative w-5 h-5 text-amber-500 shrink-0 mt-0.5 transition-all duration-300 group-hover:scale-125 group-hover:rotate-12" />
+          </div>
         )}
       </div>
 
       {/* Meta */}
       {entry.courtName && (
-        <p className="text-xs text-slate-500">{entry.courtName}</p>
+        <p className="text-xs text-slate-500 group-hover:text-slate-600 transition-colors duration-300 flex items-center gap-1.5">
+          <Scale className="w-3 h-3" />
+          {entry.courtName}
+        </p>
       )}
 
       {/* Final decision snippet */}
       {entry.finalDecision && (
-        <p className="text-xs text-slate-600 line-clamp-2 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
+        <p className="text-xs text-slate-600 line-clamp-2 bg-slate-50 rounded-xl px-3 py-2 border border-slate-100 group-hover:border-slate-200 group-hover:bg-slate-100/50 transition-all duration-300">
           {entry.finalDecision}
         </p>
       )}
@@ -593,9 +857,9 @@ function LibraryCard({
           {entry.tags.map((tag) => (
             <span
               key={tag}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 text-[11px] font-medium"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-[11px] font-semibold border border-primary-200 hover:bg-primary-100 hover:border-primary-300 transition-all duration-300 cursor-default"
             >
-              <Tag className="w-2.5 h-2.5" />
+              <Tag className="w-3 h-3" />
               {tag}
             </span>
           ))}
@@ -603,43 +867,69 @@ function LibraryCard({
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-1 pt-1 border-t border-slate-100">
+      <div className="flex items-center gap-1 pt-3 mt-2 border-t border-slate-100 group-hover:border-slate-200 transition-colors duration-300">
         <button
-          onClick={onView}
-          className="btn-ghost flex-1 text-xs justify-center"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onView?.();
+          }}
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-primary-50 rounded-xl text-xs font-semibold text-slate-600 hover:text-primary-600 transition-all duration-300 group/btn"
         >
-          <Eye className="w-3.5 h-3.5" />
+          <Eye className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform duration-300" />
           View
         </button>
         <button
-          onClick={onToggleFavourite}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleFavourite?.();
+          }}
           title={entry.isFavourite ? "Remove favourite" : "Mark favourite"}
-          className={`btn-ghost px-2.5 ${
-            entry.isFavourite ? "text-yellow-500" : "text-slate-400"
+          className={`p-2 rounded-xl transition-all duration-300 hover:scale-110 ${
+            entry.isFavourite
+              ? "text-yellow-500 bg-yellow-50 hover:bg-yellow-100"
+              : "text-slate-400 hover:text-yellow-500 hover:bg-yellow-50"
           }`}
         >
           {entry.isFavourite ? (
-            <Star className="w-4 h-4 fill-yellow-400" />
+            <Star className="w-4 h-4 fill-yellow-400 transition-transform duration-300 hover:rotate-12" />
           ) : (
             <StarOff className="w-4 h-4" />
           )}
         </button>
         <button
-          onClick={onToggleImportant}
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onToggleImportant?.();
+          }}
           title={
             entry.isMostImportant
               ? "Remove important flag"
               : "Mark as Most Important"
           }
-          className={`btn-ghost px-2.5 ${
-            entry.isMostImportant ? "text-amber-500" : "text-slate-400"
+          className={`p-2 rounded-xl transition-all duration-300 hover:scale-110 ${
+            entry.isMostImportant
+              ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
+              : "text-slate-400 hover:text-amber-500 hover:bg-amber-50"
           }`}
         >
-          <Trophy className="w-4 h-4" />
+          <Trophy
+            className={`w-4 h-4 transition-transform duration-300 ${entry.isMostImportant ? "scale-110" : ""}`}
+          />
         </button>
         <button
-          onClick={onDelete}
-          className="btn-ghost px-2.5 text-slate-400 hover:text-red-500"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDelete?.();
+          }}
+          className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all duration-300 hover:scale-110"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -658,16 +948,21 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
   const [tagInput, setTagInput] = useState((entry.tags || []).join(", "));
 
   const SECTIONS = [
-    { key: "offenceName", label: "Offence Name" },
-    { key: "courtName", label: "Court" },
-    { key: "lawsDiscussed", label: "Laws Discussed" },
-    { key: "crossExaminationQuestions", label: "Cross-Examination Questions" },
+    { key: "offenceName", label: "Offence Name", icon: BookOpen },
+    { key: "courtName", label: "Court", icon: Gavel },
+    { key: "lawsDiscussed", label: "Laws Discussed", icon: Scale },
+    {
+      key: "crossExaminationQuestions",
+      label: "Cross-Examination Questions",
+      icon: Zap,
+    },
     {
       key: "courtExaminationOfEvidence",
       label: "Court Examination of Evidence",
+      icon: Search,
     },
-    { key: "finalDecision", label: "Final Decision" },
-    { key: "voiceSummary", label: "Comprehensive Summary" },
+    { key: "finalDecision", label: "Final Decision", icon: CheckCircle2 },
+    { key: "voiceSummary", label: "Comprehensive Summary", icon: Sparkles },
   ];
 
   const [shareUrl, setShareUrl] = useState(null);
@@ -739,17 +1034,18 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
 
   return (
     <Modal isOpen onClose={onClose} title={data.title} size="xl">
-      <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-1">
+      <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
         {/* Citation + meta */}
-        <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm p-4 bg-gradient-to-r from-slate-50 to-white rounded-2xl border border-slate-200">
           <div className="flex flex-wrap gap-3">
             {data.citation && (
-              <span className="font-mono text-teal-700 bg-teal-50 px-2 py-0.5 rounded font-semibold">
+              <span className="font-mono text-teal-700 bg-teal-50 px-3 py-1 rounded-lg font-bold border border-teal-200 shadow-sm">
                 {data.citation}
               </span>
             )}
             {data.judgementDate && (
-              <span className="text-slate-500">
+              <span className="text-slate-500 flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" />
                 {new Date(data.judgementDate).toLocaleDateString("en-PK", {
                   day: "numeric",
                   month: "long",
@@ -761,32 +1057,45 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
           <button
             onClick={handleShare}
             disabled={sharing}
-            className="flex items-center gap-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-2 text-xs font-bold bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105 disabled:opacity-50"
           >
-            {sharing ? <span className="w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> : <Share2 className="w-3 h-3" />}
+            {sharing ? (
+              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Share2 className="w-3 h-3" />
+            )}
             {sharing ? "Sharing..." : "Share"}
           </button>
         </div>
+
         {shareUrl && (
-          <div className="flex items-center gap-2 p-2.5 bg-teal-50 rounded-lg border border-teal-200">
-            <LinkIcon className="w-3.5 h-3.5 text-teal-600 shrink-0" />
-            <span className="text-xs text-teal-700 font-mono flex-1 truncate">{shareUrl}</span>
+          <div className="flex items-center gap-3 p-3 bg-teal-50 rounded-xl border border-teal-200 animate-slideIn">
+            <LinkIcon className="w-4 h-4 text-teal-600 shrink-0" />
+            <span className="text-xs text-teal-700 font-mono flex-1 truncate">
+              {shareUrl}
+            </span>
             <button
-              onClick={() => { navigator.clipboard.writeText(shareUrl); toast.success("Copied!"); }}
-              className="shrink-0 text-teal-600 hover:text-teal-800"
+              onClick={() => {
+                navigator.clipboard.writeText(shareUrl);
+                toast.success("Copied!");
+              }}
+              className="shrink-0 p-1.5 bg-teal-100 hover:bg-teal-200 rounded-lg text-teal-600 transition-all duration-300 hover:scale-110"
             >
               <Copy className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
 
-        {/* 7-section display */}
+        {/* 7-section display with icons */}
         <div className="space-y-4">
-          {SECTIONS.map(({ key, label }) =>
+          {SECTIONS.map(({ key, label, icon: Icon }) =>
             data[key] ? (
-              <div key={key}>
-                <p className="label">{label}</p>
-                <p className="text-sm text-slate-700 bg-slate-50 rounded-lg px-4 py-3 border border-slate-100 whitespace-pre-wrap">
+              <div key={key} className="group animate-fadeIn">
+                <p className="label flex items-center gap-2 text-slate-700 mb-2">
+                  <Icon className="w-4 h-4 text-primary-500" />
+                  {label}
+                </p>
+                <p className="text-sm text-slate-700 bg-slate-50 rounded-xl px-4 py-3 border border-slate-200 group-hover:border-primary-200 group-hover:bg-white transition-all duration-300 whitespace-pre-wrap">
                   {data[key]}
                 </p>
               </div>
@@ -794,56 +1103,68 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
           )}
         </div>
 
-        {/* Import cross-exam questions to cross-exam module */}
+        {/* Import cross-exam questions with animation */}
         {data.crossExaminationQuestions && (
-          <div className="p-4 rounded-xl bg-violet-50 border border-violet-200">
-            <p className="text-xs font-bold text-violet-700 mb-1 flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 hover:border-violet-300 transition-all duration-300 animate-slideUp">
+            <p className="text-xs font-bold text-violet-700 mb-2 flex items-center gap-2">
+              <div className="p-1 bg-violet-500 rounded-lg">
+                <Zap className="w-3.5 h-3.5 text-white" />
+              </div>
               Cross-Examination Questions Extracted
             </p>
-            <p className="text-xs text-violet-600 mb-2">These questions can be imported into a new Cross-Examination draft.</p>
+            <p className="text-xs text-violet-600 mb-3">
+              These questions can be imported into a new Cross-Examination
+              draft.
+            </p>
             <a
               href={`/cross-exams/new`}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-bold bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
-              Create Cross-Exam with these questions →
+              Create Cross-Exam with these questions
+              <ArrowUpRight className="w-3.5 h-3.5" />
             </a>
           </div>
         )}
 
-        {/* Tags */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="label mb-0">Tags</p>
+        {/* Tags with animations */}
+        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
+          <div className="flex items-center justify-between mb-3">
+            <p className="label mb-0 flex items-center gap-2">
+              <Tag className="w-4 h-4 text-primary-500" />
+              Tags
+            </p>
             <button
               onClick={() => setEditTags((v) => !v)}
-              className="text-xs text-primary-600 hover:underline"
+              className="text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors duration-300 hover:underline"
             >
               {editTags ? "Cancel" : "Edit tags"}
             </button>
           </div>
           {editTags ? (
-            <div className="flex gap-2">
+            <div className="flex gap-2 animate-slideIn">
               <input
-                className="input flex-1"
+                className="input flex-1 rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
                 placeholder="Criminal, Bail, High Court..."
               />
-              <button onClick={saveTags} className="btn-primary text-xs px-4">
+              <button
+                onClick={saveTags}
+                className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-xs font-semibold transition-all duration-300 hover:shadow-lg"
+              >
                 Save
               </button>
             </div>
           ) : (
             <div className="flex flex-wrap gap-1.5">
               {data.tags?.length > 0 ? (
-                data.tags.map((t) => (
+                data.tags.map((tag) => (
                   <span
-                    key={t}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-xs font-medium"
+                    key={tag}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-primary-700 text-xs font-semibold border border-primary-200 hover:border-primary-300 hover:shadow-sm transition-all duration-300"
                   >
                     <Tag className="w-3 h-3" />
-                    {t}
+                    {tag}
                   </span>
                 ))
               ) : (
@@ -853,25 +1174,31 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
           )}
         </div>
 
-        {/* Private notes */}
-        <div>
-          <p className="label">Private Notes</p>
+        {/* Private notes with enhanced design */}
+        <div className="p-4 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl border border-yellow-200">
+          <p className="label flex items-center gap-2 mb-3">
+            <StickyNote className="w-4 h-4 text-yellow-600" />
+            Private Notes
+          </p>
           <div className="space-y-2 mb-3">
             {(data.notes || []).length === 0 ? (
-              <p className="text-xs text-slate-400">No notes yet.</p>
+              <p className="text-xs text-slate-400 italic">
+                No notes yet. Add your private annotations here.
+              </p>
             ) : (
-              data.notes.map((note) => (
+              data.notes.map((note, index) => (
                 <div
                   key={note._id}
-                  className="flex gap-2 items-start bg-yellow-50 border border-yellow-200 rounded-lg p-3"
+                  className="flex gap-3 items-start bg-white border border-yellow-200 rounded-xl p-3 hover:shadow-md transition-all duration-300 animate-fadeIn"
+                  style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <StickyNote className="w-3.5 h-3.5 text-yellow-500 shrink-0 mt-0.5" />
+                  <StickyNote className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
                   <p className="text-xs text-slate-700 flex-1 whitespace-pre-wrap">
                     {note.content}
                   </p>
                   <button
                     onClick={() => deleteNote(note._id)}
-                    className="text-slate-400 hover:text-red-500"
+                    className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-300"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -881,7 +1208,7 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
           </div>
           <div className="flex gap-2">
             <textarea
-              className="textarea flex-1 h-16 text-xs"
+              className="textarea flex-1 h-20 text-xs rounded-xl border-yellow-200 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-all duration-300"
               placeholder="Add a private note or annotation..."
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
@@ -889,9 +1216,16 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
             <button
               onClick={addNote}
               disabled={saving || !noteText.trim()}
-              className="btn-primary text-xs px-4 self-end"
+              className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white rounded-xl text-xs font-bold transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:hover:shadow-none"
             >
-              Add
+              {saving ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Adding...
+                </span>
+              ) : (
+                "Add Note"
+              )}
             </button>
           </div>
         </div>
@@ -900,7 +1234,7 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
   );
 }
 
-// ── Add Entry Modal ───────────────────────────────────────────────────────────
+// ── Enhanced Add Entry Modal ───────────────────────────────────────────────────────────
 
 function AddEntryModal({ onClose, onAdded }) {
   const [form, setForm] = useState({
@@ -916,6 +1250,7 @@ function AddEntryModal({ onClose, onAdded }) {
     isMostImportant: false,
   });
   const [saving, setSaving] = useState(false);
+  const [step, setStep] = useState(1);
 
   const handleSubmit = async () => {
     if (!form.title.trim()) {
@@ -940,135 +1275,209 @@ function AddEntryModal({ onClose, onAdded }) {
 
   return (
     <Modal isOpen onClose={onClose} title="Add Judgement to Library" size="lg">
-      <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="sm:col-span-2">
-            <label className="label">Title *</label>
-            <input
-              className="input"
-              placeholder="e.g. State vs Ahmed Ali"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="label">Citation</label>
-            <input
-              className="input font-mono"
-              placeholder="e.g. 2015 SCMR 1002"
-              value={form.citation}
-              onChange={(e) => setForm({ ...form, citation: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="label">Judgement Date</label>
-            <input
-              type="date"
-              className="input"
-              value={form.judgementDate}
-              onChange={(e) =>
-                setForm({ ...form, judgementDate: e.target.value })
-              }
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="label">Court Name</label>
-            <select
-              className="select"
-              value={form.courtName}
-              onChange={(e) => setForm({ ...form, courtName: e.target.value })}
+      <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
+        {/* Step Indicator */}
+        <div className="flex items-center gap-2 mb-6">
+          {[1, 2].map((s) => (
+            <button
+              key={s}
+              onClick={() => setStep(s)}
+              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
+                step === s
+                  ? "bg-primary-600 text-white shadow-lg"
+                  : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+              }`}
             >
-              <option value="">Select court...</option>
-              {COURTS.filter(Boolean).map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="sm:col-span-2">
-            <label className="label">Offence Name</label>
-            <input
-              className="input"
-              placeholder="e.g. Possession under Section 9(c) CNSA 1997"
-              value={form.offenceName}
-              onChange={(e) =>
-                setForm({ ...form, offenceName: e.target.value })
-              }
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="label">Laws Discussed</label>
-            <textarea
-              className="textarea h-16"
-              placeholder="Sections, articles, legal principles..."
-              value={form.lawsDiscussed}
-              onChange={(e) =>
-                setForm({ ...form, lawsDiscussed: e.target.value })
-              }
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="label">Final Decision</label>
-            <textarea
-              className="textarea h-16"
-              placeholder="Verdict, conviction/acquittal, sentence..."
-              value={form.finalDecision}
-              onChange={(e) =>
-                setForm({ ...form, finalDecision: e.target.value })
-              }
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="label">Summary</label>
-            <textarea
-              className="textarea h-20"
-              placeholder="Plain-language summary of the judgement..."
-              value={form.voiceSummary}
-              onChange={(e) =>
-                setForm({ ...form, voiceSummary: e.target.value })
-              }
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="label">Tags (comma-separated)</label>
-            <input
-              className="input"
-              placeholder="Criminal, Bail, High Court Precedent..."
-              value={form.tags}
-              onChange={(e) => setForm({ ...form, tags: e.target.value })}
-            />
-          </div>
-          <div className="sm:col-span-2 flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="mostImportant"
-              checked={form.isMostImportant}
-              onChange={(e) =>
-                setForm({ ...form, isMostImportant: e.target.checked })
-              }
-              className="w-4 h-4 accent-amber-500"
-            />
-            <label
-              htmlFor="mostImportant"
-              className="text-sm text-slate-700 font-medium cursor-pointer flex items-center gap-1.5"
-            >
-              <Trophy className="w-3.5 h-3.5 text-amber-500" />
-              Mark as Most Important
-            </label>
-          </div>
+              Step {s}
+            </button>
+          ))}
         </div>
-        <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
-          <button onClick={onClose} className="btn-secondary">
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={saving}
-            className="btn-primary"
-          >
-            {saving ? "Saving..." : "Save to Library"}
-          </button>
+
+        {step === 1 && (
+          <div className="space-y-4 animate-fadeIn">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="label flex items-center gap-2">
+                  <BookOpen className="w-3.5 h-3.5 text-primary-500" />
+                  Title *
+                </label>
+                <input
+                  className="input rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="e.g. State vs Ahmed Ali"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="label">Citation</label>
+                <input
+                  className="input font-mono rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="e.g. 2015 SCMR 1002"
+                  value={form.citation}
+                  onChange={(e) =>
+                    setForm({ ...form, citation: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <label className="label flex items-center gap-2">
+                  <Calendar className="w-3.5 h-3.5 text-primary-500" />
+                  Judgement Date
+                </label>
+                <input
+                  type="date"
+                  className="input rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  value={form.judgementDate}
+                  onChange={(e) =>
+                    setForm({ ...form, judgementDate: e.target.value })
+                  }
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label flex items-center gap-2">
+                  <Gavel className="w-3.5 h-3.5 text-primary-500" />
+                  Court Name
+                </label>
+                <select
+                  className="select rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  value={form.courtName}
+                  onChange={(e) =>
+                    setForm({ ...form, courtName: e.target.value })
+                  }
+                >
+                  <option value="">Select court...</option>
+                  {COURTS.filter(Boolean).map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div className="space-y-4 animate-fadeIn">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="label">Offence Name</label>
+                <input
+                  className="input rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="e.g. Possession under Section 9(c) CNSA 1997"
+                  value={form.offenceName}
+                  onChange={(e) =>
+                    setForm({ ...form, offenceName: e.target.value })
+                  }
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Laws Discussed</label>
+                <textarea
+                  className="textarea h-20 rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="Sections, articles, legal principles..."
+                  value={form.lawsDiscussed}
+                  onChange={(e) =>
+                    setForm({ ...form, lawsDiscussed: e.target.value })
+                  }
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Final Decision</label>
+                <textarea
+                  className="textarea h-20 rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="Verdict, conviction/acquittal, sentence..."
+                  value={form.finalDecision}
+                  onChange={(e) =>
+                    setForm({ ...form, finalDecision: e.target.value })
+                  }
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label">Summary</label>
+                <textarea
+                  className="textarea h-24 rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="Plain-language summary of the judgement..."
+                  value={form.voiceSummary}
+                  onChange={(e) =>
+                    setForm({ ...form, voiceSummary: e.target.value })
+                  }
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="label flex items-center gap-2">
+                  <Tag className="w-3.5 h-3.5 text-primary-500" />
+                  Tags (comma-separated)
+                </label>
+                <input
+                  className="input rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="Criminal, Bail, High Court Precedent..."
+                  value={form.tags}
+                  onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="flex items-center gap-3 p-4 bg-amber-50 rounded-xl border border-amber-200 cursor-pointer hover:bg-amber-100 transition-all duration-300">
+                  <input
+                    type="checkbox"
+                    checked={form.isMostImportant}
+                    onChange={(e) =>
+                      setForm({ ...form, isMostImportant: e.target.checked })
+                    }
+                    className="w-5 h-5 accent-amber-500 rounded-lg"
+                  />
+                  <span className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                    <Trophy className="w-4 h-4 text-amber-500" />
+                    Mark as Most Important
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between gap-3 pt-4 border-t border-slate-200">
+          <div>
+            {step === 2 && (
+              <button
+                onClick={() => setStep(1)}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all duration-300"
+              >
+                ← Back
+              </button>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-sm font-semibold transition-all duration-300"
+            >
+              Cancel
+            </button>
+            {step === 1 ? (
+              <button
+                onClick={() => setStep(2)}
+                className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl text-sm font-bold transition-all duration-300 hover:shadow-lg"
+              >
+                Next →
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={saving}
+                className="px-6 py-2.5 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 text-white rounded-xl text-sm font-bold transition-all duration-300 hover:shadow-lg disabled:opacity-50"
+              >
+                {saving ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Saving...
+                  </span>
+                ) : (
+                  "Save to Library"
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </Modal>

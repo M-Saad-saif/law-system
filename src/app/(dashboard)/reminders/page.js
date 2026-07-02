@@ -268,7 +268,7 @@ export default function RemindersPage() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="max-w-4xl mx-auto space-y-6 px-4 sm:px-0"
+      className="max-w-6xl p-6 mx-auto space-y-6  bg-[#eef5f3]"
     >
       {/* Header */}
       <motion.div
