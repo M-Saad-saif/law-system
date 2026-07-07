@@ -18,6 +18,7 @@ export default function NotFound() {
             className="text-[14rem] sm:text-[20rem] font-bold leading-none tracking-tight flex items-center justify-center text-transparent bg-clip-text bg-gradient-to-b from-[#0e8278] via-[#11584e] to-[#07403d] filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)]"
             style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
           >
+            4
             <span className="relative inline-flex items-center justify-center mx-[-1.5rem] sm:mx-[-2.5rem] w-[14rem] h-[14rem] sm:w-[20rem] sm:h-[20rem] z-20">
               <span className="absolute text-[9rem] sm:text-[13rem] font-black text-[#0e8278] opacity-40 mix-blend-screen scale-110 blur-[1px]">
                 0

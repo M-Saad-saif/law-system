@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { api } from "@/utils/api";
 import BackgroundPattern from "@/components/auth/BackgroundPattern";
-import Field from "@component/Field";
+import {Field} from "@/components/auth/Field";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -43,7 +43,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await api.post("/api/auth/register", { ...form, seniority: "senior" });
-      toast.success("Senior Lawyer account created! Welcome to LawPortal.");
+      toast.success("Senior Lawyer account created! Welcome to LegalPortal.");
       router.push("/dashboard");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Registration failed.");
@@ -150,15 +150,13 @@ export default function RegisterPage() {
       <BackgroundPattern />
 
       <div className="w-full max-w-7xl min-h-screen lg:min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-8 lg:px-24 py-12 relative z-10">
-        {/* LEFT SIDE: REGISTRATION FORM */}
         <div className="lg:col-span-5 flex flex-col justify-center">
-          {/* Logo with Animation */}
           <div className="flex items-center gap-2.5 mb-16 group cursor-pointer animate-scale-in">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f766e] to-[#0d9488] flex items-center justify-center shadow-lg transform group-hover:rotate-180 transition-all duration-700 animate-gradient-shift">
               <Scale className="text-white w-5 h-5" />
             </div>
-            <span className="text-sm font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
-              LawPortal
+            <span className="text-[25px] font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
+              legalPortal
             </span>
           </div>
 
@@ -208,7 +206,7 @@ export default function RegisterPage() {
               <Field
                 label="Email Address"
                 type="email"
-                placeholder="john@lawfirm.com"
+                placeholder="youremail.com"
                 required
                 value={form.email}
                 onChange={set("email")}

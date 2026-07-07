@@ -129,7 +129,7 @@ export default function LogoutOverlay() {
                 className="text-white text-lg font-semibold tracking-wide"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                LawPortal
+                LegalPortal
               </p>
               <AnimatePresence mode="wait">
                 <motion.p

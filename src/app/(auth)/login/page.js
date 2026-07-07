@@ -10,40 +10,7 @@ import { Mail, Lock, Eye, EyeOff, Scale } from "lucide-react";
 import { api } from "@/utils/api";
 import { LaptopMockup } from "@/components/auth/LaptopMockup";
 import BackgroundPattern from "@/components/auth/BackgroundPattern";
-
-function FormField({
-  type = "text",
-  placeholder,
-  value,
-  onChange,
-  icon: Icon,
-  required = false,
-  rightElement = null,
-}) {
-  return (
-    <div className="form-group transform transition-all duration-300 hover:translate-x-1">
-      <div className="relative group">
-        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-all duration-300 group-focus-within:text-[#0d9488] group-focus-within:scale-110">
-          {Icon && (
-            <Icon
-              size={14}
-              className="opacity-50 group-focus-within:opacity-100 transition-opacity"
-            />
-          )}
-        </span>
-        <input
-          type={type}
-          className="w-full pl-10 pr-4 py-2.5 bg-[#f1f5f9]/90 rounded-full text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#0d9488]/20 focus:border-[#0d9488] transition-all duration-300 text-xs shadow-sm"
-          placeholder={placeholder}
-          value={value}
-          onChange={onChange}
-          required={required}
-        />
-        {rightElement}
-      </div>
-    </div>
-  );
-}
+import { FormField } from "@/components/auth/Field";
 
 function LoadingSpinner({ className = "" }) {
   return (
@@ -59,8 +26,8 @@ function Logo() {
       <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f766e] to-[#0d9488] flex items-center justify-center shadow-lg transform group-hover:rotate-180 transition-all duration-700 animate-gradient-shift">
         <Scale className="text-white w-5 h-5" />
       </div>
-      <span className="text-sm font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
-        LawPortal
+      <span className="text-[25px] font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
+        LegalPortal
       </span>
     </div>
   );
@@ -195,8 +162,8 @@ export default function LoginPage() {
           <Logo />
 
           <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
-            <h1 className="text-3xl lg:text-4xl font-normal tracking-tight text-slate-800 mb-2">
-              Welcome to LawPortal
+            <h1 className="text-2xl lg:text-4xl font-normal tracking-tight text-slate-800 mb-2">
+              Welcome to LegalPortal
             </h1>
             <p className="text-slate-400 text-xs mb-8">
               Login to the legal network

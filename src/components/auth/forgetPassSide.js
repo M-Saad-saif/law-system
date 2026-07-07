@@ -8,8 +8,8 @@ function Logo() {
       <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f766e] to-[#0d9488] flex items-center justify-center shadow-lg transform group-hover:rotate-180 transition-all duration-700 animate-gradient-shift">
         <Scale className="text-white w-5 h-5" />
       </div>
-      <span className="text-sm font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
-        LawPortal
+      <span className="text-[25px] font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
+        LegalPortal
       </span>
     </div>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import logo from "/public/logo1.png"
 import { useEffect, useState, useRef } from "react";
 import {
   Scale,
@@ -165,15 +167,12 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-black overflow-x-hidden selection:bg-[#027f7e]/30">
-      {/* Animated background grid */}
       <div className="fixed inset-0 bg-[linear-gradient(rgba(2,127,126,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(2,127,126,0.03)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
 
-      {/* Enhanced glow effects */}
       <div className="absolute top-[-30%] left-[-20%] w-[80%] h-[80%] rounded-full bg-[#103168]/20 blur-[120px] pointer-events-none animate-pulse" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] rounded-full bg-[#027f7e]/15 blur-[120px] pointer-events-none animate-pulse delay-1000" />
       <div className="absolute top-[40%] left-[50%] w-[50%] h-[50%] rounded-full bg-[#027f7e]/5 blur-[100px] pointer-events-none" />
 
-      {/* Mouse-following gradient */}
       <div
         className="absolute w-[500px] h-[500px] rounded-full bg-gradient-to-r from-[#027f7e]/10 to-[#103168]/10 blur-[100px] pointer-events-none transition-transform duration-1000"
         style={{
@@ -181,7 +180,6 @@ export default function LandingPage() {
         }}
       />
 
-      {/* Navigation */}
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -196,12 +194,20 @@ export default function LandingPage() {
             <motion.div
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.6 }}
-              className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#027f7e] to-[#103168] flex items-center justify-center shadow-lg shadow-[#027f7e]/30 group-hover:shadow-xl group-hover:shadow-[#027f7e]/40 transition-all"
+              className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-[#027f7e] to-[#103168] overflow-hidden flex items-center justify-center shadow-lg shadow-[#027f7e]/30 group-hover:shadow-xl group-hover:shadow-[#027f7e]/40 transition-all"
             >
-              <Scale className="w-5 h-5 text-white" />
+              {/* <Scale className="w-5 h-5 text-white" /> */}
+              <Image
+                src={logo}
+                width={40}
+                height={40}
+                alt="Logo"
+                className="object-contain"
+                priority
+              />
             </motion.div>
             <span className="text-xl font-bold tracking-tight text-white">
-              Law<span className="text-[#027f7e]">Portal</span>
+              Legal<span className="text-[#027f7e]">Portal</span>
             </span>
           </motion.div>
 
@@ -924,7 +930,7 @@ export default function LandingPage() {
               ?
             </h2>
             <p className="text-gray-400 text-lg max-w-2xl mx-auto mb-10">
-              Join dozens of law firms already using LawPortal to manage cases
+              Join dozens of law firms already using LegalPortal to manage cases
               and hearings efficiently.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
@@ -978,7 +984,7 @@ export default function LandingPage() {
                   <Scale className="w-5 h-5 text-white" />
                 </motion.div>
                 <span className="text-lg font-bold text-white">
-                  Law<span className="text-[#027f7e]">Portal</span>
+                  Legal<span className="text-[#027f7e]">Portal</span>
                 </span>
               </div>
               <p className="text-sm text-gray-500 mb-4 max-w-xs">
@@ -1094,7 +1100,7 @@ export default function LandingPage() {
                   <Scale className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-sm text-gray-500">
-                  © {new Date().getFullYear()} LawPortal — Legal Management
+                  © {new Date().getFullYear()} LegalPortal — Legal Management
                   Platform
                 </span>
               </div>
