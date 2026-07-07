@@ -6,18 +6,151 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 import { apiFetch } from "@/utils/api";
-import { BookMarked, Calendar } from "lucide-react";
+import {
+  BookMarked,
+  Calendar,
+  Plus,
+  X,
+  ChevronDown,
+  ChevronUp,
+  User,
+  MessageSquare,
+  Flag,
+  Check,
+  Edit3,
+  Trash2,
+  Eye,
+  Send,
+  AlertCircle,
+  CheckCircle,
+  Activity,
+  Archive,
+  History,
+  FileText,
+  Users,
+  Clock,
+  ArrowLeft,
+  Loader2,
+  Sparkles,
+  RefreshCw,
+  Download,
+  MoreVertical,
+  MessageCircle,
+  ThumbsUp,
+  ThumbsDown,
+  AlertTriangle,
+  Zap,
+  Play,
+  Square,
+  BarChart,
+  GitBranch,
+  Settings,
+  Menu,
+  Home,
+  Folder,
+  Briefcase,
+  UserCircle,
+  LogOut,
+  Bell,
+  PlusCircle,
+  MinusCircle,
+  Upload,
+  Link2,
+  ExternalLink,
+  Copy,
+  Star,
+  StarOff,
+  Send as SendIcon,
+  Inbox,
+  Trash,
+  Edit,
+  Save,
+  XCircle,
+  CheckSquare,
+  Square as SquareIcon,
+  Radio,
+  RadioOff,
+  EyeOff,
+  Shield,
+  Award,
+  TrendingUp,
+  TrendingDown,
+  PieChart,
+  CalendarDays,
+  FileCheck,
+  FileX,
+  Clock as ClockIcon,
+  HelpCircle,
+  Info,
+} from "lucide-react";
 
-// --- Status pill ---
-const STATUS_STYLES = {
-  draft: "bg-slate-100 text-slate-600",
-  submitted: "bg-blue-50 text-blue-700",
-  in_review: "bg-amber-50 text-amber-700",
-  changes_requested: "bg-orange-50 text-orange-700",
-  approved: "bg-emerald-50 text-emerald-700",
-  courtroom_active: "bg-red-100 text-red-700",
-  archived: "bg-gray-100 text-gray-500",
+// --- Theme Colors ---
+const COLORS = {
+  primary: "#026665",
+  primaryLight: "#0e9185",
+  primaryMuted: "#9fd8d1",
+  primaryBg: "#eef5f3",
+  white: "#ffffff",
+  slate: {
+    50: "#f8fafc",
+    100: "#f1f5f9",
+    200: "#e2e8f0",
+    300: "#cbd5e1",
+    400: "#94a3b8",
+    500: "#64748b",
+    600: "#475569",
+    700: "#334155",
+    800: "#1e293b",
+    900: "#0f172a",
+  },
 };
+
+// --- Status Config ---
+const STATUS_STYLES = {
+  draft: {
+    bg: "bg-slate-100",
+    text: "text-black",
+    border: "border-slate-200",
+    icon: Edit3,
+  },
+  submitted: {
+    bg: "bg-blue-50",
+    text: "text-black",
+    border: "border-blue-200",
+    icon: SendIcon,
+  },
+  in_review: {
+    bg: "bg-amber-50",
+    text: "text-black",
+    border: "border-amber-200",
+    icon: Eye,
+  },
+  changes_requested: {
+    bg: "bg-orange-50",
+    text: "text-black",
+    border: "border-orange-200",
+    icon: AlertCircle,
+  },
+  approved: {
+    bg: "bg-emerald-50",
+    text: "text-black",
+    border: "border-emerald-200",
+    icon: CheckCircle,
+  },
+  courtroom_active: {
+    bg: "bg-red-50",
+    text: "text-black",
+    border: "border-red-200",
+    icon: Activity,
+  },
+  archived: {
+    bg: "bg-gray-100",
+    text: "text-black",
+    border: "border-gray-200",
+    icon: Archive,
+  },
+};
+
 const STATUS_LABELS = {
   draft: "Draft",
   submitted: "Submitted",
@@ -28,17 +161,24 @@ const STATUS_LABELS = {
   archived: "Archived",
 };
 
-function StatusPill({ status }) {
+// --- Components ---
+
+function StatusPill({ status, size = "sm" }) {
+  const style = STATUS_STYLES[status] || STATUS_STYLES.draft;
+  const Icon = style.icon;
+  const sizeClasses =
+    size === "sm" ? "px-2.5 py-1 text-xs" : "px-4 py-1.5 text-sm";
+
   return (
     <span
-      className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${STATUS_STYLES[status] || STATUS_STYLES.draft}`}
+      className={`inline-flex items-center gap-1.5 rounded-full font-semibold ${sizeClasses} ${style.bg} ${style.text} border ${style.border}`}
     >
+      <Icon className="w-3.5 h-3.5" />
       {STATUS_LABELS[status] || status}
     </span>
   );
 }
 
-// --- Add Witness modal ---
 function AddWitnessModal({ onAdd, onClose }) {
   const [form, setForm] = useState({
     witnessName: "",
@@ -64,20 +204,20 @@ function AddWitnessModal({ onAdd, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-          <h2 className="text-base font-bold text-slate-900">Add Witness</h2>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-[#eef5f3]">
+          <h2 className="text-base font-bold text-black">Add Witness</h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 text-xl leading-none"
+            className="text-black hover:text-black text-xl leading-none w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors"
           >
-            ×
+            <X className="w-4 h-4" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-              Witness Name *
+            <label className="block text-xs font-bold text-black uppercase tracking-wide mb-1.5">
+              Witness Name <span className="text-red-400">*</span>
             </label>
             <input
               value={form.witnessName}
@@ -85,12 +225,12 @@ function AddWitnessModal({ onAdd, onClose }) {
                 setForm((f) => ({ ...f, witnessName: e.target.value }))
               }
               placeholder="e.g. Muhammad Tariq"
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#026665] focus:border-transparent transition-all"
               required
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs font-bold text-black uppercase tracking-wide mb-1.5">
               Type
             </label>
             <select
@@ -98,7 +238,7 @@ function AddWitnessModal({ onAdd, onClose }) {
               onChange={(e) =>
                 setForm((f) => ({ ...f, witnessType: e.target.value }))
               }
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 bg-white"
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#026665] focus:border-transparent bg-white transition-all"
             >
               <option value="prosecution">Prosecution</option>
               <option value="defense">Defense</option>
@@ -107,28 +247,35 @@ function AddWitnessModal({ onAdd, onClose }) {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs font-bold text-black uppercase tracking-wide mb-1.5">
               Role / Description
             </label>
             <input
               value={form.role}
               onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
               placeholder="e.g. Eyewitness present at scene"
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#026665] focus:border-transparent transition-all"
             />
           </div>
           <div className="flex gap-3 pt-1">
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-slate-900 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60"
+              className="flex-1 bg-[#026665] hover:bg-[#0e9185] text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60 transition-all shadow-lg shadow-[#026665]/20 hover:shadow-[#026665]/30"
             >
-              {saving ? "Adding…" : "Add Witness"}
+              {saving ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Adding…
+                </span>
+              ) : (
+                "Add Witness"
+              )}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm"
+              className="flex-1 bg-slate-100 hover:bg-slate-200 text-black font-semibold py-2.5 rounded-xl text-sm transition-colors"
             >
               Cancel
             </button>
@@ -153,35 +300,48 @@ function SubmitReviewModal({
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
-          <h2 className="text-base font-bold text-slate-900">
-            {isResubmit ? "Resubmit For Review" : "Submit For Review"}
-          </h2>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-[#eef5f3]">
+          <div>
+            <h2 className="text-base font-bold text-black">
+              {isResubmit ? "Resubmit For Review" : "Submit For Review"}
+            </h2>
+            <p className="text-xs text-black mt-0.5">
+              {isResubmit
+                ? "Send updated version for approval"
+                : "Send for senior review"}
+            </p>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 text-xl leading-none"
+            className="text-black hover:text-black w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors"
           >
-            x
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="px-6 py-5 space-y-4">
-          <p className="text-sm text-slate-600">
-            You can optionally assign a senior lawyer now, or leave it
-            unassigned.
-          </p>
+          <div className="bg-[#eef5f3] rounded-xl p-4 border border-[#9fd8d1]">
+            <p className="text-sm text-black flex items-center gap-2">
+              <Info className="w-4 h-4 text-black" />
+              You can optionally assign a senior lawyer now, or leave it
+              unassigned.
+            </p>
+          </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-              Senior Lawyer (Optional)
+            <label className="block text-xs font-bold text-black uppercase tracking-wide mb-1.5">
+              Senior Lawyer{" "}
+              <span className="text-black font-normal normal-case">
+                (Optional)
+              </span>
             </label>
             <select
               value={selectedReviewer}
               onChange={(e) => onReviewerChange(e.target.value)}
               disabled={loadingReviewers || submitting}
-              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 bg-white disabled:opacity-60"
+              className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#026665] focus:border-transparent bg-white disabled:opacity-60 transition-all"
             >
               <option value="">No preference (auto-assign later)</option>
               {reviewers.map((reviewer) => (
@@ -191,7 +351,8 @@ function SubmitReviewModal({
               ))}
             </select>
             {loadingReviewers && (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-black flex items-center gap-1.5">
+                <Loader2 className="w-3 h-3 animate-spin" />
                 Loading senior lawyers...
               </p>
             )}
@@ -203,21 +364,24 @@ function SubmitReviewModal({
             type="button"
             onClick={onConfirm}
             disabled={submitting}
-            className="flex-1 bg-slate-900 hover:bg-slate-700 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60"
+            className="flex-1 bg-[#026665] hover:bg-[#0e9185] text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60 transition-all shadow-lg shadow-[#026665]/20 hover:shadow-[#026665]/30"
           >
-            {submitting
-              ? isResubmit
-                ? "Resubmitting..."
-                : "Submitting..."
-              : isResubmit
-                ? "Confirm Resubmit"
-                : "Confirm Submit"}
+            {submitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                {isResubmit ? "Resubmitting..." : "Submitting..."}
+              </span>
+            ) : isResubmit ? (
+              "Confirm Resubmit"
+            ) : (
+              "Confirm Submit"
+            )}
           </button>
           <button
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60"
+            className="flex-1 bg-slate-100 hover:bg-slate-200 text-black font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60 transition-colors"
           >
             Cancel
           </button>
@@ -227,7 +391,6 @@ function SubmitReviewModal({
   );
 }
 
-// --- Add QA inline form ---
 function AddQAForm({ witnessId, onAdd, onClose }) {
   const [q, setQ] = useState("");
   const [a, setA] = useState("");
@@ -247,6 +410,7 @@ function AddQAForm({ witnessId, onAdd, onClose }) {
       });
       setQ("");
       setA("");
+      toast.success("Q&A pair added.");
     } finally {
       setSaving(false);
     }
@@ -255,14 +419,14 @@ function AddQAForm({ witnessId, onAdd, onClose }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3"
+      className="mt-3 p-4 bg-[#eef5f3] rounded-xl border border-[#9fd8d1] space-y-3"
     >
       <textarea
         rows={2}
         value={q}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Question *"
-        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 resize-none"
+        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#026665] resize-none transition-all"
         required
       />
       <textarea
@@ -270,20 +434,27 @@ function AddQAForm({ witnessId, onAdd, onClose }) {
         value={a}
         onChange={(e) => setA(e.target.value)}
         placeholder="Expected answer (optional)"
-        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 resize-none"
+        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#026665] resize-none transition-all"
       />
       <div className="flex gap-2">
         <button
           type="submit"
           disabled={saving}
-          className="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg disabled:opacity-60"
+          className="bg-[#026665] hover:bg-[#0e9185] text-white text-xs font-semibold px-4 py-2 rounded-lg disabled:opacity-60 transition-all shadow-md shadow-[#026665]/20"
         >
-          {saving ? "Adding…" : "Add Q&A"}
+          {saving ? (
+            <span className="flex items-center gap-1.5">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Adding…
+            </span>
+          ) : (
+            "Add Q&A"
+          )}
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="text-xs text-slate-400 hover:text-slate-600 px-3"
+          className="text-xs text-black hover:text-black px-3 transition-colors"
         >
           Cancel
         </button>
@@ -300,7 +471,6 @@ function ReviewerComments({
   onCommentAdded,
 }) {
   const [open, setOpen] = useState(true);
-  // Track which comment the junior is replying to: null = none
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [posting, setPosting] = useState(false);
@@ -339,68 +509,55 @@ function ReviewerComments({
   };
 
   return (
-    <div className="mt-3 rounded-xl border border-red-100 bg-red-50/60 overflow-hidden">
-      {/* Collapsible header */}
+    <div className="mt-3 rounded-xl border border-orange-200 bg-orange-50/60 overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between px-3 py-2 text-left"
+        className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-orange-100/50 transition-colors"
       >
-        <span className="text-[10px] font-bold text-red-600 uppercase tracking-wide">
-          💬 Reviewer Comments ({comments.length})
+        <span className="text-[10px] font-bold text-black uppercase tracking-wide flex items-center gap-1.5">
+          <MessageSquare className="w-3 h-3" />
+          Reviewer Comments ({comments.length})
         </span>
-        <svg
-          className={`w-3.5 h-3.5 text-red-400 transition-transform ${open ? "rotate-180" : ""}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        <ChevronDown
+          className={`w-3.5 h-3.5 text-black transition-transform ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open && (
         <div className="px-3 pb-3 space-y-2">
           {topLevel.map((c) => (
             <div key={c._id}>
-              {/* Top-level comment bubble */}
               <div
                 className={`rounded-lg p-2.5 border ${
                   c.resolved
                     ? "bg-white/40 border-slate-100 opacity-50"
-                    : "bg-white border-red-100"
+                    : "bg-white border-orange-200"
                 }`}
               >
-                <p className="text-xs text-slate-800 leading-relaxed">
-                  {c.text}
-                </p>
+                <p className="text-xs text-black leading-relaxed">{c.text}</p>
                 <div className="flex items-center justify-between mt-1.5 gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-semibold text-red-500">
+                    <span className="text-[10px] font-semibold text-black">
                       {c.author?.name || "Reviewer"}
                     </span>
                     {c.createdAt && (
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-black">
                         · {format(new Date(c.createdAt), "dd MMM HH:mm")}
                       </span>
                     )}
                     {c.resolved && (
-                      <span className="text-[10px] text-slate-400 italic">
-                        · resolved
+                      <span className="text-[10px] text-black italic flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        resolved
                       </span>
                     )}
                   </div>
-                  {/* Junior can reply to unresolved senior comments */}
                   {!c.resolved && (
                     <button
                       onClick={() =>
                         setReplyingTo((prev) => (prev === c._id ? null : c._id))
                       }
-                      className="text-[10px] font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
+                      className="text-[10px] font-semibold text-black hover:text-black transition-colors"
                     >
                       {replyingTo === c._id ? "Cancel" : "↩ Reply"}
                     </button>
@@ -408,21 +565,18 @@ function ReviewerComments({
                 </div>
               </div>
 
-              {/* Existing replies */}
               {getReplies(c._id).map((r) => (
                 <div
                   key={r._id}
-                  className="ml-4 mt-1 rounded-lg p-2.5 border border-l-2 border-l-indigo-300 bg-indigo-50/50 border-slate-100"
+                  className="ml-4 mt-1 rounded-lg p-2.5 border border-l-2 border-l-[#0e9185] bg-[#eef5f3] border-slate-100"
                 >
-                  <p className="text-xs text-slate-700 leading-relaxed">
-                    {r.text}
-                  </p>
+                  <p className="text-xs text-black leading-relaxed">{r.text}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] font-semibold text-indigo-500">
+                    <span className="text-[10px] font-semibold text-black">
                       {r.author?.name || "You"}
                     </span>
                     {r.createdAt && (
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-black">
                         · {format(new Date(r.createdAt), "dd MMM HH:mm")}
                       </span>
                     )}
@@ -430,16 +584,15 @@ function ReviewerComments({
                 </div>
               ))}
 
-              {/* Inline reply box — appears under the comment being replied to */}
               {replyingTo === c._id && (
-                <div className="ml-4 mt-1.5 p-2.5 bg-indigo-50 rounded-lg border border-indigo-200">
+                <div className="ml-4 mt-1.5 p-2.5 bg-[#eef5f3] rounded-lg border border-[#9fd8d1]">
                   <textarea
                     rows={2}
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Write your reply…"
                     autoFocus
-                    className="w-full border border-indigo-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none bg-white"
+                    className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-black focus:outline-none focus:ring-2 focus:ring-[#026665] resize-none bg-white transition-all"
                     onKeyDown={(e) => {
                       if ((e.metaKey || e.ctrlKey) && e.key === "Enter")
                         handleReply(c._id);
@@ -449,16 +602,23 @@ function ReviewerComments({
                     <button
                       onClick={() => handleReply(c._id)}
                       disabled={posting || !replyText.trim()}
-                      className="text-[10px] font-bold bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors"
+                      className="text-[10px] font-bold bg-[#026665] hover:bg-[#0e9185] disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors"
                     >
-                      {posting ? "Posting…" : "Post Reply"}
+                      {posting ? (
+                        <span className="flex items-center gap-1.5">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          Posting…
+                        </span>
+                      ) : (
+                        "Post Reply"
+                      )}
                     </button>
                     <button
                       onClick={() => {
                         setReplyingTo(null);
                         setReplyText("");
                       }}
-                      className="text-[10px] text-slate-400 hover:text-slate-600 px-2"
+                      className="text-[10px] text-black hover:text-black px-2 transition-colors"
                     >
                       Cancel
                     </button>
@@ -473,7 +633,6 @@ function ReviewerComments({
   );
 }
 
-// --- QA pair display ---
 function QAPairCard({
   pair,
   witnessId,
@@ -498,6 +657,7 @@ function QAPairCard({
         originalAnswer: a,
       });
       setEditMode(false);
+      toast.success("Updated.");
     } finally {
       setSaving(false);
     }
@@ -517,37 +677,39 @@ function QAPairCard({
   const borderColor = pair.isApproved
     ? "border-l-emerald-400"
     : pair.isFlagged
-      ? "border-l-red-400"
+      ? "border-l-orange-400"
       : "border-l-slate-200";
 
   return (
     <div
-      className={`bg-white rounded-xl border border-slate-200 border-l-4 ${borderColor} p-4`}
+      className={`bg-white rounded-xl border border-slate-200 border-l-4 ${borderColor} p-4 hover:shadow-md transition-shadow`}
     >
       <div className="flex items-start justify-between gap-3 mb-2">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+        <span className="text-[10px] font-bold text-black uppercase tracking-widest mt-0.5">
           Q{pair.sequence}
         </span>
         <div className="flex gap-1.5 flex-wrap">
           {pair.isFlagged && (
-            <span className="text-[10px] bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full font-bold">
-              ⚑ FLAGGED
+            <span className="text-[10px] bg-orange-50 text-black border border-orange-200 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+              <Flag className="w-3 h-3" />
+              FLAGGED
             </span>
           )}
           {pair.isApproved && (
-            <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
-              ✓ APPROVED
+            <span className="text-[10px] bg-emerald-50 text-black border border-emerald-200 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+              <Check className="w-3 h-3" />
+              APPROVED
             </span>
           )}
           {pair.useEditedVersion && (
-            <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-2 py-0.5 rounded-full font-bold">
+            <span className="text-[10px] bg-[#9fd8d1]/30 text-black border border-[#9fd8d1] px-2 py-0.5 rounded-full font-bold">
               REVIEWER EDITED
             </span>
           )}
           {pair.comments?.length > 0 && (
-            <span className="text-[10px] text-red-500 font-semibold">
-              💬 {pair.comments.length} comment
-              {pair.comments.length !== 1 ? "s" : ""}
+            <span className="text-[10px] text-black font-semibold flex items-center gap-1">
+              <MessageSquare className="w-3 h-3" />
+              {pair.comments.length}
             </span>
           )}
         </div>
@@ -559,25 +721,32 @@ function QAPairCard({
             rows={2}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 resize-none"
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#026665] resize-none transition-all"
           />
           <textarea
             rows={2}
             value={a}
             onChange={(e) => setA(e.target.value)}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 resize-none"
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-[#026665] resize-none transition-all"
           />
           <div className="flex gap-2">
             <button
               onClick={handleSave}
               disabled={saving}
-              className="text-xs bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 disabled:opacity-60"
+              className="text-xs bg-[#026665] hover:bg-[#0e9185] text-white px-3 py-1.5 rounded-lg disabled:opacity-60 transition-all shadow-md shadow-[#026665]/20"
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? (
+                <span className="flex items-center gap-1.5">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Saving…
+                </span>
+              ) : (
+                "Save"
+              )}
             </button>
             <button
               onClick={() => setEditMode(false)}
-              className="text-xs text-slate-400 hover:text-slate-600"
+              className="text-xs text-black hover:text-black transition-colors"
             >
               Cancel
             </button>
@@ -585,31 +754,29 @@ function QAPairCard({
         </div>
       ) : (
         <>
-          <p className="text-sm font-semibold text-slate-800 leading-relaxed">
+          <p className="text-sm font-semibold text-black leading-relaxed">
             {pair.originalQuestion || (
-              <em className="text-slate-400 font-normal">No question yet</em>
+              <em className="text-black font-normal">No question yet</em>
             )}
           </p>
           {pair.originalAnswer && (
-            <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">
+            <p className="text-sm text-black mt-1.5 leading-relaxed">
               {pair.originalAnswer}
             </p>
           )}
           {pair.editedQuestion && (
-            <div className="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-100">
-              <p className="text-[10px] font-bold text-blue-500 uppercase mb-1">
+            <div className="mt-3 p-3 rounded-lg bg-[#eef5f3] border border-[#9fd8d1]">
+              <p className="text-[10px] font-bold text-black uppercase mb-1 flex items-center gap-1.5">
+                <Edit3 className="w-3 h-3" />
                 Reviewer's Edit
               </p>
-              <p className="text-xs text-blue-800">{pair.editedQuestion}</p>
+              <p className="text-xs text-black">{pair.editedQuestion}</p>
               {pair.editedAnswer && (
-                <p className="text-xs text-blue-600 mt-1">
-                  {pair.editedAnswer}
-                </p>
+                <p className="text-xs text-black mt-1">{pair.editedAnswer}</p>
               )}
             </div>
           )}
 
-          {/* Show reviewer comments to junior — with reply support */}
           {pair.comments?.length > 0 && (
             <ReviewerComments
               comments={pair.comments}
@@ -623,8 +790,9 @@ function QAPairCard({
           {isEditable && (
             <button
               onClick={() => setEditMode(true)}
-              className="mt-3 text-xs text-slate-400 hover:text-slate-700 font-medium underline underline-offset-2"
+              className="mt-3 text-xs text-black hover:text-black font-medium transition-colors"
             >
+              <Edit3 className="w-3 h-3 inline mr-1" />
               Edit
             </button>
           )}
@@ -632,7 +800,7 @@ function QAPairCard({
           {pair.isApproved &&
             (confirmDelete ? (
               <div className="mt-3 flex items-center gap-1.5">
-                <span className="text-[11px] text-red-600 font-semibold">
+                <span className="text-[11px] text-black font-semibold">
                   Delete?
                 </span>
                 <button
@@ -640,11 +808,15 @@ function QAPairCard({
                   disabled={deleting}
                   className="text-[11px] px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold disabled:opacity-60 transition-colors"
                 >
-                  {deleting ? "…" : "Yes, delete"}
+                  {deleting ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    "Yes, delete"
+                  )}
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
-                  className="text-[11px] px-2 py-1.5 text-slate-500 hover:text-slate-700"
+                  className="text-[11px] px-2 py-1.5 text-black hover:text-black transition-colors"
                 >
                   Cancel
                 </button>
@@ -652,9 +824,10 @@ function QAPairCard({
             ) : (
               <button
                 onClick={() => setConfirmDelete(true)}
-                className="mt-3 text-[11px] px-2.5 py-1.5 border border-red-200 rounded-lg text-red-500 hover:bg-red-50 hover:border-red-300 font-medium transition-colors"
+                className="mt-3 text-[11px] px-2.5 py-1.5 border border-red-200 rounded-lg text-black hover:bg-red-50 hover:border-red-300 font-medium transition-colors"
               >
-                🗑 Delete
+                <Trash2 className="w-3 h-3 inline mr-1" />
+                Delete
               </button>
             ))}
         </>
@@ -663,7 +836,6 @@ function QAPairCard({
   );
 }
 
-// --- Witness accordion ---
 function WitnessCard({
   witness,
   examId,
@@ -681,72 +853,63 @@ function WitnessCard({
   const approved = witness.qaPairs.filter((p) => p.isApproved).length;
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-5 py-4 bg-slate-50 border-b border-slate-100">
+    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <div className="flex items-center gap-3 px-5 py-4 bg-[#eef5f3] border-b border-slate-200">
         <button
           onClick={() => setOpen((v) => !v)}
           className="flex items-center gap-3 flex-1 text-left min-w-0"
         >
-          <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#026665] text-white flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-md shadow-[#026665]/20">
             {witness.witnessName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-slate-800 text-sm truncate">
+            <p className="font-semibold text-black text-sm truncate">
               {witness.witnessName}
             </p>
-            <p className="text-xs text-slate-400 capitalize">
+            <p className="text-xs text-black capitalize">
               {witness.witnessType} · {witness.qaPairs.length} Q&amp;A pair
               {witness.qaPairs.length !== 1 ? "s" : ""}
             </p>
           </div>
           <div className="flex gap-2 mr-2">
             {flagged > 0 && (
-              <span className="text-xs bg-red-50 text-red-600 border border-red-100 px-2 py-0.5 rounded-full">
-                ⚑ {flagged}
+              <span className="text-xs bg-orange-50 text-black border border-orange-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Flag className="w-3 h-3" />
+                {flagged}
               </span>
             )}
             {approved > 0 && (
-              <span className="text-xs bg-emerald-50 text-emerald-600 border border-emerald-100 px-2 py-0.5 rounded-full">
-                ✓ {approved}
+              <span className="text-xs bg-emerald-50 text-black border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Check className="w-3 h-3" />
+                {approved}
               </span>
             )}
           </div>
-          <svg
-            className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ${open ? "rotate-180" : ""}`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
+          <ChevronDown
+            className={`w-4 h-4 text-black transition-transform flex-shrink-0 ${open ? "rotate-180" : ""}`}
+          />
         </button>
         {isEditable && (
           <button
             onClick={() => onDelete(witness._id)}
-            className="text-xs text-red-400 hover:text-red-600 border border-red-100 hover:border-red-300 px-2.5 py-1 rounded-lg transition-colors flex-shrink-0"
+            className="text-xs text-black hover:text-black border border-red-200 hover:border-red-300 px-2.5 py-1 rounded-lg transition-colors flex-shrink-0"
           >
-            Remove
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         )}
       </div>
 
-      {/* Body */}
       {open && (
         <div className="p-5 space-y-3">
           {witness.role && (
-            <p className="text-xs text-slate-500 italic border-l-2 border-slate-200 pl-3">
+            <p className="text-xs text-black italic border-l-2 border-[#9fd8d1] pl-3">
               {witness.role}
             </p>
           )}
 
           {witness.qaPairs.length === 0 ? (
-            <div className="py-6 text-center text-slate-400 text-sm border-2 border-dashed border-slate-100 rounded-xl">
+            <div className="py-6 text-center text-black text-sm border-2 border-dashed border-slate-200 rounded-xl">
+              <FileText className="w-8 h-8 mx-auto mb-2 text-black" />
               No Q&amp;A pairs yet. Add your first one below.
             </div>
           ) : (
@@ -778,9 +941,10 @@ function WitnessCard({
             ) : (
               <button
                 onClick={() => setAddingQA(true)}
-                className="w-full py-2.5 border-2 border-dashed border-slate-200 rounded-xl text-sm text-slate-400 hover:border-slate-400 hover:text-slate-600 transition-colors font-medium"
+                className="w-full py-3 border-2 border-dashed border-[#9fd8d1] rounded-xl text-sm text-black hover:border-[#0e9185] hover:text-black transition-colors font-medium bg-[#eef5f3]/50 hover:bg-[#eef5f3]"
               >
-                + Add Q&amp;A Pair
+                <Plus className="w-4 h-4 inline mr-1.5" />
+                Add Q&amp;A Pair
               </button>
             ))}
         </div>
@@ -789,7 +953,7 @@ function WitnessCard({
   );
 }
 
-// --- Main page ---
+// --- Main Page ---
 export default function CrossExamEditPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -898,7 +1062,6 @@ export default function CrossExamEditPage() {
     }
   };
 
-  // Append a new comment into local state after junior posts a reply
   const handleAddComment = (wId, qaId, newComment) => {
     setExam((p) => ({
       ...p,
@@ -949,8 +1112,6 @@ export default function CrossExamEditPage() {
 
     const successMessage =
       submitMode === "resubmit" ? "Resubmitted!" : "Submitted for review!";
-    const failureMessage =
-      submitMode === "resubmit" ? "Resubmit failed." : "Submit failed.";
 
     setSubmitting(true);
     try {
@@ -969,7 +1130,7 @@ export default function CrossExamEditPage() {
       setShowSubmitModal(false);
       fetchExam();
     } catch (err) {
-      toast.error(err.message || failureMessage);
+      toast.error(err.message || "Action failed.");
     } finally {
       setSubmitting(false);
     }
@@ -986,10 +1147,10 @@ export default function CrossExamEditPage() {
   if (loading)
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />
+        <Loader2 className="w-8 h-8 text-[#026665] animate-spin" />
       </div>
     );
-  if (!exam) return <div className="p-8 text-red-500">Not found.</div>;
+  if (!exam) return <div className="p-8 text-black">Not found.</div>;
 
   const isEditable =
     ["draft", "changes_requested"].includes(exam.status) && !exam.isLocked;
@@ -997,31 +1158,19 @@ export default function CrossExamEditPage() {
   const canResubmit = exam.status === "changes_requested";
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#eef5f3]">
       {/* Top bar */}
       <div className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-5xl mx-auto px-6 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/cross-exams"
-              className="text-slate-400 hover:text-slate-700 transition-colors flex-shrink-0"
+              className="text-black hover:text-black transition-colors flex-shrink-0 p-1.5 rounded-lg hover:bg-[#eef5f3]"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
+              <ArrowLeft className="w-5 h-5" />
             </Link>
             <h1
-              className="text-base font-bold text-slate-800 truncate max-w-xs"
+              className="text-lg font-bold text-black truncate max-w-xs"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               {exam.title}
@@ -1032,23 +1181,30 @@ export default function CrossExamEditPage() {
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={() => setShowActivity((v) => !v)}
-              className="text-xs text-slate-500 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+              className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
+                showActivity
+                  ? "bg-[#026665] text-white shadow-md shadow-[#026665]/20"
+                  : "text-black border border-slate-200 hover:bg-[#eef5f3] hover:border-[#9fd8d1]"
+              }`}
             >
+              <Activity className="w-3.5 h-3.5 inline mr-1" />
               Activity
             </button>
             <Link
               href={`/cross-exams/${id}/compare`}
-              className="text-xs text-slate-500 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+              className="text-xs text-black border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-[#eef5f3] hover:border-[#9fd8d1] transition-all"
             >
+              <History className="w-3.5 h-3.5 inline mr-1" />
               History
             </Link>
             {(exam.status === "approved" ||
               exam.status === "courtroom_active") && (
               <Link
                 href={`/cross-exams/${id}/courtroom`}
-                className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5"
+                className="text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors shadow-md shadow-red-600/20"
               >
-                🏛 Courtroom
+                <Activity className="w-3.5 h-3.5 inline mr-1" />
+                Courtroom
               </Link>
             )}
             {exam.status === "approved" && (
@@ -1056,27 +1212,42 @@ export default function CrossExamEditPage() {
                 href={`/api/cross-exams/${id}/pdf`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors"
+                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-semibold transition-colors shadow-md shadow-emerald-600/20"
               >
-                Export PDF
+                <Download className="w-3.5 h-3.5 inline mr-1" />
+                PDF
               </a>
             )}
             {canSubmit && (
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="text-xs bg-slate-900 hover:bg-slate-700 disabled:opacity-60 text-white px-4 py-1.5 rounded-lg font-semibold transition-colors"
+                className="text-xs bg-[#026665] hover:bg-[#0e9185] disabled:opacity-60 text-white px-4 py-1.5 rounded-lg font-semibold transition-all shadow-md shadow-[#026665]/20 hover:shadow-[#026665]/30"
               >
-                {submitting ? "Submitting…" : "Submit for Review →"}
+                {submitting ? (
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Submitting…
+                  </span>
+                ) : (
+                  "Submit for Review →"
+                )}
               </button>
             )}
             {canResubmit && (
               <button
                 onClick={handleResubmit}
                 disabled={submitting}
-                className="text-xs bg-orange-600 hover:bg-orange-700 disabled:opacity-60 text-white px-4 py-1.5 rounded-lg font-semibold transition-colors"
+                className="text-xs bg-orange-600 hover:bg-orange-700 disabled:opacity-60 text-white px-4 py-1.5 rounded-lg font-semibold transition-colors shadow-md shadow-orange-600/20"
               >
-                {submitting ? "Resubmitting…" : "Resubmit →"}
+                {submitting ? (
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Resubmitting…
+                  </span>
+                ) : (
+                  "Resubmit →"
+                )}
               </button>
             )}
           </div>
@@ -1086,64 +1257,40 @@ export default function CrossExamEditPage() {
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Banners */}
         {exam.status === "changes_requested" && (
-          <div className="mb-6 flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
-            <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0">
-              <svg
-                className="w-4 h-4 text-orange-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                />
-              </svg>
+          <div className="mb-6 flex items-start gap-4 p-4 bg-orange-50 border border-orange-200 rounded-2xl shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="w-5 h-5 text-black" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-orange-800 text-sm">
+              <p className="font-semibold text-black text-sm flex items-center gap-2">
                 Changes requested by reviewer
+                <span className="text-xs font-normal text-black">
+                  Please address all flagged items
+                </span>
               </p>
               {exam.revisionNote ? (
-                <p className="text-xs text-orange-700 mt-1.5 p-2.5 bg-orange-100 rounded-lg border border-orange-200 leading-relaxed whitespace-pre-wrap">
+                <p className="text-xs text-black mt-1.5 p-2.5 bg-orange-100 rounded-lg border border-orange-200 leading-relaxed whitespace-pre-wrap">
                   {exam.revisionNote}
                 </p>
               ) : (
-                <p className="text-xs text-orange-600 mt-0.5">
+                <p className="text-xs text-black mt-0.5">
                   Check the flagged Q&amp;A pairs below, make your revisions,
                   then click Resubmit.
                 </p>
               )}
-              <p className="text-xs text-orange-500 mt-2">
-                Fix the flagged Q&amp;A pairs below, then click Resubmit.
-              </p>
             </div>
           </div>
         )}
         {exam.isLocked && (
-          <div className="mb-6 flex items-start gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center flex-shrink-0">
-              <svg
-                className="w-4 h-4 text-emerald-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                />
-              </svg>
+          <div className="mb-6 flex items-start gap-4 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <CheckCircle className="w-5 h-5 text-black" />
             </div>
             <div>
-              <p className="font-semibold text-emerald-800 text-sm">
+              <p className="font-semibold text-black text-sm">
                 Approved — Document is locked
               </p>
-              <p className="text-xs text-emerald-600 mt-0.5">
+              <p className="text-xs text-black mt-0.5">
                 This cross-examination has been approved. Export the PDF using
                 the button above.
               </p>
@@ -1152,102 +1299,69 @@ export default function CrossExamEditPage() {
         )}
 
         {/* Meta info */}
-        <div className="flex flex-wrap gap-5 mb-6 text-xs text-slate-500">
+        <div className="flex flex-wrap gap-4 mb-6 text-xs text-black bg-white rounded-2xl px-5 py-3 border border-slate-200 shadow-sm">
           {exam.caseId && (
-            <span className="flex items-center gap-1">
-              <BookMarked
-                size={15}
-                className="bg-[#a7b6e84d] rounded-[10px] p-1 w-[23px] h-[21px] text-blue-500"
-              />
+            <span className="flex items-center gap-1.5">
+              <BookMarked className="w-4 h-4 text-black" />
               {exam.caseId.caseTitle}
             </span>
           )}
           {exam.hearingDate && (
-            <span className="flex items-center gap-1">
-              <Calendar
-                size={15}
-                className="bg-[#a7b6e84d] rounded-[10px] p-1 w-[23px] h-[21px] text-blue-500"
-              />
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-black" />
               Hearing {format(new Date(exam.hearingDate), "dd MMM yyyy")}
             </span>
           )}
-          {exam.assignedTo && <span>👤 Reviewer: {exam.assignedTo.name}</span>}
-          <span>Version {exam.version - 1}</span>
+          {exam.assignedTo && (
+            <span className="flex items-center gap-1.5">
+              <User className="w-4 h-4 text-black" />
+              Reviewer: {exam.assignedTo.name}
+            </span>
+          )}
+          <span className="flex items-center gap-1.5">
+            <GitBranch className="w-4 h-4 text-black" />
+            Version {exam.version - 1}
+          </span>
         </div>
 
-        {/* ---- AI Generated Questions Panel ---- */}
+        {/* AI Generated Questions Panel */}
         {exam.aiGeneratedQuestions && (
-          <div className="mb-6 border border-indigo-200 rounded-2xl overflow-hidden bg-white">
+          <div className="mb-6 border border-[#9fd8d1] rounded-2xl overflow-hidden bg-white shadow-sm">
             <button
               type="button"
               onClick={() => setShowAIQuestions((v) => !v)}
-              className="w-full flex items-center justify-between px-5 py-4 bg-indigo-50 hover:bg-indigo-100 transition-colors"
+              className="w-full flex items-center justify-between px-5 py-4 bg-[#eef5f3] hover:bg-[#9fd8d1]/30 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                  <svg
-                    className="w-4 h-4 text-indigo-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.347.347a3.75 3.75 0 01-1.04 2.163H8.927a3.75 3.75 0 01-1.04-2.163l-.347-.347z"
-                    />
-                  </svg>
+                <div className="w-9 h-9 rounded-xl bg-[#9fd8d1]/50 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-black" />
                 </div>
                 <div className="text-left">
-                  <p className="text-sm font-semibold text-indigo-800">
-                    AI-Generated Cross-Examination Questions
+                  <p className="text-sm font-semibold text-black">
+                    AI-Generated Questions
                   </p>
-                  <p className="text-xs text-indigo-500 mt-0.5">
-                    Generated by AI — use these as a reference to build your
-                    witness Q&amp;A pairs below
+                  <p className="text-xs text-black mt-0.5">
+                    Use these as a reference to build your witness Q&amp;A pairs
                   </p>
                 </div>
               </div>
-              <svg
-                className={`w-4 h-4 text-indigo-500 transition-transform flex-shrink-0 ${showAIQuestions ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              <ChevronDown
+                className={`w-4 h-4 text-black transition-transform flex-shrink-0 ${showAIQuestions ? "rotate-180" : ""}`}
+              />
             </button>
 
             {showAIQuestions && (
               <div className="px-5 py-4">
-                <pre className="whitespace-pre-wrap text-xs text-slate-700 leading-relaxed font-sans bg-slate-50 rounded-xl p-4 border border-slate-100 max-h-96 overflow-y-auto">
+                <pre className="whitespace-pre-wrap text-xs text-black leading-relaxed font-sans bg-[#eef5f3] rounded-xl p-4 border border-slate-200 max-h-96 overflow-y-auto">
                   {exam.aiGeneratedQuestions}
                 </pre>
-                <p className="text-xs text-slate-400 mt-3 flex items-center gap-1.5">
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+                <p className="text-xs text-black mt-3 flex items-center gap-1.5">
+                  <Info className="w-3.5 h-3.5 text-black" />
                   Add these as formal Q&amp;A pairs by clicking{" "}
-                  <strong className="text-slate-500">Add Witness</strong> below,
+                  <strong className="text-black">Add Witness</strong> below,
                   then using{" "}
-                  <strong className="text-slate-500">+ Add Q&amp;A</strong> on
-                  each witness section.
+                  <strong className="text-black">+ Add Q&amp;A</strong> on each
+                  witness section.
                 </p>
               </div>
             )}
@@ -1260,55 +1374,33 @@ export default function CrossExamEditPage() {
           {/* Witnesses */}
           <div className={showActivity ? "lg:col-span-2" : ""}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+              <h2 className="text-sm font-bold text-black uppercase tracking-wide flex items-center gap-2">
+                <Users className="w-4 h-4" />
                 Witnesses ({(exam.witnesses || []).length})
               </h2>
               {isEditable && (
                 <button
                   onClick={() => setShowWitnessModal(true)}
-                  className="flex items-center gap-1.5 text-xs bg-slate-900 hover:bg-slate-700 text-white px-3 py-2 rounded-lg font-semibold transition-colors"
+                  className="flex items-center gap-1.5 text-xs bg-[#026665] hover:bg-[#0e9185] text-white px-3 py-2 rounded-lg font-semibold transition-all shadow-md shadow-[#026665]/20"
                 >
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
+                  <Plus className="w-3.5 h-3.5" />
                   Add Witness
                 </button>
               )}
             </div>
 
             {(exam.witnesses || []).length === 0 ? (
-              <div className="text-center py-16 border-2 border-dashed border-slate-200 rounded-2xl bg-white">
-                <svg
-                  className="w-10 h-10 text-slate-300 mx-auto mb-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={1.5}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <p className="text-slate-500 font-medium text-sm">
+              <div className="text-center py-16 border-2 border-dashed border-[#9fd8d1] rounded-2xl bg-white">
+                <Users className="w-12 h-12 text-black mx-auto mb-3" />
+                <p className="text-black font-medium text-sm">
                   No witnesses added yet
                 </p>
                 {isEditable && (
                   <button
                     onClick={() => setShowWitnessModal(true)}
-                    className="mt-4 text-sm font-semibold text-slate-900 hover:text-slate-600 underline underline-offset-2"
+                    className="mt-4 text-sm font-semibold text-black hover:text-black transition-colors"
                   >
+                    <Plus className="w-4 h-4 inline mr-1" />
                     Add your first witness
                   </button>
                 )}
@@ -1336,29 +1428,33 @@ export default function CrossExamEditPage() {
           {showActivity && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+                <h2 className="text-sm font-bold text-black uppercase tracking-wide flex items-center gap-2">
+                  <Activity className="w-4 h-4" />
                   Activity
                 </h2>
                 <button
                   onClick={() => setShowActivity(false)}
-                  className="text-slate-400 hover:text-slate-600 text-lg leading-none"
+                  className="text-black hover:text-black w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors"
                 >
-                  ×
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden max-h-[600px] overflow-y-auto">
+              <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden max-h-[600px] overflow-y-auto shadow-sm">
                 {activity.length === 0 ? (
-                  <p className="text-center text-slate-400 text-sm py-8">
+                  <p className="text-center text-black text-sm py-8">
                     No activity yet.
                   </p>
                 ) : (
                   <ul className="divide-y divide-slate-50">
                     {activity.map((e) => (
-                      <li key={e._id} className="px-4 py-3 flex gap-3">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-300 mt-2 flex-shrink-0" />
+                      <li
+                        key={e._id}
+                        className="px-4 py-3 flex gap-3 hover:bg-[#eef5f3]/50 transition-colors"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-[#026665] mt-1.5 flex-shrink-0" />
                         <div>
-                          <p className="text-xs text-slate-700">{e.message}</p>
-                          <p className="text-[10px] text-slate-400 mt-1">
+                          <p className="text-xs text-black">{e.message}</p>
+                          <p className="text-[10px] text-black mt-1">
                             {e.performedBy?.name} ·{" "}
                             {e.createdAt
                               ? format(new Date(e.createdAt), "dd MMM HH:mm")
@@ -1375,7 +1471,7 @@ export default function CrossExamEditPage() {
         </div>
       </div>
 
-      {/* Add Witness modal */}
+      {/* Modals */}
       {showWitnessModal && (
         <AddWitnessModal
           onAdd={handleAddWitness}

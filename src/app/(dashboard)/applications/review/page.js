@@ -13,6 +13,13 @@ import {
   RefreshCw,
   ClipboardList,
   Sparkles,
+  Clock,
+  User,
+  Hash,
+  Building,
+  FileText,
+  AlertCircle,
+  Send,
 } from "lucide-react";
 
 const APPLICATION_TYPES = {
@@ -48,7 +55,6 @@ export default function ReviewDashboardPage() {
   }, [fetchPending]);
 
   const handleUpdated = (updated) => {
-    // Remove from list once approved/changed
     if (updated?._id) {
       setApplications((prev) => prev.filter((a) => a._id !== updated._id));
     }
@@ -56,50 +62,73 @@ export default function ReviewDashboardPage() {
   };
 
   return (
-    <div className="space-y-5 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-display">
-            Review Queue
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            {applications.length} application
-            {applications.length !== 1 ? "s" : ""} awaiting your review
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-[#eef5f3] via-white to-[#eef5f3]">
+      <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <div className="relative mb-8">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#026665]/5 to-[#0e9185]/5 rounded-3xl blur-3xl" />
+          <div className="relative bg-white/80 backdrop-blur-xl rounded-2xl border border-[#9fd8d1]/30 p-6 shadow-lg shadow-[#026665]/5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-br from-[#026665] to-[#0e9185] rounded-xl shadow-md">
+                    <ClipboardList className="w-5 h-5 text-white" />
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#000000] to-[#000000]">
+                    Review Queue
+                  </h1>
+                </div>
+                <p className="text-sm text-gray-600 ml-14">
+                  {applications.length} application
+                  {applications.length !== 1 ? "s" : ""} awaiting your review
+                </p>
+              </div>
+              <button
+                onClick={fetchPending}
+                className="group flex items-center gap-2 px-5 py-2.5 bg-white border border-[#9fd8d1] rounded-xl text-[#026665] font-medium hover:bg-[#eef5f3] hover:border-[#0e9185] transition-all duration-300 shadow-sm hover:shadow-md"
+              >
+                <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+                <span>Refresh</span>
+              </button>
+            </div>
+          </div>
         </div>
-        <button onClick={fetchPending} className="btn-secondary">
-          <RefreshCw className="w-4 h-4" /> Refresh
-        </button>
-      </div>
 
-      {loading ? (
-        <PageLoader />
-      ) : applications.length === 0 ? (
-        <EmptyState
-          icon={ClipboardList}
-          title="No applications pending review"
-          description="All caught up! Junior lawyers will submit new applications here for your approval."
-        />
-      ) : (
-        <div className="space-y-3">
-          {applications.map((app) => (
-            <ReviewCard
-              key={app._id}
-              app={app}
-              onView={() => setViewTarget(app)}
-              onUpdated={handleUpdated}
+        {/* Content Section */}
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <PageLoader />
+          </div>
+        ) : applications.length === 0 ? (
+          <div className="bg-white/80 backdrop-blur-xl rounded-2xl border border-[#9fd8d1]/30 p-12 shadow-lg">
+            <EmptyState
+              icon={ClipboardList}
+              title="No applications pending review"
+              description="All caught up! Junior lawyers will submit new applications here for your approval."
             />
-          ))}
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {applications.map((app) => (
+              <ReviewCard
+                key={app._id}
+                app={app}
+                onView={() => setViewTarget(app)}
+                onUpdated={handleUpdated}
+              />
+            ))}
+          </div>
+        )}
 
-      {viewTarget && (
-        <ReviewDetailModal
-          app={viewTarget}
-          onClose={() => setViewTarget(null)}
-          onUpdated={handleUpdated}
-        />
-      )}
+        {/* Detail Modal */}
+        {viewTarget && (
+          <ReviewDetailModal
+            app={viewTarget}
+            onClose={() => setViewTarget(null)}
+            onUpdated={handleUpdated}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -112,9 +141,6 @@ function ReviewCard({ app, onView, onUpdated }) {
 
   const typeLabel =
     APPLICATION_TYPES[app.applicationType] || app.applicationType;
-
-  const juniorName = app.userId?.name || "Unknown Junior";
-
 
   const handleApprove = async () => {
     setProcessing("approve");
@@ -163,110 +189,160 @@ function ReviewCard({ app, onView, onUpdated }) {
   };
 
   return (
-    <div className="card p-5 space-y-4">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <p className="text-[13px] font-semibold text-primary-800   mb-0.5">
-            Applicant: {app.userId?.name}  <span className="text-xs ml-4 text-slate-500">Email: {app.userId?.email}</span>
-          </p>
-          <p className="text-xs font-semibold text-primary-600 mb-0.5">
-            {typeLabel}
-          </p>
-          <h3 className="font-semibold text-slate-800 text-sm">
-            {app.caseTitle || app.applicantName || "Untitled Application"}
-          </h3>
-          <div className="flex flex-wrap gap-3 mt-1 text-xs text-slate-500">
-            {app.caseNumber && <span>Case: {app.caseNumber}</span>}
-            {app.courtName && <span>Court: {app.courtName}</span>}
-            {app.applicantName && <span>Applicant: {app.applicantName}</span>}
+    <div className="group bg-white/90 backdrop-blur-sm rounded-2xl border border-[#9fd8d1]/30 p-6 shadow-md hover:shadow-xl hover:border-[#0e9185]/40 transition-all duration-300">
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+          <div className="flex-1 space-y-3">
+            {/* Applicant Info */}
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 bg-gradient-to-br from-[#026665] to-[#0e9185] rounded-lg">
+                <User className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {app.userId?.name || "Unknown Junior"}
+                </p>
+                <p className="text-xs text-gray-500">{app.userId?.email}</p>
+              </div>
+            </div>
+
+            {/* Type Badge */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-[#026665]/10 to-[#0e9185]/10 text-[#026665] rounded-full text-xs font-semibold border border-[#9fd8d1]/40">
+                <FileText className="w-3 h-3" />
+                {typeLabel}
+              </span>
+              {app.autoGenerated && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                  Auto-generated
+                </span>
+              )}
+              {app.aiEnhanced && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-violet-50 to-purple-50 text-violet-700 rounded-full text-xs font-medium border border-violet-200">
+                  <Sparkles className="w-3 h-3" /> AI Enhanced
+                </span>
+              )}
+            </div>
+
+            {/* Case Title */}
+            <h3 className="text-lg font-bold text-gray-900 leading-tight">
+              {app.caseTitle || app.applicantName || "Untitled Application"}
+            </h3>
+
+            {/* Meta Details */}
+            <div className="flex flex-wrap gap-4 text-xs">
+              {app.caseNumber && (
+                <span className="inline-flex items-center gap-1 text-gray-600">
+                  <Hash className="w-3 h-3 text-[#0e9185]" />
+                  Case: {app.caseNumber}
+                </span>
+              )}
+              {app.courtName && (
+                <span className="inline-flex items-center gap-1 text-gray-600">
+                  <Building className="w-3 h-3 text-[#0e9185]" />
+                  Court: {app.courtName}
+                </span>
+              )}
+              {app.applicantName && (
+                <span className="inline-flex items-center gap-1 text-gray-600">
+                  <User className="w-3 h-3 text-[#0e9185]" />
+                  Applicant: {app.applicantName}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Status Indicators */}
+          <div className="flex items-center gap-2 lg:self-start">
+            <div className="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold border border-amber-200 flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              Pending Review
+            </div>
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          {app.autoGenerated && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">
-              Auto-generated
-            </span>
-          )}
-          {app.aiEnhanced && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 font-medium flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> AI Enhanced
-            </span>
-          )}
-        </div>
-      </div>
 
-      {/* Note input for requesting changes */}
-      {showNoteInput && (
-        <div className="space-y-2">
-          <textarea
-            value={reviewNote}
-            onChange={(e) => setReviewNote(e.target.value)}
-            placeholder="Explain what needs to be changed (e.g. 'Ground 3 is too vague — cite the specific precedent')..."
-            className="textarea h-20 text-sm"
-            autoFocus
-          />
-        </div>
-      )}
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
-        <button onClick={onView} className="btn-ghost text-xs">
-          <Eye className="w-3.5 h-3.5" /> View Full Draft
-        </button>
-        <div className="flex-1" />
-
-        {!showNoteInput ? (
-          <>
-            <button
-              onClick={() => setShowNoteInput(true)}
-              className="btn-secondary text-amber-600 border-amber-200 hover:bg-amber-50 text-xs"
-            >
-              <XCircle className="w-3.5 h-3.5" /> Request Changes
-            </button>
-            <button
-              onClick={handleApprove}
-              disabled={!!processing}
-              className="btn-primary bg-emerald-600 hover:bg-emerald-700 text-xs"
-            >
-              {processing === "approve" ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <CheckCircle className="w-3.5 h-3.5" />
-              )}
-              Approve
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => {
-                setShowNoteInput(false);
-                setReviewNote("");
-              }}
-              className="btn-ghost text-xs text-slate-500"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleRequestChanges}
-              disabled={!!processing}
-              className="btn-primary bg-amber-500 hover:bg-amber-600 text-xs"
-            >
-              {processing === "changes" ? (
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                "Send Feedback"
-              )}
-            </button>
-          </>
+        {/* Note input for requesting changes */}
+        {showNoteInput && (
+          <div className="space-y-2 animate-fadeIn">
+            <div className="relative">
+              <textarea
+                value={reviewNote}
+                onChange={(e) => setReviewNote(e.target.value)}
+                placeholder="Explain what needs to be changed (e.g. 'Ground 3 is too vague — cite the specific precedent')..."
+                className="w-full h-24 px-4 py-3 bg-[#eef5f3]/50 border border-[#9fd8d1] rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0e9185]/30 focus:border-[#0e9185] transition-all resize-none"
+                autoFocus
+              />
+              <AlertCircle className="absolute top-3 right-3 w-4 h-4 text-amber-500" />
+            </div>
+          </div>
         )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-3 pt-4 border-t border-[#9fd8d1]/20">
+          <button
+            onClick={onView}
+            className="group flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-[#026665] bg-gray-50 hover:bg-[#eef5f3] rounded-xl transition-all duration-200 border border-gray-200 hover:border-[#9fd8d1]"
+          >
+            <Eye className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            View Full Draft
+          </button>
+          <div className="flex-1" />
+
+          {!showNoteInput ? (
+            <>
+              <button
+                onClick={() => setShowNoteInput(true)}
+                className="group flex items-center gap-2 px-4 py-2 text-sm font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-xl transition-all duration-200 border border-amber-200 hover:border-amber-300"
+              >
+                <XCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                Request Changes
+              </button>
+              <button
+                onClick={handleApprove}
+                disabled={!!processing}
+                className="group flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-[#026665] to-[#0e9185] hover:from-[#025554] hover:to-[#0a7d73] rounded-xl transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+              >
+                {processing === "approve" ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CheckCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                )}
+                Approve
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => {
+                  setShowNoteInput(false);
+                  setReviewNote("");
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 border border-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRequestChanges}
+                disabled={!!processing}
+                className="group flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+              >
+                {processing === "changes" ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                )}
+                Send Feedback
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-// ----- Review Detail Modal -----
 
+// ----- Review Detail Modal -----
 function ReviewDetailModal({ app, onClose, onUpdated }) {
   const [processing, setProcessing] = useState(null);
   const [reviewNote, setReviewNote] = useState("");
@@ -320,107 +396,171 @@ function ReviewDetailModal({ app, onClose, onUpdated }) {
   };
 
   return (
-    <Modal isOpen onClose={onClose} title={typeLabel} size="xl">
-      <div className="space-y-5 max-h-[80vh] overflow-y-auto pr-1">
-        {/* Meta */}
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          {[
-            ["Applicant", app.applicantName],
-            ["Respondent", app.respondentName],
-            ["Case No.", app.caseNumber],
-            ["FIR No.", app.firNo],
-            ["Court", app.courtName],
-            ["Judge", app.judgeName],
-            ["Sections", app.ppcSections?.join(", ")],
-            ["Version", app.version ? `v${app.version}` : null],
-          ]
-            .filter(([, v]) => v)
-            .map(([label, value]) => (
-              <div
-                key={label}
-                className="bg-slate-50 rounded-lg p-3 border border-slate-100"
-              >
-                <p className="text-xs text-slate-400 font-medium mb-0.5">
-                  {label}
-                </p>
-                <p className="text-slate-700 font-medium text-sm">{value}</p>
+    <Modal isOpen onClose={onClose} size="xl">
+      <div className="bg-gradient-to-b from-white to-[#eef5f3]/30 rounded-2xl">
+        {/* Modal Header */}
+        <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-[#9fd8d1]/30 p-6 rounded-t-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-[#026665] to-[#0e9185] rounded-xl">
+                <FileText className="w-5 h-5 text-white" />
               </div>
-            ))}
-        </div>
-
-        {/* Grounds */}
-        {app.grounds?.length > 0 && (
-          <div>
-            <p className="label">Grounds</p>
-            <ol className="space-y-2">
-              {app.grounds.map((g, i) => (
-                <li
-                  key={i}
-                  className="flex gap-2 text-sm text-slate-700 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100"
-                >
-                  <span className="text-slate-400 font-mono text-xs mt-0.5 shrink-0">
-                    {i + 1}.
-                  </span>
-                  {g}
-                </li>
-              ))}
-            </ol>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">{typeLabel}</h2>
+                <p className="text-sm text-gray-500">Detailed Review</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {app.autoGenerated && (
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
+                  Auto-generated
+                </span>
+              )}
+              {app.aiEnhanced && (
+                <span className="px-3 py-1 bg-gradient-to-r from-violet-50 to-purple-50 text-violet-700 rounded-full text-xs font-medium border border-violet-200 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> AI Enhanced
+                </span>
+              )}
+            </div>
           </div>
-        )}
-
-        {/* Full application text */}
-        <div>
-          <p className="label">Full Application Text</p>
-          <pre className="text-xs text-slate-700 bg-slate-50 rounded-lg px-4 py-3 border border-slate-100 whitespace-pre-wrap font-mono overflow-x-auto max-h-96 overflow-y-auto">
-            {app.content || app.generatedText || "No content available."}
-          </pre>
         </div>
 
-        {/* Review note input */}
-        <div>
-          <label className="label">
-            Review Note{" "}
-            <span className="text-slate-400 font-normal normal-case">
-              (required if requesting changes)
-            </span>
-          </label>
-          <textarea
-            value={reviewNote}
-            onChange={(e) => setReviewNote(e.target.value)}
-            placeholder="Explain what needs to be changed or improved..."
-            className="textarea h-24"
-          />
+        <div className="space-y-6 p-6 max-h-[70vh] overflow-y-auto">
+          {/* Meta Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { icon: User, label: "Applicant", value: app.applicantName },
+              { icon: User, label: "Respondent", value: app.respondentName },
+              { icon: Hash, label: "Case No.", value: app.caseNumber },
+              { icon: Hash, label: "FIR No.", value: app.firNo },
+              { icon: Building, label: "Court", value: app.courtName },
+              { icon: User, label: "Judge", value: app.judgeName },
+              {
+                icon: FileText,
+                label: "Sections",
+                value: app.ppcSections?.join(", "),
+              },
+              {
+                icon: Clock,
+                label: "Version",
+                value: app.version ? `v${app.version}` : null,
+              },
+            ]
+              .filter(([, , v]) => v)
+              .map(({ icon: Icon, label, value }) => (
+                <div
+                  key={label}
+                  className="group bg-gradient-to-br from-[#eef5f3]/50 to-white rounded-xl p-4 border border-[#9fd8d1]/20 hover:border-[#0e9185]/30 hover:shadow-md transition-all duration-300"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Icon className="w-4 h-4 text-[#0e9185]" />
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {label}
+                    </p>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-900 ml-6">
+                    {value}
+                  </p>
+                </div>
+              ))}
+          </div>
+
+          {/* Grounds */}
+          {app.grounds?.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-gradient-to-br from-[#026665] to-[#0e9185] rounded-lg">
+                  <AlertCircle className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Grounds</h3>
+              </div>
+              <div className="space-y-2">
+                {app.grounds.map((g, i) => (
+                  <div
+                    key={i}
+                    className="group flex gap-3 bg-gradient-to-r from-[#eef5f3]/50 to-white rounded-xl p-4 border border-[#9fd8d1]/20 hover:border-[#0e9185]/30 transition-all duration-200"
+                  >
+                    <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-[#026665] to-[#0e9185] text-white flex items-center justify-center text-sm font-bold">
+                      {i + 1}
+                    </span>
+                    <p className="text-sm text-gray-700 leading-relaxed pt-1">
+                      {g}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Full Application Text */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-gradient-to-br from-[#026665] to-[#0e9185] rounded-lg">
+                <FileText className="w-4 h-4 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">
+                Full Application Text
+              </h3>
+            </div>
+            <div className="bg-gradient-to-br from-[#eef5f3]/30 to-white rounded-xl border border-[#9fd8d1]/20 overflow-hidden">
+              <pre className="text-sm text-gray-800 p-5 whitespace-pre-wrap font-mono leading-relaxed overflow-x-auto max-h-96 overflow-y-auto">
+                {app.content || app.generatedText || "No content available."}
+              </pre>
+            </div>
+          </div>
+
+          {/* Review Note Input */}
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+              <AlertCircle className="w-4 h-4 text-[#0e9185]" />
+              Review Note
+              <span className="text-gray-400 font-normal">
+                (required if requesting changes)
+              </span>
+            </label>
+            <textarea
+              value={reviewNote}
+              onChange={(e) => setReviewNote(e.target.value)}
+              placeholder="Explain what needs to be changed or improved..."
+              className="w-full h-28 px-4 py-3 bg-[#eef5f3]/30 border border-[#9fd8d1] rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0e9185]/30 focus:border-[#0e9185] transition-all resize-none"
+            />
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
-          <button onClick={onClose} className="btn-secondary">
-            Close
-          </button>
-          <button
-            onClick={handleRequestChanges}
-            disabled={!!processing}
-            className="btn-secondary text-amber-600 border-amber-200 hover:bg-amber-50"
-          >
-            {processing === "changes" ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <XCircle className="w-4 h-4" />
-            )}
-            Request Changes
-          </button>
-          <button
-            onClick={handleApprove}
-            disabled={!!processing}
-            className="btn-primary bg-emerald-600 hover:bg-emerald-700"
-          >
-            {processing === "approve" ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : (
-              <CheckCircle className="w-4 h-4" />
-            )}
-            Approve
-          </button>
+        {/* Modal Footer Actions */}
+        <div className="sticky bottom-0 bg-white/95 backdrop-blur-sm border-t border-[#9fd8d1]/30 p-6 rounded-b-2xl">
+          <div className="flex items-center justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all duration-200 border border-gray-200 hover:border-gray-300"
+            >
+              Close
+            </button>
+            <button
+              onClick={handleRequestChanges}
+              disabled={!!processing}
+              className="group flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-xl transition-all duration-200 border border-amber-200 hover:border-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {processing === "changes" ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <XCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              )}
+              Request Changes
+            </button>
+            <button
+              onClick={handleApprove}
+              disabled={!!processing}
+              className="group flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-[#026665] to-[#0e9185] hover:from-[#025554] hover:to-[#0a7d73] rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+            >
+              {processing === "approve" ? (
+                <RefreshCw className="w-4 h-4 animate-spin" />
+              ) : (
+                <CheckCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              )}
+              Approve Application
+            </button>
+          </div>
         </div>
       </div>
     </Modal>

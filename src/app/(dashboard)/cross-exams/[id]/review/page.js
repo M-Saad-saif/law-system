@@ -6,6 +6,22 @@ import Link from "next/link";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import { apiFetch } from "@/utils/api";
+import {
+  ChevronLeft,
+  CheckCircle,
+  Flag,
+  Edit3,
+  MessageCircle,
+  Trash2,
+  X,
+  Send,
+  Users,
+  FileText,
+  Clock,
+  RotateCcw,
+  ThumbsUp,
+  AlertCircle,
+} from "lucide-react";
 
 // --- Tiny status pill ─---
 function Pill({ children, color }) {
@@ -18,7 +34,7 @@ function Pill({ children, color }) {
   };
   return (
     <span
-      className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold border ${map[color] || map.slate}`}
+      className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${map[color] || map.slate}`}
     >
       {children}
     </span>
@@ -70,23 +86,23 @@ function ReviewCard({
   };
 
   const borderClass = pair.isApproved
-    ? "border-l-emerald-400"
+    ? "border-l-[#0e9185]"
     : pair.isFlagged
-      ? "border-l-red-400"
-      : "border-l-slate-200";
+      ? "border-l-[#026665]"
+      : "border-l-[#9fd8d1]";
   const bgClass = pair.isApproved
-    ? "bg-emerald-50/40"
+    ? "bg-gradient-to-r from-[#eef5f3] to-white"
     : pair.isFlagged
-      ? "bg-red-50/40"
+      ? "bg-gradient-to-r from-[#eef5f3] to-white"
       : "bg-white";
 
   return (
     <div
-      className={`rounded-xl border border-slate-200 border-l-4 ${borderClass} ${bgClass} p-4 transition-all`}
+      className={`rounded-2xl border border-[#9fd8d1]/30 border-l-4 ${borderClass} ${bgClass} p-5 transition-all duration-200 hover:shadow-md`}
     >
       {/* Header row */}
       <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        <span className="text-[10px] font-bold text-[#026665] uppercase tracking-widest bg-[#eef5f3] px-3 py-1 rounded-full">
           Q{pair.sequence}
         </span>
         <div className="flex items-center gap-1.5 flex-wrap justify-end">
@@ -94,8 +110,8 @@ function ReviewCard({
           {pair.isApproved && <Pill color="green">✓ Approved</Pill>}
           {pair.useEditedVersion && <Pill color="blue">Edited active</Pill>}
           {pair.comments?.length > 0 && (
-            <span className="text-[10px] text-slate-400">
-              💬 {pair.comments.length}
+            <span className="text-[10px] text-[#0e9185] bg-[#eef5f3] px-2 py-1 rounded-full flex items-center gap-1">
+              <MessageCircle className="w-3 h-3" /> {pair.comments.length}
             </span>
           )}
         </div>
@@ -103,16 +119,16 @@ function ReviewCard({
 
       {/* Original */}
       <div className="mb-3">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">
+        <p className="text-[10px] font-bold text-[#0e9185] uppercase tracking-wide mb-1">
           Original Question
         </p>
-        <p className="text-sm text-slate-800 font-medium leading-relaxed">
+        <p className="text-sm text-[#026665] font-medium leading-relaxed">
           {pair.originalQuestion || (
-            <em className="text-slate-400 font-normal">—</em>
+            <em className="text-[#9fd8d1] font-normal">—</em>
           )}
         </p>
         {pair.originalAnswer && (
-          <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+          <p className="text-xs text-[#0e9185] mt-1 leading-relaxed">
             {pair.originalAnswer}
           </p>
         )}
@@ -120,8 +136,8 @@ function ReviewCard({
 
       {/* Senior edit area */}
       {!isLocked && editMode ? (
-        <div className="mt-3 space-y-2 p-3 bg-indigo-50 rounded-xl border border-indigo-100">
-          <p className="text-[10px] font-bold text-indigo-600 uppercase">
+        <div className="mt-3 space-y-2 p-4 bg-[#eef5f3] rounded-2xl border border-[#9fd8d1]/40">
+          <p className="text-[10px] font-bold text-[#026665] uppercase tracking-wide">
             Your Inline Edit
           </p>
           <textarea
@@ -129,21 +145,21 @@ function ReviewCard({
             value={editedQ}
             onChange={(e) => setEditedQ(e.target.value)}
             placeholder="Edited question…"
-            className="w-full border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white"
+            className="w-full border border-[#9fd8d1]/40 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0e9185] focus:border-transparent resize-none bg-white"
           />
           <textarea
             rows={2}
             value={editedA}
             onChange={(e) => setEditedA(e.target.value)}
             placeholder="Edited answer / expected response…"
-            className="w-full border border-indigo-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none bg-white"
+            className="w-full border border-[#9fd8d1]/40 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#0e9185] focus:border-transparent resize-none bg-white"
           />
-          <label className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+          <label className="flex items-center gap-2 text-xs text-[#026665] cursor-pointer">
             <input
               type="checkbox"
               checked={useEdited}
               onChange={(e) => setUseEdited(e.target.checked)}
-              className="rounded border-slate-300"
+              className="rounded border-[#9fd8d1] accent-[#026665]"
             />
             Use this version in final PDF
           </label>
@@ -151,40 +167,41 @@ function ReviewCard({
             <button
               onClick={handleSaveEdit}
               disabled={saving}
-              className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg disabled:opacity-60 font-semibold"
+              className="text-xs bg-[#026665] hover:bg-[#0e9185] text-white px-4 py-2 rounded-xl disabled:opacity-60 font-semibold transition-colors"
             >
               {saving ? "Saving…" : "Save Edit"}
             </button>
             <button
               onClick={() => setEditMode(false)}
-              className="text-xs text-slate-500 hover:text-slate-700 px-2"
+              className="text-xs text-[#0e9185] hover:text-[#026665] px-2 font-medium"
             >
               Cancel
             </button>
           </div>
         </div>
       ) : pair.editedQuestion ? (
-        <div className="mt-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
-          <p className="text-[10px] font-bold text-blue-500 uppercase mb-1">
+        <div className="mt-3 p-4 rounded-2xl bg-[#eef5f3] border border-[#9fd8d1]/40">
+          <p className="text-[10px] font-bold text-[#0e9185] uppercase mb-1">
             Your Edit {pair.useEditedVersion ? "(active in PDF)" : "(inactive)"}
           </p>
-          <p className="text-sm text-blue-900 font-medium">
+          <p className="text-sm text-[#026665] font-medium">
             {pair.editedQuestion}
           </p>
           {pair.editedAnswer && (
-            <p className="text-xs text-blue-700 mt-1">{pair.editedAnswer}</p>
+            <p className="text-xs text-[#0e9185] mt-1">{pair.editedAnswer}</p>
           )}
         </div>
       ) : null}
 
       {/* Action buttons */}
-      <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-slate-100">
+      <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-[#9fd8d1]/20">
         {!isLocked && (
           <button
             onClick={() => setEditMode((v) => !v)}
-            className="text-[11px] px-2.5 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 font-medium transition-colors"
+            className="text-[11px] px-3 py-1.5 border border-[#9fd8d1]/40 rounded-xl text-[#026665] hover:bg-[#eef5f3] font-medium transition-all duration-200 flex items-center gap-1"
           >
-            {editMode ? "Cancel" : "✏️ Edit"}
+            <Edit3 className="w-3.5 h-3.5" />
+            {editMode ? "Cancel" : "Edit"}
           </button>
         )}
         {!isLocked && (
@@ -192,13 +209,14 @@ function ReviewCard({
             onClick={() =>
               onFlag(witnessId, pair._id, { isFlagged: !pair.isFlagged })
             }
-            className={`text-[11px] px-2.5 py-1.5 border rounded-lg font-medium transition-colors ${
+            className={`text-[11px] px-3 py-1.5 border rounded-xl font-medium transition-all duration-200 flex items-center gap-1 ${
               pair.isFlagged
-                ? "bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
-                : "border-slate-200 text-slate-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600"
+                ? "bg-[#026665] border-[#026665] text-white hover:bg-[#0e9185]"
+                : "border-[#9fd8d1]/40 text-[#026665] hover:bg-[#eef5f3]"
             }`}
           >
-            {pair.isFlagged ? "× Unflag" : "⚑ Flag"}
+            <Flag className="w-3.5 h-3.5" />
+            {pair.isFlagged ? "Unflag" : "Flag"}
           </button>
         )}
         {!isLocked && (
@@ -206,39 +224,40 @@ function ReviewCard({
             onClick={() =>
               onFlag(witnessId, pair._id, { isApproved: !pair.isApproved })
             }
-            className={`text-[11px] px-2.5 py-1.5 border rounded-lg font-medium transition-colors ${
+            className={`text-[11px] px-3 py-1.5 border rounded-xl font-medium transition-all duration-200 flex items-center gap-1 ${
               pair.isApproved
-                ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100"
-                : "border-slate-200 text-slate-600 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600"
+                ? "bg-[#0e9185] border-[#0e9185] text-white hover:bg-[#026665]"
+                : "border-[#9fd8d1]/40 text-[#026665] hover:bg-[#eef5f3]"
             }`}
           >
-            {pair.isApproved ? "✓ Approved" : "✓ Approve"}
+            <CheckCircle className="w-3.5 h-3.5" />
+            {pair.isApproved ? "Approved" : "Approve"}
           </button>
         )}
         <button
           onClick={() => onSelectComment(witnessId, pair._id)}
-          className="ml-auto text-[11px] px-2.5 py-1.5 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50 transition-colors"
+          className="ml-auto text-[11px] px-3 py-1.5 border border-[#9fd8d1]/40 rounded-xl text-[#0e9185] hover:bg-[#eef5f3] transition-all duration-200 flex items-center gap-1"
         >
-          💬 Comment{" "}
-          {pair.comments?.length > 0 ? `(${pair.comments.length})` : ""}
+          <MessageCircle className="w-3.5 h-3.5" />
+          Comment {pair.comments?.length > 0 ? `(${pair.comments.length})` : ""}
         </button>
 
         {pair.isApproved &&
           (confirmDelete ? (
-            <div className="flex items-center gap-1.5 ml-1">
-              <span className="text-[11px] text-red-600 font-semibold">
+            <div className="flex items-center gap-2 ml-1">
+              <span className="text-[11px] text-[#026665] font-semibold">
                 Delete?
               </span>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="text-[11px] px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold disabled:opacity-60 transition-colors"
+                className="text-[11px] px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold disabled:opacity-60 transition-colors"
               >
-                {deleting ? "…" : "Yes, delete"}
+                {deleting ? "…" : "Yes"}
               </button>
               <button
                 onClick={() => setConfirmDelete(false)}
-                className="text-[11px] px-2 py-1.5 text-slate-500 hover:text-slate-700"
+                className="text-[11px] px-2 py-1.5 text-[#0e9185] hover:text-[#026665]"
               >
                 Cancel
               </button>
@@ -246,9 +265,10 @@ function ReviewCard({
           ) : (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="text-[11px] px-2.5 py-1.5 border border-red-200 rounded-lg text-red-500 hover:bg-red-50 hover:border-red-300 font-medium transition-colors"
+              className="text-[11px] px-3 py-1.5 border border-red-200 rounded-xl text-red-500 hover:bg-red-50 hover:border-red-300 font-medium transition-all duration-200 flex items-center gap-1"
             >
-              🗑 Delete
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
             </button>
           ))}
       </div>
@@ -312,53 +332,50 @@ function CommentPanel({
     replies.filter((r) => r.parentComment?.toString() === parentId?.toString());
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-white">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50 flex-shrink-0">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#eef5f3] bg-[#eef5f3]/30 flex-shrink-0">
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+          <p className="text-[10px] font-bold text-[#0e9185] uppercase tracking-wide">
             Comments
           </p>
-          <p className="text-sm font-semibold text-slate-800 mt-0.5">
+          <p className="text-sm font-bold text-[#026665] mt-0.5">
             Q{qaPair.sequence}
           </p>
         </div>
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-slate-700 text-xl w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors"
+          className="text-[#9fd8d1] hover:text-[#026665] w-8 h-8 flex items-center justify-center rounded-xl hover:bg-[#eef5f3] transition-all duration-200"
         >
-          ×
+          <X className="w-5 h-5" />
         </button>
       </div>
 
       {/* Comments */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-5 space-y-3">
         {topLevel.length === 0 && (
-          <div className="text-center py-8 text-slate-400">
-            <svg
-              className="w-8 h-8 mx-auto mb-2 opacity-40"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
-            <p className="text-sm">No comments yet.</p>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 rounded-full bg-[#eef5f3] flex items-center justify-center mx-auto mb-3">
+              <MessageCircle className="w-8 h-8 text-[#9fd8d1]" />
+            </div>
+            <p className="text-sm text-[#000000] font-medium">No comments yet</p>
+            <p className="text-xs text-[#000000] mt-1">
+              Start the conversation
+            </p>
           </div>
         )}
         {topLevel.map((c) => (
           <div key={c._id}>
             <div
-              className={`rounded-xl p-3 border ${c.resolved ? "border-slate-100 bg-slate-50 opacity-60" : "border-slate-200 bg-white"}`}
+              className={`rounded-2xl p-4 border ${
+                c.resolved
+                  ? "border-[#9fd8d1]/30 bg-[#eef5f3]/50 opacity-70"
+                  : "border-[#9fd8d1]/40 bg-white shadow-sm"
+              }`}
             >
-              <p className="text-sm text-slate-800 leading-relaxed">{c.text}</p>
-              <div className="flex items-center justify-between mt-2 gap-2">
-                <p className="text-[10px] text-slate-400">
+              <p className="text-sm text-[#026665] leading-relaxed">{c.text}</p>
+              <div className="flex items-center justify-between mt-2.5 gap-2">
+                <p className="text-[10px] text-[#0e9185]">
                   {c.author?.name || "Unknown"} ·{" "}
                   {c.createdAt
                     ? format(new Date(c.createdAt), "dd MMM HH:mm")
@@ -366,7 +383,11 @@ function CommentPanel({
                 </p>
                 <button
                   onClick={() => resolve(c._id, !c.resolved)}
-                  className={`text-[10px] font-medium ${c.resolved ? "text-slate-400 hover:text-slate-600" : "text-emerald-600 hover:text-emerald-800"}`}
+                  className={`text-[10px] font-medium px-2 py-1 rounded-full transition-colors ${
+                    c.resolved
+                      ? "text-[#9fd8d1] hover:text-[#0e9185] bg-[#eef5f3]"
+                      : "text-[#0e9185] hover:text-[#026665] bg-[#eef5f3]"
+                  }`}
                 >
                   {c.resolved ? "↩ Reopen" : "✓ Resolve"}
                 </button>
@@ -375,17 +396,21 @@ function CommentPanel({
             {getReplies(c._id).map((r) => (
               <div
                 key={r._id}
-                className={`ml-4 mt-1.5 rounded-xl p-3 border border-l-2 border-l-indigo-400 ${r.resolved ? "bg-slate-50 border-slate-100 opacity-60" : "bg-indigo-50/60 border-indigo-100"}`}
+                className={`ml-5 mt-2 rounded-2xl p-4 border-l-4 ${
+                  r.resolved
+                    ? "border-[#9fd8d1]/30 bg-[#eef5f3]/30"
+                    : "border-[#0e9185] bg-[#eef5f3]/50"
+                }`}
               >
-                <p className="text-xs text-slate-700 leading-relaxed">
+                <p className="text-sm text-[#026665] leading-relaxed">
                   {r.text}
                 </p>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[10px] font-semibold text-indigo-500">
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-[10px] font-semibold text-[#0e9185]">
                     {r.author?.name || "Junior"}
                   </span>
                   {r.createdAt && (
-                    <span className="text-[10px] text-slate-400">
+                    <span className="text-[10px] text-[#9fd8d1]">
                       · {format(new Date(r.createdAt), "dd MMM HH:mm")}
                     </span>
                   )}
@@ -397,13 +422,13 @@ function CommentPanel({
       </div>
 
       {/* Input — senior posts new top-level comments */}
-      <div className="px-4 pb-4 pt-2 border-t border-slate-100 flex-shrink-0">
+      <div className="px-5 pb-5 pt-3 border-t border-[#eef5f3] flex-shrink-0">
         <textarea
           rows={3}
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder="Write a comment… (Ctrl+Enter to submit)"
-          className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 resize-none mb-2"
+          className="w-full border border-[#9fd8d1]/40 rounded-2xl px-4 py-3 text-sm text-[#026665] placeholder-[#9fd8d1] focus:outline-none focus:ring-2 focus:ring-[#0e9185] focus:border-transparent resize-none mb-2.5 bg-[#eef5f3]/30"
           onKeyDown={(e) => {
             if ((e.metaKey || e.ctrlKey) && e.key === "Enter") post();
           }}
@@ -411,9 +436,9 @@ function CommentPanel({
         <button
           onClick={post}
           disabled={posting || !text.trim()}
-          className="w-full bg-slate-900 hover:bg-slate-700 disabled:opacity-50 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors"
+          className="w-full bg-[#026665] hover:bg-[#0e9185] disabled:opacity-50 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors duration-200 flex items-center justify-center gap-2"
         >
-          {posting ? "Posting…" : "Post Comment"}
+          {posting ? "Posting…" : <><Send className="w-4 h-4" /> Post Comment</>}
         </button>
       </div>
     </div>
@@ -574,8 +599,8 @@ export default function ReviewPage() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-slate-900 border-t-transparent rounded-full animate-spin" />
+      <div className="flex items-center justify-center h-screen bg-[#eef5f3]">
+        <div className="w-12 h-12 border-4 border-[#026665] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   if (!exam) return <div className="p-8 text-red-500">Not found.</div>;
@@ -589,58 +614,65 @@ export default function ReviewPage() {
   );
 
   const statusColors = {
-    submitted: "bg-blue-50 text-blue-700",
-    in_review: "bg-amber-50 text-amber-700",
-    approved: "bg-emerald-50 text-emerald-700",
+    submitted: "bg-blue-50 text-blue-700 border-blue-200",
+    in_review: "bg-amber-50 text-amber-700 border-amber-200",
+    approved: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  };
+
+  const statusIcons = {
+    submitted: <Clock className="w-4 h-4" />,
+    in_review: <AlertCircle className="w-4 h-4" />,
+    approved: <ThumbsUp className="w-4 h-4" />,
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
-      {/* ── Top bar --- */}
-      <div className="flex items-center justify-between px-6 py-3.5 bg-white border-b border-slate-200 shadow-sm flex-shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#eef5f3]">
+      <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-[#9fd8d1]/30 shadow-sm flex-shrink-0">
+        <div className="flex items-center gap-4 min-w-0">
           <Link
             href="/cross-exams"
-            className="text-slate-400 hover:text-slate-700 transition-colors"
+            className="text-[#9fd8d1] hover:text-[#026665] transition-colors p-1.5 rounded-xl hover:bg-[#eef5f3]"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h1
-            className="font-bold text-slate-800 truncate max-w-xs text-sm"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            {exam.title}
-          </h1>
-          <span
-            className={`text-xs font-bold px-3 py-1 rounded-full ${statusColors[exam.status] || "bg-slate-100 text-slate-600"}`}
-          >
-            {exam.status.replace("_", " ").toUpperCase()}
-          </span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-[#026665] flex items-center justify-center shadow-md shadow-[#026665]/20">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1
+                className="font-bold text-[#000000] truncate max-w-xs text-lg"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                {exam.title}
+              </h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span
+                  className={`text-[10px] font-bold px-3 py-0.5 rounded-full border ${statusColors[exam.status] || "bg-slate-100 text-slate-600"}`}
+                >
+                  {exam.status.replace("_", " ").toUpperCase()}
+                </span>
+                <span className="text-[10px] text-[#000000]">
+                  {exam.witnesses?.length || 0} witnesses ·{" "}
+                  {exam.witnesses?.reduce((acc, w) => acc + w.qaPairs.length, 0) || 0} questions
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Link
             href={`/cross-exams/${id}/compare`}
-            className="text-xs text-slate-500 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+            className="text-xs text-[#0e9185] border border-[#9fd8d1]/40 px-4 py-2 rounded-xl hover:bg-[#eef5f3] transition-all duration-200 flex items-center gap-1.5"
           >
+            <RotateCcw className="w-3.5 h-3.5" />
             Version History
           </Link>
           {exam.status === "submitted" && (
             <button
               onClick={handleStartReview}
               disabled={busy}
-              className="text-xs bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg font-bold disabled:opacity-60 transition-colors"
+              className="text-xs bg-[#026665] hover:bg-[#0e9185] text-white px-5 py-2 rounded-xl font-bold disabled:opacity-60 transition-all duration-200 shadow-md shadow-[#026665]/20 hover:shadow-lg hover:shadow-[#026665]/30 flex items-center gap-1.5"
             >
               {busy ? "…" : "Start Review →"}
             </button>
@@ -650,16 +682,18 @@ export default function ReviewPage() {
               <button
                 onClick={() => setShowChanges(true)}
                 disabled={busy}
-                className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg font-bold disabled:opacity-60 transition-colors"
+                className="text-xs bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl font-bold disabled:opacity-60 transition-all duration-200 shadow-md shadow-amber-500/20 flex items-center gap-1.5"
               >
+                <AlertCircle className="w-3.5 h-3.5" />
                 Request Changes
               </button>
               <button
                 onClick={handleApprove}
                 disabled={busy}
-                className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-1.5 rounded-lg font-bold disabled:opacity-60 transition-colors"
+                className="text-xs bg-[#0e9185] hover:bg-[#026665] text-white px-5 py-2 rounded-xl font-bold disabled:opacity-60 transition-all duration-200 shadow-md shadow-[#0e9185]/20 hover:shadow-lg flex items-center gap-1.5"
               >
-                Approve ✓
+                <ThumbsUp className="w-3.5 h-3.5" />
+                Approve
               </button>
             </>
           )}
@@ -669,14 +703,17 @@ export default function ReviewPage() {
       {/*--- 3-column body --- */}
       <div className="flex flex-1 overflow-hidden">
         {/* Column 1 — Witness list */}
-        <aside className="w-56 border-r border-slate-200 bg-white overflow-y-auto flex-shrink-0">
-          <p className="px-4 py-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100">
-            Witnesses
-          </p>
-          {(exam.witnesses || []).length === 0 ? (
-            <p className="px-4 py-6 text-xs text-slate-400 italic">
-              No witnesses.
+        <aside className="w-64 border-r border-[#9fd8d1]/30 bg-white overflow-y-auto flex-shrink-0">
+          <div className="px-4 py-4 border-b border-[#eef5f3] bg-[#eef5f3]/30">
+            <p className="text-[10px] font-bold text-[#0e9185] uppercase tracking-widest flex items-center gap-2">
+              <Users className="w-3.5 h-3.5" />
+              Witnesses
             </p>
+          </div>
+          {(exam.witnesses || []).length === 0 ? (
+            <div className="px-4 py-12 text-center">
+              <p className="text-xs text-[#9fd8d1] italic">No witnesses.</p>
+            </div>
           ) : (
             exam.witnesses.map((w) => {
               const fl = w.qaPairs.filter((p) => p.isFlagged).length;
@@ -686,17 +723,23 @@ export default function ReviewPage() {
                 <button
                   key={w._id}
                   onClick={() => setActiveWitness(w._id)}
-                  className={`w-full text-left px-4 py-3.5 border-b border-slate-50 transition-colors ${
+                  className={`w-full text-left px-4 py-3.5 border-b border-[#eef5f3] transition-all duration-200 ${
                     isActive
-                      ? "bg-slate-900 border-l-2 border-l-amber-400"
-                      : "hover:bg-slate-50"
+                      ? "bg-gradient-to-r from-[#026665] to-[#0e9185] border-l-4 border-l-[#9fd8d1]"
+                      : "hover:bg-[#eef5f3]"
                   }`}
                 >
                   <div
-                    className={`flex items-center gap-2 mb-1 ${isActive ? "text-white" : "text-slate-800"}`}
+                    className={`flex items-center gap-2.5 mb-1.5 ${
+                      isActive ? "text-white" : "text-[#026665]"
+                    }`}
                   >
                     <div
-                      className={`w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${isActive ? "bg-amber-400 text-slate-900" : "bg-slate-100 text-slate-600"}`}
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-[#eef5f3] text-[#026665]"
+                      }`}
                     >
                       {w.witnessName.charAt(0).toUpperCase()}
                     </div>
@@ -704,17 +747,21 @@ export default function ReviewPage() {
                       {w.witnessName}
                     </span>
                   </div>
-                  <div className="flex gap-2 pl-8">
+                  <div className="flex gap-3 pl-11">
                     {fl > 0 && (
-                      <span className="text-[10px] text-red-500">⚑{fl}</span>
+                      <span className="text-[10px] text-amber-500 flex items-center gap-1">
+                        <Flag className="w-3 h-3" /> {fl}
+                      </span>
                     )}
                     {ap > 0 && (
-                      <span className="text-[10px] text-emerald-500">
-                        ✓{ap}
+                      <span className="text-[10px] text-[#0e9185] flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" /> {ap}
                       </span>
                     )}
                     <span
-                      className={`text-[10px] ${isActive ? "text-slate-400" : "text-slate-400"}`}
+                      className={`text-[10px] ${
+                        isActive ? "text-white/70" : "text-[#9fd8d1]"
+                      }`}
                     >
                       {w.qaPairs.length}Q
                     </span>
@@ -726,14 +773,18 @@ export default function ReviewPage() {
         </aside>
 
         {/* Column 2 — QA pairs */}
-        <main className="flex-1 overflow-y-auto p-5 space-y-3">
+        <main className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#eef5f3]/30">
           {!currentWitness ? (
-            <div className="flex items-center justify-center h-full text-slate-400 text-sm">
-              Select a witness from the left panel.
+            <div className="flex flex-col items-center justify-center h-full text-[#9fd8d1]">
+              <Users className="w-12 h-12 mb-3 opacity-30" />
+              <p className="text-sm font-medium">Select a witness</p>
+              <p className="text-xs">from the left panel to review Q&A</p>
             </div>
           ) : currentWitness.qaPairs.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-slate-400 text-sm">
-              No Q&A pairs for this witness.
+            <div className="flex flex-col items-center justify-center h-full text-[#9fd8d1]">
+              <FileText className="w-12 h-12 mb-3 opacity-30" />
+              <p className="text-sm font-medium">No Q&A pairs</p>
+              <p className="text-xs">This witness has no questions yet</p>
             </div>
           ) : (
             currentWitness.qaPairs
@@ -758,7 +809,9 @@ export default function ReviewPage() {
 
         {/* Column 3 — Comments */}
         <aside
-          className={`border-l border-slate-200 bg-white flex-shrink-0 transition-all duration-200 ${commentQaPair ? "w-72" : "w-16"}`}
+          className={`border-l border-[#9fd8d1]/30 bg-white flex-shrink-0 transition-all duration-300 ${
+            commentQaPair ? "w-80" : "w-16"
+          }`}
         >
           {commentQaPair ? (
             <CommentPanel
@@ -783,22 +836,12 @@ export default function ReviewPage() {
               }
             />
           ) : (
-            <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-300 px-2">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                />
-              </svg>
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-[#9fd8d1] px-2">
+              <div className="w-12 h-12 rounded-2xl bg-[#eef5f3] flex items-center justify-center">
+                <MessageCircle className="w-6 h-6" />
+              </div>
               <p
-                className="text-[10px] text-center leading-tight writing-mode-vertical"
+                className="text-[10px] text-center leading-tight font-medium text-[#0e9185]"
                 style={{ writingMode: "vertical-rl" }}
               >
                 Comments
@@ -810,35 +853,40 @@ export default function ReviewPage() {
 
       {/* Request changes modal */}
       {showChanges && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            <div className="px-6 py-5 border-b border-slate-100">
-              <h2 className="text-base font-bold text-slate-900">
+        <div className="fixed inset-0 bg-[#026665]/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#eef5f3] bg-gradient-to-r from-[#eef5f3] to-white">
+              <h2 className="text-lg font-bold text-[#026665]">
                 Request Changes
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-[#0e9185] mt-1">
                 The junior will see your note alongside all flagged Q&A pairs.
               </p>
             </div>
-            <div className="px-6 py-5">
-              <textarea
-                rows={4}
-                value={changesNote}
-                onChange={(e) => setChangesNote(e.target.value)}
-                placeholder="Describe the overall revisions needed…"
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 resize-none mb-4"
-              />
+            <div className="px-6 py-6">
+              <div className="mb-4">
+                <label className="text-xs font-bold text-[#026665] uppercase tracking-wider">
+                  Revision Notes
+                </label>
+                <textarea
+                  rows={4}
+                  value={changesNote}
+                  onChange={(e) => setChangesNote(e.target.value)}
+                  placeholder="Describe the overall revisions needed…"
+                  className="w-full border border-[#9fd8d1]/40 rounded-2xl px-4 py-3 text-sm text-[#026665] placeholder-[#9fd8d1] focus:outline-none focus:ring-2 focus:ring-[#0e9185] focus:border-transparent resize-none mt-1.5 bg-[#eef5f3]/30"
+                />
+              </div>
               <div className="flex gap-3">
                 <button
                   onClick={handleRequestChanges}
                   disabled={busy}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl text-sm disabled:opacity-60"
+                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 rounded-xl text-sm disabled:opacity-60 transition-colors duration-200 shadow-md shadow-amber-500/20"
                 >
-                  Send to Junior
+                  {busy ? "Sending…" : "Send to Junior"}
                 </button>
                 <button
                   onClick={() => setShowChanges(false)}
-                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-sm"
+                  className="flex-1 bg-[#eef5f3] hover:bg-[#9fd8d1]/30 text-[#026665] font-bold py-3 rounded-xl text-sm transition-colors duration-200"
                 >
                   Cancel
                 </button>

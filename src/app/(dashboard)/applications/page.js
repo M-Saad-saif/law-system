@@ -21,6 +21,14 @@ import {
   X,
   Clock,
   AlertCircle,
+  Calendar,
+  Building2,
+  Scale,
+  User,
+  BadgeCheck,
+  PenTool,
+  Layers,
+  Gavel,
 } from "lucide-react";
 
 // ---─ Constants ------------------
@@ -37,11 +45,11 @@ const APPLICATION_TYPES = [
 ];
 
 const STATUS_CONFIG = {
-  draft: { label: "Draft", color: "bg-slate-100 text-slate-600" },
-  generated: { label: "Generated", color: "bg-blue-100 text-blue-700" },
-  review: { label: "Under Review", color: "bg-amber-100 text-amber-700" },
-  approved: { label: "Approved", color: "bg-emerald-100 text-emerald-700" },
-  filed: { label: "Filed", color: "bg-purple-100 text-purple-700" },
+  draft: { label: "Draft", color: "bg-[#eef5f3] text-[#026665]" },
+  generated: { label: "Generated", color: "bg-[#9fd8d1]/30 text-[#0e9185]" },
+  review: { label: "Under Review", color: "bg-[#9fd8d1]/50 text-[#026665]" },
+  approved: { label: "Approved", color: "bg-[#0e9185]/20 text-[#026665]" },
+  filed: { label: "Filed", color: "bg-[#026665]/20 text-[#026665]" },
 };
 
 // ---─ Main Page Component ---
@@ -108,20 +116,20 @@ export default function ApplicationsPage() {
   const hasFilters = filterType || filterStatus;
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 py-6 bg-[#eef5f3]">
       {/* --- Header ---─ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-display">
+          <h1 className="text-2xl font-bold text-black font-display tracking-tight">
             Applications
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-sm text-black/60 mt-0.5">
             {total} application{total !== 1 ? "s" : ""}
           </p>
         </div>
         <button
           onClick={() => setCreateOpen(true)}
-          className="btn-primary shrink-0"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#026665] text-white rounded-xl font-medium hover:bg-[#0e9185] transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98]"
         >
           <Plus className="w-4 h-4" />
           New Application
@@ -129,11 +137,11 @@ export default function ApplicationsPage() {
       </div>
 
       {/* --- Filters --- */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 bg-white rounded-xl p-4 border border-[#9fd8d1]/30 shadow-sm">
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="select w-full sm:w-64"
+          className="w-full sm:w-64 px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all"
         >
           <option value="">All Types</option>
           {APPLICATION_TYPES.map((t) => (
@@ -146,7 +154,7 @@ export default function ApplicationsPage() {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="select w-full sm:w-48"
+          className="w-full sm:w-48 px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all"
         >
           <option value="">All Statuses</option>
           {Object.entries(STATUS_CONFIG).map(([val, cfg]) => (
@@ -162,7 +170,7 @@ export default function ApplicationsPage() {
               setFilterType("");
               setFilterStatus("");
             }}
-            className="btn-ghost text-red-500 hover:bg-red-50 shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2.5 text-[#026665] hover:bg-[#eef5f3] rounded-xl transition-all duration-200 shrink-0"
           >
             <X className="w-4 h-4" /> Clear
           </button>
@@ -180,7 +188,7 @@ export default function ApplicationsPage() {
         />
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {applications.map((app) => (
               <ApplicationCard
                 key={app._id}
@@ -198,21 +206,21 @@ export default function ApplicationsPage() {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-3 pt-2">
+            <div className="flex items-center justify-center gap-3 pt-4">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="btn-secondary disabled:opacity-40"
+                className="inline-flex items-center gap-2 px-4 py-2 text-black/60 hover:text-[#026665] hover:bg-[#eef5f3] rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <span className="text-sm text-slate-600">
+              <span className="text-sm text-black/60">
                 Page {page} of {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="btn-secondary disabled:opacity-40"
+                className="inline-flex items-center gap-2 px-4 py-2 text-black/60 hover:text-[#026665] hover:bg-[#eef5f3] rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -295,14 +303,14 @@ function ApplicationCard({ app, onView, onDelete, onUpdated }) {
   };
 
   return (
-    <div className="card p-5 flex flex-col gap-3 group">
+    <div className="group bg-white rounded-2xl border border-[#9fd8d1]/30 shadow-sm hover:shadow-lg transition-all duration-300 p-5 flex flex-col gap-3 hover:border-[#0e9185]/40">
       {/* Top */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-primary-600 truncate mb-0.5">
+          <p className="text-xs font-semibold text-[#0e9185] truncate mb-1">
             {typeLabel}
           </p>
-          <h3 className="font-semibold text-slate-800 text-sm leading-snug line-clamp-2">
+          <h3 className="font-semibold text-black text-sm leading-snug line-clamp-2">
             {app.caseTitle || app.applicantName || "Untitled Application"}
           </h3>
         </div>
@@ -310,17 +318,29 @@ function ApplicationCard({ app, onView, onDelete, onUpdated }) {
       </div>
 
       {/* Meta */}
-      <div className="space-y-1 text-xs text-slate-500">
-        {app.caseNumber && <p>Case: {app.caseNumber}</p>}
-        {app.courtName && <p>Court: {app.courtName}</p>}
+      <div className="space-y-1.5 text-xs text-black/60">
+        {app.caseNumber && (
+          <p className="flex items-center gap-1.5">
+            <Scale className="w-3.5 h-3.5 text-[#0e9185]" />
+            <span>Case: {app.caseNumber}</span>
+          </p>
+        )}
+        {app.courtName && (
+          <p className="flex items-center gap-1.5">
+            <Building2 className="w-3.5 h-3.5 text-[#0e9185]" />
+            <span>{app.courtName}</span>
+          </p>
+        )}
         {app.hearingDate && (
-          <p className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            {new Date(app.hearingDate).toLocaleDateString("en-PK", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}
+          <p className="flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-[#0e9185]" />
+            <span>
+              {new Date(app.hearingDate).toLocaleDateString("en-PK", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
           </p>
         )}
       </div>
@@ -328,29 +348,29 @@ function ApplicationCard({ app, onView, onDelete, onUpdated }) {
       {/* Flags */}
       <div className="flex gap-2 flex-wrap">
         {app.autoGenerated && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[11px] font-medium">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#9fd8d1]/20 text-[#026665] text-[11px] font-medium">
             <FileText className="w-3 h-3" /> Auto-generated
           </span>
         )}
         {app.aiEnhanced && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 text-[11px] font-medium">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#9fd8d1]/30 text-[#0e9185] text-[11px] font-medium">
             <Sparkles className="w-3 h-3" /> AI Enhanced
           </span>
         )}
         {app.version > 1 && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-50 text-slate-500 text-[11px] font-medium">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#eef5f3] text-black/60 text-[11px] font-medium">
             v{app.version}
           </span>
         )}
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1 pt-1 border-t border-slate-100">
+      <div className="flex items-center gap-1 pt-3 border-t border-[#9fd8d1]/20">
         <button
           onClick={onView}
-          className="btn-ghost flex-1 text-xs justify-center"
+          className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-black/70 hover:text-[#026665] hover:bg-[#eef5f3] rounded-xl text-xs font-medium transition-all duration-200"
         >
-          <Eye className="w-3.5 h-3.5" /> View
+          <Eye className="w-3.5 h-3.5" /> View Details
         </button>
 
         {(app.content || app.generatedText) &&
@@ -359,7 +379,7 @@ function ApplicationCard({ app, onView, onDelete, onUpdated }) {
               onClick={handleQuickImprove}
               disabled={improving}
               title="Improve with AI"
-              className="btn-ghost px-2.5 text-violet-500 hover:bg-violet-50 disabled:opacity-40"
+              className="p-2 text-[#0e9185] hover:bg-[#9fd8d1]/20 rounded-xl transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {improving ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
@@ -371,7 +391,7 @@ function ApplicationCard({ app, onView, onDelete, onUpdated }) {
 
         <button
           onClick={onDelete}
-          className="btn-ghost px-2.5 text-slate-400 hover:text-red-500"
+          className="p-2 text-black/40 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -386,7 +406,7 @@ function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.draft;
   return (
     <span
-      className={`text-[11px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${cfg.color}`}
+      className={`text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.color}`}
     >
       {cfg.label}
     </span>
@@ -411,10 +431,10 @@ function CreateApplicationModal({ onClose, onCreated }) {
     courtType: "",
     applicantName: "",
     respondentName: "",
-    ppcSections: "", // comma-separated input → split to array on submit
+    ppcSections: "",
     judgeName: "",
     hearingDate: "",
-    grounds: "", // newline-separated → split to array on submit
+    grounds: "",
     prayer: "",
     additionalNotes: "",
   });
@@ -423,7 +443,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
   const [autoGenerate, setAutoGenerate] = useState(true);
   const [useAI, setUseAI] = useState(false);
   const [generatedContent, setGeneratedContent] = useState("");
-  const [step, setStep] = useState("form"); // "form" | "preview"
+  const [step, setStep] = useState("form");
 
   useEffect(() => {
     api
@@ -432,7 +452,6 @@ function CreateApplicationModal({ onClose, onCreated }) {
       .catch(() => {});
   }, []);
 
-  // Auto-fill from linked case
   const handleCaseSelect = async (caseId) => {
     setForm((f) => ({ ...f, caseId }));
     if (!caseId) return;
@@ -460,7 +479,6 @@ function CreateApplicationModal({ onClose, onCreated }) {
   const set = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  // Prepare body for API call
   const buildPayload = () => ({
     ...form,
     ppcSections: form.ppcSections
@@ -476,8 +494,6 @@ function CreateApplicationModal({ onClose, onCreated }) {
     useAI,
   });
 
-  // Generate preview (no DB save yet — we POST but could also do client-side generation)
-  // For simplicity and to honour the API boundary, we use the API.
   const handleGenerate = async () => {
     if (!form.applicationType) {
       toast.error("Select an application type.");
@@ -498,7 +514,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
       toast.success(
         useAI ? "Draft generated and AI-improved!" : "Draft generated!",
       );
-      onCreated(); // refresh list
+      onCreated();
       onClose();
     } catch (err) {
       toast.error(err.message || "Generation failed.");
@@ -536,12 +552,14 @@ function CreateApplicationModal({ onClose, onCreated }) {
 
   return (
     <Modal isOpen onClose={onClose} title="New Legal Application" size="xl">
-      <div className="space-y-5 max-h-[75vh] overflow-y-auto pr-1">
+      <div className="space-y-6 max-h-[75vh] overflow-y-auto pr-1 ">
         {/* --- Type ---------------─ */}
         <div>
-          <label className="label">Application Type *</label>
+          <label className="text-sm font-medium text-black mb-1.5 block">
+            Application Type <span className="text-[#026665]">*</span>
+          </label>
           <select
-            className="select"
+            className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all"
             value={form.applicationType}
             onChange={set("applicationType")}
           >
@@ -555,14 +573,14 @@ function CreateApplicationModal({ onClose, onCreated }) {
 
         {/* --- Linked Case --------------------- */}
         <div>
-          <label className="label">
+          <label className="text-sm font-medium text-black mb-1.5 block">
             Link to Case{" "}
-            <span className="text-slate-400 font-normal normal-case">
+            <span className="text-black/50 font-normal normal-case">
               (auto-fills fields)
             </span>
           </label>
           <select
-            className="select"
+            className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all"
             value={form.caseId}
             onChange={(e) => handleCaseSelect(e.target.value)}
           >
@@ -579,92 +597,113 @@ function CreateApplicationModal({ onClose, onCreated }) {
         {/* --- Case Details ------------------─ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="sm:col-span-2">
-            <label className="label">Case Title</label>
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              Case Title
+            </label>
             <input
-              className="input"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40"
               placeholder="e.g. State vs Ahmed Ali"
               value={form.caseTitle}
               onChange={set("caseTitle")}
             />
           </div>
           <div>
-            <label className="label">Case / Suit Number</label>
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              Case / Suit Number
+            </label>
             <input
-              className="input"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40"
               placeholder="e.g. 123/2024"
               value={form.caseNumber}
               onChange={set("caseNumber")}
             />
           </div>
           <div>
-            <label className="label">FIR Number</label>
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              FIR Number
+            </label>
             <input
-              className="input"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40"
               placeholder="e.g. 45/2024"
               value={form.firNo}
               onChange={set("firNo")}
             />
           </div>
           <div>
-            <label className="label">Applicant / Accused Name</label>
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              Applicant / Accused Name
+            </label>
             <input
-              className="input"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40"
               placeholder="Full name"
               value={form.applicantName}
               onChange={set("applicantName")}
             />
           </div>
           <div>
-            <label className="label">Respondent / Complainant</label>
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              Respondent / Complainant
+            </label>
             <input
-              className="input"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40"
               placeholder="Full name or 'The State'"
               value={form.respondentName}
               onChange={set("respondentName")}
             />
           </div>
           <div>
-            <label className="label">Court Name</label>
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              Court Name
+            </label>
             <input
-              className="input"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40"
               placeholder="e.g. Lahore High Court"
               value={form.courtName}
               onChange={set("courtName")}
             />
           </div>
           <div>
-            <label className="label">Court Type</label>
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              Court Type
+            </label>
             <input
-              className="input"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40"
               placeholder="e.g. Sessions Court"
               value={form.courtType}
               onChange={set("courtType")}
             />
           </div>
           <div>
-            <label className="label">Judge Name</label>
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              Judge Name
+            </label>
             <input
-              className="input"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40"
               placeholder="Honourable Mr. Justice ..."
               value={form.judgeName}
               onChange={set("judgeName")}
             />
           </div>
           <div>
-            <label className="label">Hearing Date</label>
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              Hearing Date
+            </label>
             <input
               type="date"
-              className="input"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all"
               value={form.hearingDate}
               onChange={set("hearingDate")}
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="label">
-              PPC / Act Sections (comma-separated)
+            <label className="text-sm font-medium text-black mb-1.5 block">
+              PPC / Act Sections{" "}
+              <span className="text-black/50 font-normal normal-case">
+                (comma-separated)
+              </span>
             </label>
             <input
-              className="input font-mono"
+              className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm font-mono focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40"
               placeholder="e.g. 302, 34, 120-B"
               value={form.ppcSections}
               onChange={set("ppcSections")}
@@ -674,14 +713,14 @@ function CreateApplicationModal({ onClose, onCreated }) {
 
         {/* --- Grounds ------------ */}
         <div>
-          <label className="label">
+          <label className="text-sm font-medium text-black mb-1.5 block">
             Grounds{" "}
-            <span className="text-slate-400 font-normal normal-case">
+            <span className="text-black/50 font-normal normal-case">
               (one per line)
             </span>
           </label>
           <textarea
-            className="textarea h-28"
+            className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40 resize-none h-28"
             placeholder={
               "1. The applicant has no previous criminal record.\n2. The allegations are false and fabricated.\n3. The maximum sentence does not bar bail."
             }
@@ -692,9 +731,11 @@ function CreateApplicationModal({ onClose, onCreated }) {
 
         {/* --- Prayer ------------─ */}
         <div>
-          <label className="label">Prayer / Relief Sought</label>
+          <label className="text-sm font-medium text-black mb-1.5 block">
+            Prayer / Relief Sought
+          </label>
           <textarea
-            className="textarea h-20"
+            className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40 resize-none h-20"
             placeholder="It is respectfully prayed that bail be granted..."
             value={form.prayer}
             onChange={set("prayer")}
@@ -703,9 +744,11 @@ function CreateApplicationModal({ onClose, onCreated }) {
 
         {/* --- Additional Notes ------------─ */}
         <div>
-          <label className="label">Additional Notes / Submissions</label>
+          <label className="text-sm font-medium text-black mb-1.5 block">
+            Additional Notes / Submissions
+          </label>
           <textarea
-            className="textarea h-16"
+            className="w-full px-4 py-2.5 bg-[#eef5f3] border-0 rounded-xl text-black text-sm focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all placeholder:text-black/40 resize-none h-16"
             placeholder="Any additional context or special circumstances..."
             value={form.additionalNotes}
             onChange={set("additionalNotes")}
@@ -713,24 +756,24 @@ function CreateApplicationModal({ onClose, onCreated }) {
         </div>
 
         {/* --- Control Flags ------------------─ */}
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-          <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">
+        <div className="rounded-2xl border border-[#9fd8d1]/40 bg-[#eef5f3] p-5 space-y-4">
+          <p className="text-xs font-bold text-[#026665] uppercase tracking-wide">
             Generation Options
           </p>
 
           {/* Auto-generate */}
-          <label className="flex items-start gap-3 cursor-pointer">
+          <label className="flex items-start gap-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={autoGenerate}
               onChange={(e) => setAutoGenerate(e.target.checked)}
-              className="w-4 h-4 accent-primary-600 mt-0.5"
+              className="w-5 h-5 accent-[#026665] mt-0.5 rounded-md border-[#9fd8d1]"
             />
             <div>
-              <p className="text-sm font-medium text-slate-700">
+              <p className="text-sm font-medium text-black">
                 Auto-Generate Draft
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-black/60">
                 Use the built-in legal template to instantly produce a full
                 application text from the fields above.
               </p>
@@ -739,21 +782,23 @@ function CreateApplicationModal({ onClose, onCreated }) {
 
           {/* AI Improve */}
           <label
-            className={`flex items-start gap-3 cursor-pointer ${!autoGenerate ? "opacity-40 pointer-events-none" : ""}`}
+            className={`flex items-start gap-3 cursor-pointer group ${
+              !autoGenerate ? "opacity-40 pointer-events-none" : ""
+            }`}
           >
             <input
               type="checkbox"
               checked={useAI}
               onChange={(e) => setUseAI(e.target.checked)}
               disabled={!autoGenerate}
-              className="w-4 h-4 accent-violet-600 mt-0.5"
+              className="w-5 h-5 accent-[#0e9185] mt-0.5 rounded-md border-[#9fd8d1]"
             />
             <div>
-              <p className="text-sm font-medium text-slate-700 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+              <p className="text-sm font-medium text-black flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#0e9185]" />
                 Improve with AI
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-black/60">
                 After generation, send the draft to AI for legal language
                 enhancement. Facts are preserved — only clarity and formal tone
                 are improved. Requires OpenAI API key.
@@ -763,14 +808,17 @@ function CreateApplicationModal({ onClose, onCreated }) {
         </div>
 
         {/* --- Actions ------------ */}
-        <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
-          <button onClick={onClose} className="btn-secondary">
+        <div className="flex justify-end gap-3 pt-4 border-t border-[#9fd8d1]/30">
+          <button
+            onClick={onClose}
+            className="px-5 py-2.5 text-black/60 hover:text-black hover:bg-[#eef5f3] rounded-xl font-medium transition-all duration-200"
+          >
             Cancel
           </button>
           <button
             onClick={handleSaveDraft}
             disabled={saving || generating}
-            className="btn-secondary"
+            className="px-5 py-2.5 text-[#026665] bg-[#eef5f3] hover:bg-[#9fd8d1]/30 rounded-xl font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save as Draft"}
           </button>
@@ -778,7 +826,7 @@ function CreateApplicationModal({ onClose, onCreated }) {
             <button
               onClick={handleGenerate}
               disabled={saving || generating}
-              className="btn-primary"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#026665] text-white rounded-xl font-medium hover:bg-[#0e9185] transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {generating ? (
                 <span className="flex items-center gap-2">
@@ -818,7 +866,6 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
     APPLICATION_TYPES.find((t) => t.value === data.applicationType)?.label ||
     data.applicationType;
 
-  // --- AI Improve ------------
   const handleImprove = async () => {
     setImproving(true);
     try {
@@ -842,7 +889,6 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
     }
   };
 
-  // --- Submit for Review ------------------─
   const handleSubmitForReview = async () => {
     setSubmitting(true);
     try {
@@ -865,7 +911,6 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
     }
   };
 
-  // --- Save Edited Content ---------------─
   const handleSaveContent = async () => {
     setSavingContent(true);
     try {
@@ -895,34 +940,36 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
 
   return (
     <Modal isOpen onClose={onClose} title={typeLabel} size="xl">
-      <div className="space-y-5 max-h-[80vh] overflow-y-auto pr-1">
+      <div className="space-y-6 max-h-[80vh] overflow-y-auto pr-1">
         {/* --- Status + Meta ------------------─ */}
         <div className="flex flex-wrap items-center gap-3">
           <StatusBadge status={data.status} />
           {data.autoGenerated && (
-            <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-medium">
+            <span className="text-xs text-[#026665] bg-[#eef5f3] px-3 py-1 rounded-full font-medium">
               Auto-generated
             </span>
           )}
           {data.aiEnhanced && (
-            <span className="text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+            <span className="text-xs text-[#0e9185] bg-[#9fd8d1]/20 px-3 py-1 rounded-full font-medium flex items-center gap-1">
               <Sparkles className="w-3 h-3" /> AI Enhanced
             </span>
           )}
           {data.version > 1 && (
-            <span className="text-xs text-slate-500">v{data.version}</span>
+            <span className="text-xs text-black/50 bg-[#eef5f3] px-3 py-1 rounded-full font-medium">
+              v{data.version}
+            </span>
           )}
         </div>
 
         {/* --- Key Fields ------------------------ */}
         <div className="grid grid-cols-2 gap-3 text-sm">
           {[
-            ["Applicant", data.applicantName],
-            ["Respondent", data.respondentName],
-            ["Case No.", data.caseNumber],
-            ["FIR No.", data.firNo],
-            ["Court", data.courtName],
-            ["Judge", data.judgeName],
+            ["Applicant", data.applicantName, User],
+            ["Respondent", data.respondentName, User],
+            ["Case No.", data.caseNumber, Scale],
+            ["FIR No.", data.firNo, FileText],
+            ["Court", data.courtName, Building2],
+            ["Judge", data.judgeName, Gavel],
             [
               "Hearing",
               data.hearingDate
@@ -932,19 +979,21 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
                     year: "numeric",
                   })
                 : null,
+              Calendar,
             ],
-            ["Sections", data.ppcSections?.join(", ")],
+            ["Sections", data.ppcSections?.join(", "), Layers],
           ]
             .filter(([, v]) => v)
-            .map(([label, value]) => (
+            .map(([label, value, Icon]) => (
               <div
                 key={label}
-                className="bg-slate-50 rounded-lg p-3 border border-slate-100"
+                className="bg-[#eef5f3] rounded-xl p-4 border border-[#9fd8d1]/20 hover:border-[#9fd8d1]/40 transition-all duration-200"
               >
-                <p className="text-xs text-slate-400 font-medium mb-0.5">
-                  {label}
-                </p>
-                <p className="text-slate-700 font-medium text-sm truncate">
+                <div className="flex items-center gap-2 mb-1.5">
+                  {Icon && <Icon className="w-3.5 h-3.5 text-[#0e9185]" />}
+                  <p className="text-xs text-black/50 font-medium">{label}</p>
+                </div>
+                <p className="text-black font-medium text-sm truncate">
                   {value}
                 </p>
               </div>
@@ -954,30 +1003,32 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
         {/* --- Grounds ------------ */}
         {data.grounds?.length > 0 && (
           <div>
-            <p className="label">Grounds</p>
-            <ol className="space-y-1.5">
-              {data.grounds.map((g, i) => (
-                <li key={i} className="flex gap-2 text-sm text-slate-700">
-                  <span className="text-slate-400 font-mono text-xs mt-0.5 shrink-0">
-                    {i + 1}.
-                  </span>
-                  {g}
-                </li>
-              ))}
-            </ol>
+            <p className="text-sm font-medium text-black mb-2">Grounds</p>
+            <div className="bg-[#eef5f3] rounded-xl p-4 border border-[#9fd8d1]/20">
+              <ol className="space-y-2">
+                {data.grounds.map((g, i) => (
+                  <li key={i} className="flex gap-3 text-sm text-black/80">
+                    <span className="text-[#0e9185] font-mono text-xs mt-0.5 shrink-0">
+                      {i + 1}.
+                    </span>
+                    <span>{g}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
         )}
 
         {/* --- Generated Content ------------─ */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <p className="label mb-0">Application Text</p>
+            <p className="text-sm font-medium text-black">Application Text</p>
             {canEdit && hasContent && (
               <div className="flex items-center gap-2">
                 {!editingContent ? (
                   <button
                     onClick={() => setEditingContent(true)}
-                    className="text-xs text-primary-600 hover:underline"
+                    className="text-xs text-[#0e9185] hover:text-[#026665] font-medium transition-colors"
                   >
                     Edit
                   </button>
@@ -986,7 +1037,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
                     <button
                       onClick={handleSaveContent}
                       disabled={savingContent}
-                      className="text-xs text-emerald-600 hover:underline"
+                      className="text-xs text-[#026665] hover:text-[#0e9185] font-medium transition-colors disabled:opacity-40"
                     >
                       {savingContent ? "Saving..." : "Save"}
                     </button>
@@ -997,7 +1048,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
                           data.content || data.generatedText || "",
                         );
                       }}
-                      className="text-xs text-slate-400 hover:underline"
+                      className="text-xs text-black/40 hover:text-black/60 font-medium transition-colors"
                     >
                       Cancel
                     </button>
@@ -1010,19 +1061,19 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
           {hasContent ? (
             editingContent ? (
               <textarea
-                className="textarea h-80 font-mono text-xs"
+                className="w-full px-4 py-3 bg-[#eef5f3] border-0 rounded-xl text-black text-sm font-mono focus:ring-2 focus:ring-[#0e9185] focus:outline-none transition-all resize-none h-80"
                 value={contentDraft}
                 onChange={(e) => setContentDraft(e.target.value)}
               />
             ) : (
-              <pre className="text-xs text-slate-700 bg-slate-50 rounded-lg px-4 py-3 border border-slate-100 whitespace-pre-wrap font-mono overflow-x-auto max-h-80 overflow-y-auto">
+              <pre className="text-xs text-black/80 bg-[#eef5f3] rounded-xl px-4 py-4 border border-[#9fd8d1]/20 whitespace-pre-wrap font-mono overflow-x-auto max-h-80 overflow-y-auto">
                 {data.content || data.generatedText}
               </pre>
             )
           ) : (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+            <div className="bg-[#eef5f3] rounded-xl p-4 border border-amber-200 flex items-start gap-3">
               <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-800">
+              <p className="text-sm text-black/60">
                 No draft content yet. Create a new version with Auto-Generate
                 enabled.
               </p>
@@ -1032,22 +1083,22 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
 
         {/* --- Review Note --------------------- */}
         {data.reviewNote && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <p className="text-xs font-semibold text-amber-700 mb-1">
+          <div className="bg-[#eef5f3] rounded-xl p-4 border border-[#9fd8d1]/30">
+            <p className="text-xs font-semibold text-[#026665] mb-1">
               Review Note from Senior Lawyer
             </p>
-            <p className="text-sm text-amber-900">{data.reviewNote}</p>
+            <p className="text-sm text-black/80">{data.reviewNote}</p>
           </div>
         )}
 
         {/* --- Action Bar ------------------------ */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
+        <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-[#9fd8d1]/30">
           {/* AI Improve */}
           {canEdit && hasContent && (
             <button
               onClick={handleImprove}
               disabled={improving}
-              className="btn-secondary text-violet-600 border-violet-200 hover:bg-violet-50"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-[#0e9185] bg-[#eef5f3] hover:bg-[#9fd8d1]/30 rounded-xl font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {improving ? (
                 <>
@@ -1066,7 +1117,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
             <button
               onClick={handleSubmitForReview}
               disabled={submitting}
-              className="btn-primary"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#026665] text-white rounded-xl font-medium hover:bg-[#0e9185] transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <>
@@ -1082,8 +1133,8 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
 
           {/* Approved indicator */}
           {data.status === "approved" && (
-            <span className="flex items-center gap-1.5 text-sm text-emerald-700 font-medium">
-              <CheckCircle className="w-4 h-4" /> Approved by Senior Lawyer {data.reviewedBy?.name || "Senior Lawyer"}
+            <span className="flex items-center gap-2 text-sm text-[#026665] font-medium bg-[#eef5f3] px-4 py-2 rounded-xl">
+              <BadgeCheck className="w-4 h-4" /> Approved by Senior Lawyer
             </span>
           )}
         </div>

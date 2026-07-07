@@ -5,14 +5,14 @@ import "./globals.css";
 export const metadata = {
   metadataBase: new URL("http://localhost:3000"),
   icons: {
-    icon: "/LawWebLogo.png",
+    icon: "/logo1.png",
   },
   title: {
-    default: "LawPortal - Law Firm Management for Pakistani Lawyers",
-    template: "%s | LawPortal",
+    default: "LegalPortal - Law Firm Management for Pakistani Lawyers",
+    template: "%s | LegalPortal",
   },
   description:
-    "LawPortal is a professional law firm management system built for Pakistani lawyers. Manage cases, clients, billing, and your chamber — all in one place.",
+    "LegalPortal is a professional law firm management system built for Pakistani lawyers. Manage cases, clients, billing, and your chamber — all in one place.",
 
   keywords: [
     "law firm management Pakistan",
@@ -25,33 +25,33 @@ export const metadata = {
     "law portal Pakistan",
   ],
 
-  authors: [{ name: "LawPortal" }],
-  creator: "LawPortal",
-  publisher: "LawPortal",
+  authors: [{ name: "LegalPortal" }],
+  creator: "LegalPortal",
+  publisher: "LegalPortal",
 
   openGraph: {
     type: "website",
     locale: "en_PK",
     url: "http://localhost:3000",
-    siteName: "LawPortal",
-    title: "LawPortal — Law Firm Management for Pakistani Lawyers",
+    siteName: "LegalPortal",
+    title: "LegalPortal — Law Firm Management for Pakistani Lawyers",
     description:
-      "Manage your chamber, cases, clients, and billing with LawPortal — built specifically for law firms in Pakistan.",
+      "Manage your chamber, cases, clients, and billing with LegalPortal — built specifically for law firms in Pakistan.",
     images: [
       {
         url: "/opengrapgImg.png",
         width: 1200,
         height: 630,
-        alt: "LawPortal — Law Firm Management System",
+        alt: "LegalPortal — Law Firm Management System",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "LawPortal — Law Firm Management for Pakistani Lawyers",
+    title: "LegalPortal — Law Firm Management for Pakistani Lawyers",
     description:
-      "Manage your chamber, cases, clients, and billing with LawPortal — built for Pakistani law firms.",
+      "Manage your chamber, cases, clients, and billing with LegalPortal — built for Pakistani law firms.",
     images: ["/og-image.png"],
   },
 
@@ -80,7 +80,7 @@ export default function RootLayout({ children }) {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "SoftwareApplication",
-              name: "LawPortal",
+              name: "LegalPortal",
               applicationCategory: "BusinessApplication",
               operatingSystem: "Web",
               url: "http://localhost:3000",
@@ -93,7 +93,7 @@ export default function RootLayout({ children }) {
               },
               provider: {
                 "@type": "Organization",
-                name: "LawPortal",
+                name: "LegalPortal",
                 url: "http://localhost:3000",
               },
             }),
