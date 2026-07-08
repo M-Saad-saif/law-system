@@ -89,7 +89,7 @@ export async function POST(request) {
                             <span style="color:#fff;font-size:20px;">⚖️</span>
                           </td>
                           <td style="padding-left:12px;">
-                            <span style="color:#fff;font-size:18px;font-weight:700;">LawPortal</span>
+                            <span style="color:#fff;font-size:18px;font-weight:700;">LegalPortal</span>
                           </td>
                         </tr>
                       </table>

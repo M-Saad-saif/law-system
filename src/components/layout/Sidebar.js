@@ -90,6 +90,11 @@ function buildNavSections(user) {
             href: "/admin/payments",
             icon: Icon.Admin,
           },
+          {
+            label: "Judgments",
+            href: "/judgements",
+            icon: Icon.Search,
+          },
           { label: "Reminder", href: "/reminders", icon: Icon.Reminders },
         ],
       },

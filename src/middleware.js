@@ -23,7 +23,7 @@ const NON_ADMIN_PATHS = [
   "/calendar",
   "/cross-exams",
   "/applications",
-  "/judgements",
+  // "/judgements",
   "/judgement-search",
   "/judgement-extractor",
   "/judgement-image-generator",

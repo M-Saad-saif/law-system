@@ -186,7 +186,7 @@ function RecentImagesGallery() {
             alt={image.inputData?.judgementTitle || "Judgement image"}
             className="w-full h-48 object-cover"
             onError={(e) => {
-              e.target.src = "/placeholder-image.jpg";
+              e.currentTarget.src = "/Monogram.png";
             }}
           />
           <div className="p-3">

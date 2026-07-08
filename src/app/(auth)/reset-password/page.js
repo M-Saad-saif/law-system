@@ -4,9 +4,11 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Scale, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 import { api } from "@/utils/api";
+import logo from "/public/Horizontal-Logo.png";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -69,12 +71,14 @@ function ResetPasswordForm() {
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-[#027f7e] to-[#025f5e] mb-4 shadow-[0_8px_20px_-6px_rgba(2,127,126,0.3)]">
-            <Scale className="w-7 h-7 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-white font-display">
-            LawPortal
-          </h1>
+          <Image
+            src={logo}
+            width={260}
+            height={220}
+            alt="Logo"
+            className="object-contain"
+            priority
+          />
           <p className="text-white/50 text-sm mt-1">
             Legal Practice Management System
           </p>

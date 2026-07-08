@@ -24,6 +24,19 @@ const JudgmentSchema = new mongoose.Schema(
     },
     approved: { type: Boolean, default: false },
     fetchedAt: { type: Date, default: Date.now, index: true },
+
+    caseNumber: { type: String, default: null, trim: true },
+    summary: { type: String, default: null, trim: true },
+    keywords: { type: [String], default: [] },
+    bench: { type: String, default: null, trim: true },
+    qualityScore: { type: Number, default: null },
+    status: { type: String, default: null, trim: true },
+    source: {
+      type: String,
+      enum: ["apify", "sheet", "manual"],
+      default: "apify",
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -33,7 +46,13 @@ const JudgmentSchema = new mongoose.Schema(
 
 JudgmentSchema.index({ court: 1, orderDate: -1 });
 JudgmentSchema.index({ fetchedAt: -1 });
-JudgmentSchema.index({ title: "text", citation: "text", matter: "text" });
+JudgmentSchema.index({
+  title: "text",
+  citation: "text",
+  matter: "text",
+  caseNumber: "text",
+  keywords: "text",
+});
 
 export default mongoose.models.Judgment ||
   mongoose.model("Judgment", JudgmentSchema);

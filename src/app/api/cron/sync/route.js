@@ -25,7 +25,7 @@ export async function GET(request) {
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
       "http://localhost:3000";
 
-    const syncUrl = `${appBase}/api/sync-judgments`;
+    const syncUrl = `${appBase}/api/sync-judgments-sheet`;
 
     const response = await fetch(syncUrl, {
       method: "POST",
@@ -59,7 +59,6 @@ export async function GET(request) {
       syncResult: result,
     });
   } catch (err) {
-    console.error("[cron/sync] Unexpected error:", err.message);
     return NextResponse.json(
       { success: false, message: err.message ?? "Internal error." },
       { status: 500 },

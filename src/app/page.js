@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import logo from "/public/logo1.png"
+import logo from "/public//Horizontal-Logo.png";
+import Monogram from "/public/Monogram.png";
 import { useEffect, useState, useRef } from "react";
 import {
   Scale,
@@ -186,29 +187,19 @@ export default function LandingPage() {
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         className="fixed top-0 inset-x-0 z-50 bg-[#000203]/60 backdrop-blur-xl border-b border-white/10"
       >
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 py-1 flex items-center justify-between">
           <motion.div
             whileHover={{ scale: 1.02 }}
             className="flex items-center gap-2 group cursor-pointer"
           >
-            <motion.div
-              whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.6 }}
-              className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-[#027f7e] to-[#103168] overflow-hidden flex items-center justify-center shadow-lg shadow-[#027f7e]/30 group-hover:shadow-xl group-hover:shadow-[#027f7e]/40 transition-all"
-            >
-              {/* <Scale className="w-5 h-5 text-white" /> */}
-              <Image
-                src={logo}
-                width={40}
-                height={40}
-                alt="Logo"
-                className="object-contain"
-                priority
-              />
-            </motion.div>
-            <span className="text-xl font-bold tracking-tight text-white">
-              Legal<span className="text-[#027f7e]">Portal</span>
-            </span>
+            <Image
+              src={logo}
+              width={200}
+              height={200}
+              alt="Logo"
+              className="object-contain"
+              priority
+            />
           </motion.div>
 
           {/* NEW: Section links */}
@@ -975,14 +966,15 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
             {/* Brand column */}
             <div className="lg:col-span-2">
-              <div className="flex items-center gap-3 mb-4">
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.6 }}
-                  className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#027f7e] to-[#103168] flex items-center justify-center shadow-lg shadow-[#027f7e]/20"
-                >
-                  <Scale className="w-5 h-5 text-white" />
-                </motion.div>
+              <div className="flex items-center gap-2 mb-4">
+                <Image
+                  src={Monogram}
+                  width={50}
+                  height={50}
+                  alt="Logo"
+                  className="object-contain"
+                  priority
+                />
                 <span className="text-lg font-bold text-white">
                   Legal<span className="text-[#027f7e]">Portal</span>
                 </span>
@@ -1095,10 +1087,16 @@ export default function LandingPage() {
           {/* Bottom bar */}
           <div className="border-t border-gray-800/50 pt-8">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#027f7e] to-[#103168] flex items-center justify-center">
-                  <Scale className="w-4 h-4 text-white" />
-                </div>
+              <div className="flex items-center gap-1">
+                <Image
+                  src={Monogram}
+                  width={50}
+                  height={50}
+                  alt="Logo"
+                  className="object-contain"
+                  priority
+                />
+
                 <span className="text-sm text-gray-500">
                   © {new Date().getFullYear()} LegalPortal — Legal Management
                   Platform

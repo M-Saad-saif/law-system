@@ -1,16 +1,20 @@
 "use client";
 
 import { Scale, Key, Shield, Mail } from "lucide-react";
+import Image from "next/image";
+import logo from "/public/Horizontal-Logo.png";
 
 function Logo() {
   return (
-    <div className="flex items-center gap-2.5 mb-16 group cursor-pointer animate-scale-in">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f766e] to-[#0d9488] flex items-center justify-center shadow-lg transform group-hover:rotate-180 transition-all duration-700 animate-gradient-shift">
-        <Scale className="text-white w-5 h-5" />
-      </div>
-      <span className="text-[25px] font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
-        LegalPortal
-      </span>
+    <div className="flex items-center gap-2.5 mb-5 group cursor-pointer animate-scale-in">
+      <Image
+        src={logo}
+        width={260}
+        height={220}
+        alt="Logo"
+        className="object-contain"
+        priority
+      />
     </div>
   );
 }

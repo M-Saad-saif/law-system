@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Mail, Lock, Eye, EyeOff, Scale } from "lucide-react";
@@ -11,6 +12,7 @@ import { api } from "@/utils/api";
 import { LaptopMockup } from "@/components/auth/LaptopMockup";
 import BackgroundPattern from "@/components/auth/BackgroundPattern";
 import { FormField } from "@/components/auth/Field";
+import logo from "/public/Horizontal-Logo.png";
 
 function LoadingSpinner({ className = "" }) {
   return (
@@ -22,13 +24,15 @@ function LoadingSpinner({ className = "" }) {
 
 function Logo() {
   return (
-    <div className="flex items-center gap-2.5 mb-16 group cursor-pointer animate-scale-in">
-      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#0f766e] to-[#0d9488] flex items-center justify-center shadow-lg transform group-hover:rotate-180 transition-all duration-700 animate-gradient-shift">
-        <Scale className="text-white w-5 h-5" />
-      </div>
-      <span className="text-[25px] font-bold tracking-wide text-slate-700 group-hover:text-[#0d9488] transition-colors duration-300">
-        LegalPortal
-      </span>
+    <div className="flex items-center gap-2.5 mb-5 group cursor-pointer animate-scale-in">
+      <Image
+        src={logo}
+        width={260}
+        height={220}
+        alt="Logo"
+        className="object-contain"
+        priority
+      />
     </div>
   );
 }
@@ -122,7 +126,6 @@ export default function LoginPage() {
             background-position: 200% 0;
           }
         }
-      
 
         .animate-sweep-1 {
           animation: sweepIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;

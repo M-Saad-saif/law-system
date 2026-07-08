@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata = {
   metadataBase: new URL("http://localhost:3000"),
   icons: {
-    icon: "/logo1.png",
+    icon: "/Monogram.png",
   },
   title: {
     default: "LegalPortal - Law Firm Management for Pakistani Lawyers",
