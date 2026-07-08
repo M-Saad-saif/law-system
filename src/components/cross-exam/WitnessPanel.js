@@ -36,13 +36,13 @@ function AddWitnessForm({ onAdd, onCancel }) {
       className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 space-y-3"
     >
       <p className="text-sm font-semibold text-indigo-800">Add Witness</p>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <input
           name="witnessName"
           value={form.witnessName}
           onChange={handleChange}
           placeholder="Witness name *"
-          className="col-span-2 border border-indigo-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="sm:col-span-2 border border-indigo-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           required
         />
         <select

@@ -286,7 +286,7 @@ const JudgementCard = ({ data, onImageGenerated }) => {
       </div>
 
       {/* Controls - Formal Style */}
-      <div className="flex gap-4 justify-center pt-4">
+      <div className="flex flex-wrap gap-4 justify-center pt-4">
         <button
           onClick={() => downloadImage("png")}
           disabled={isGenerating}

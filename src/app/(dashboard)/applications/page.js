@@ -962,7 +962,7 @@ function ApplicationDetailModal({ app, onClose, onUpdated }) {
         </div>
 
         {/* --- Key Fields ------------------------ */}
-        <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
           {[
             ["Applicant", data.applicantName, User],
             ["Respondent", data.respondentName, User],

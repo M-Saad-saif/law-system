@@ -160,7 +160,7 @@ export default function LoginPage() {
 
       <BackgroundPattern />
 
-      <div className="w-full max-w-7xl min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-8 lg:px-24 py-12 relative z-10">
+      <div className="w-full max-w-7xl min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-5 sm:px-8 lg:px-24 py-8 sm:py-12 relative z-10">
         <div className="lg:col-span-5 flex flex-col justify-center">
           <Logo />
 
@@ -234,7 +234,7 @@ export default function LoginPage() {
             </div>
 
             <div
-              className="flex items-center gap-8 pt-4 pl-1 animate-slide-up"
+              className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-4 pl-1 animate-slide-up"
               style={{ animationDelay: "800ms" }}
             >
               <button

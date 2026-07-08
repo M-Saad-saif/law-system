@@ -171,7 +171,7 @@ export default function NewCrossExamPage() {
 
         {/* ---- Basic Info Card ---- */}
         <div className="bg-white rounded-3xl border border-[#9fd8d1]/30 shadow-xl overflow-hidden transition-all duration-200 hover:shadow-2xl">
-          <div className="px-8 py-6 border-b border-[#eef5f3] bg-gradient-to-r from-[#eef5f3] to-white">
+          <div className="px-4 sm:px-8 py-6 border-b border-[#eef5f3] bg-gradient-to-r from-[#eef5f3] to-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-[#026665] flex items-center justify-center shadow-md shadow-[#026665]/20">
                 <FileText className="w-5 h-5 text-white" />
@@ -191,7 +191,7 @@ export default function NewCrossExamPage() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="px-8 py-7 space-y-6">
+          <form onSubmit={handleSubmit} className="px-4 sm:px-8 py-7 space-y-6">
             {/* Title */}
             <div>
               <label className="block text-xs font-bold text-[#026665] uppercase tracking-wider mb-2">
@@ -313,7 +313,7 @@ export default function NewCrossExamPage() {
           <button
             type="button"
             onClick={() => setShowAIPanel((v) => !v)}
-            className="w-full flex items-center justify-between px-8 py-5 text-left hover:bg-[#eef5f3]/50 transition-colors duration-200"
+            className="w-full flex items-center justify-between px-4 sm:px-8 py-5 text-left hover:bg-[#eef5f3]/50 transition-colors duration-200"
           >
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#026665] to-[#0e9185] flex items-center justify-center shadow-md shadow-[#026665]/20">
@@ -338,7 +338,7 @@ export default function NewCrossExamPage() {
           </button>
 
           {showAIPanel && (
-            <div className="px-8 pb-7 space-y-5 border-t border-[#eef5f3]">
+            <div className="px-4 sm:px-8 pb-7 space-y-5 border-t border-[#eef5f3]">
               <p className="text-sm text-[#026665]/70 pt-5 leading-relaxed">
                 Provide the case facts, FIR contents, or witness statement
                 below. The AI will generate 15–25 strategic questions grouped by
@@ -347,7 +347,7 @@ export default function NewCrossExamPage() {
               </p>
 
               {/* Witness + Case Type */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#026665] uppercase tracking-wider mb-1.5">
                     Witness Type

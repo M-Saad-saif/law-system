@@ -431,7 +431,7 @@ export default function SettingsPage() {
           </label>
           <input
             type="password"
-            className="w-[143%] px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
             placeholder="Verify past credentials"
             value={pwdForm.currentPassword}
             onChange={(e) =>

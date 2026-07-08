@@ -151,7 +151,7 @@ export default function RegisterPage() {
 
       <BackgroundPattern />
 
-      <div className="w-full max-w-7xl min-h-screen lg:min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-8 lg:px-24 py-12 relative z-10">
+      <div className="w-full max-w-7xl min-h-screen lg:min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-5 sm:px-8 lg:px-24 py-8 sm:py-12 relative z-10">
         <div className="lg:col-span-5 flex flex-col justify-center">
           <div className="flex items-center gap-2.5 mb-5 group cursor-pointer animate-scale-in">
             <Image
@@ -259,7 +259,7 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div
                 className="animate-slide-up"
                 style={{ animationDelay: "500ms" }}
@@ -288,7 +288,7 @@ export default function RegisterPage() {
 
             {/* Submit Buttons with Enhanced Animations */}
             <div
-              className="flex items-center gap-8 pt-4 pl-1 animate-slide-up"
+              className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-4 pl-1 animate-slide-up"
               style={{ animationDelay: "800ms" }}
             >
               <button

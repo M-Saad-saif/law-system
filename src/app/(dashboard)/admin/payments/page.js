@@ -196,7 +196,7 @@ function ActionModal({ payment, onClose, onDone, onPreviewScreenshot }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-[50%] h-full  p-5 md:p-8 flex flex-col animate-in zoom-in-95 duration-300">
+      <div className="bg-white rounded-2xl shadow-2xl w-full sm:w-[85%] lg:w-[65%] xl:w-[50%] h-full p-4 sm:p-5 md:p-8 flex flex-col animate-in zoom-in-95 duration-300">
         {/* Header - Fixed at top */}
         <div className="flex items-start justify-between shrink-0 pb-6">
           <div className="space-y-1">
@@ -225,7 +225,7 @@ function ActionModal({ payment, onClose, onDone, onPreviewScreenshot }) {
             {/* Decorative gradient */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[#027675]/5 to-transparent rounded-bl-3xl -mr-2 -mt-2" />
 
-            <div className="relative grid grid-cols-2 gap-4">
+            <div className="relative grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InfoRow
                 label="Company"
                 value={payment.chamber?.name || payment.owner?.name}
@@ -281,7 +281,10 @@ function ActionModal({ payment, onClose, onDone, onPreviewScreenshot }) {
               <button
                 type="button"
                 onClick={() =>
-                  onPreviewScreenshot?.(payment.screenshot_url, payment.invoice_id)
+                  onPreviewScreenshot?.(
+                    payment.screenshot_url,
+                    payment.invoice_id,
+                  )
                 }
                 className="block w-full rounded-xl overflow-hidden border border-slate-200 hover:ring-2 hover:ring-[#027675]/20 hover:border-[#027675]/30 transition-all duration-300 group shadow-sm hover:shadow-md text-left cursor-zoom-in"
               >
@@ -309,7 +312,7 @@ function ActionModal({ payment, onClose, onDone, onPreviewScreenshot }) {
               <div className="w-1 h-1 rounded-full bg-slate-400" />
               Decision
             </label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <button
                 type="button"
                 onClick={() => setAction("approve")}
@@ -718,7 +721,10 @@ function PaymentCard({ payment, onAction, onTempAccess, onPreviewScreenshot }) {
             <button
               type="button"
               onClick={() =>
-                onPreviewScreenshot?.(payment.screenshot_url, payment.invoice_id)
+                onPreviewScreenshot?.(
+                  payment.screenshot_url,
+                  payment.invoice_id,
+                )
               }
               className="border border-slate-200 hover:border-slate-300 text-slate-700 text-xs font-medium px-5 py-3 rounded-lg flex items-center gap-2 hover:bg-slate-50 transition-all text-left"
             >
@@ -1127,9 +1133,7 @@ export default function AdminPaymentsPage() {
             setSelected(null);
             setProofPreview(null);
           }}
-          onPreviewScreenshot={(src, label) =>
-            setProofPreview({ src, label })
-          }
+          onPreviewScreenshot={(src, label) => setProofPreview({ src, label })}
           onDone={() => {
             setSelected(null);
             setProofPreview(null);

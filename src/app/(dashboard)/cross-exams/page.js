@@ -163,7 +163,8 @@ const STATUS = {
 function StatusPill({ status, size = "sm" }) {
   const s = STATUS[status] || STATUS.draft;
   const Icon = s.icon;
-  const sizeClasses = size === "sm" ? "px-2.5 py-1 text-xs" : "px-4 py-1.5 text-sm";
+  const sizeClasses =
+    size === "sm" ? "px-2.5 py-1 text-xs" : "px-4 py-1.5 text-sm";
 
   return (
     <span
@@ -184,21 +185,30 @@ function StatCard({ label, count, status, active, onClick }) {
       onClick={onClick}
       className={`
         group relative overflow-hidden text-left p-5 rounded-2xl border-2 transition-all duration-300
-        ${active
-          ? "border-[#026665] bg-[#eef5f3] shadow-lg shadow-[#026665]/10"
-          : "border-slate-200 bg-white hover:border-[#0e9185] hover:shadow-md hover:-translate-y-0.5"
+        ${
+          active
+            ? "border-[#026665] bg-[#eef5f3] shadow-lg shadow-[#026665]/10"
+            : "border-slate-200 bg-white hover:border-[#0e9185] hover:shadow-md hover:-translate-y-0.5"
         }
       `}
     >
-      <div className={`absolute top-0 left-0 h-1 w-full transition-all duration-300 ${active ? "bg-[#026665]" : "bg-transparent group-hover:bg-[#0e9185]"}`} />
+      <div
+        className={`absolute top-0 left-0 h-1 w-full transition-all duration-300 ${active ? "bg-[#026665]" : "bg-transparent group-hover:bg-[#0e9185]"}`}
+      />
       <div className="flex items-center justify-between mb-3">
         <div className={`w-2 h-2 rounded-full ${s.dot}`} />
-        <Icon className={`w-4 h-4 ${active ? "text-[#026665]" : "text-slate-400"}`} />
+        <Icon
+          className={`w-4 h-4 ${active ? "text-[#026665]" : "text-slate-400"}`}
+        />
       </div>
-      <p className={`text-2xl font-bold ${active ? "text-[#026665]" : "text-slate-800"}`}>
+      <p
+        className={`text-2xl font-bold ${active ? "text-[#026665]" : "text-slate-800"}`}
+      >
         {count}
       </p>
-      <p className={`text-xs mt-1 font-medium ${active ? "text-[#026665]" : "text-slate-500"}`}>
+      <p
+        className={`text-xs mt-1 font-medium ${active ? "text-[#026665]" : "text-slate-500"}`}
+      >
         {label}
       </p>
     </button>
@@ -302,7 +312,10 @@ export default function CrossExamsPage() {
         {/* Page Header */}
         <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-[#000000]" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1
+              className="text-3xl font-bold text-[#000000]"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               Cross-Examinations
             </h1>
             <p className="text-slate-500 text-sm mt-1 flex items-center gap-2">
@@ -357,7 +370,9 @@ export default function CrossExamsPage() {
           <div className="flex items-center gap-2">
             {filters.status && (
               <button
-                onClick={() => setFilters((f) => ({ ...f, status: "", page: 1 }))}
+                onClick={() =>
+                  setFilters((f) => ({ ...f, status: "", page: 1 }))
+                }
                 className="flex items-center gap-2 px-4 py-2.5 bg-[#eef5f3] text-[#026665] rounded-xl text-sm font-medium border border-[#9fd8d1] hover:bg-[#9fd8d1]/30 transition-colors"
               >
                 <StatusPill status={filters.status} size="sm" />
@@ -396,24 +411,42 @@ export default function CrossExamsPage() {
             <Loader2 className="w-8 h-8 text-[#026665] animate-spin" />
           </div>
         ) : exams.length === 0 ? (
-          <EmptyState hasFilters={hasFilters} onNew={() => router.push("/cross-exams/new")} />
+          <EmptyState
+            hasFilters={hasFilters}
+            onNew={() => router.push("/cross-exams/new")}
+          />
         ) : viewMode === "list" ? (
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <table className="w-full text-sm">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-x-auto">
+            <table className="w-full text-sm min-w-[720px]">
               <thead>
                 <tr className="border-b border-slate-100 bg-[#eef5f3]">
-                  <th className="text-left px-5 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">Title</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">Case</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">Status</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">Reviewer</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">Hearing</th>
-                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">Updated</th>
+                  <th className="text-left px-5 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">
+                    Title
+                  </th>
+                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">
+                    Case
+                  </th>
+                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">
+                    Status
+                  </th>
+                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">
+                    Reviewer
+                  </th>
+                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">
+                    Hearing
+                  </th>
+                  <th className="text-left px-4 py-3.5 text-xs font-bold text-[#026665] uppercase tracking-wide">
+                    Updated
+                  </th>
                   <th className="px-4 py-3.5" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {exams.map((exam) => (
-                  <tr key={exam._id} className="hover:bg-[#eef5f3]/50 transition-colors group">
+                  <tr
+                    key={exam._id}
+                    className="hover:bg-[#eef5f3]/50 transition-colors group"
+                  >
                     <td className="px-5 py-4">
                       <Link
                         href={`/cross-exams/${exam._id}`}
@@ -427,15 +460,21 @@ export default function CrossExamsPage() {
                           {exam.userId?.name}
                         </span>
                         <span className="text-xs text-slate-300">•</span>
-                        <span className="text-xs text-slate-400">{exam.userId?.email}</span>
+                        <span className="text-xs text-slate-400">
+                          {exam.userId?.email}
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-4">
                       {exam.caseId ? (
                         <div>
-                          <span className="font-medium text-slate-700">{exam.caseId.caseTitle}</span>
+                          <span className="font-medium text-slate-700">
+                            {exam.caseId.caseTitle}
+                          </span>
                           <br />
-                          <span className="text-xs text-slate-400">{exam.caseId.caseNumber}</span>
+                          <span className="text-xs text-slate-400">
+                            {exam.caseId.caseNumber}
+                          </span>
                         </div>
                       ) : (
                         <span className="text-slate-300">—</span>
@@ -446,28 +485,43 @@ export default function CrossExamsPage() {
                     </td>
                     <td className="px-4 py-4">
                       {exam.assignedTo?.name ? (
-                        <span className="text-slate-600">{exam.assignedTo.name}</span>
+                        <span className="text-slate-600">
+                          {exam.assignedTo.name}
+                        </span>
                       ) : (
-                        <span className="text-slate-300 italic text-xs">Unassigned</span>
+                        <span className="text-slate-300 italic text-xs">
+                          Unassigned
+                        </span>
                       )}
                     </td>
-                    <td className="px-4 py-4 text-slate-500 text-sm">{fmtDate(exam.hearingDate)}</td>
-                    <td className="px-4 py-4 text-slate-400 text-xs">{fmtDate(exam.updatedAt)}</td>
+                    <td className="px-4 py-4 text-slate-500 text-sm">
+                      {fmtDate(exam.hearingDate)}
+                    </td>
+                    <td className="px-4 py-4 text-slate-400 text-xs">
+                      {fmtDate(exam.updatedAt)}
+                    </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {isSenior && ["submitted", "in_review"].includes(exam.status) ? (
+                        {isSenior &&
+                        ["submitted", "in_review"].includes(exam.status) ? (
                           <Link
                             href={`/cross-exams/${exam._id}/review`}
                             className="px-3 py-1.5 bg-[#026665] text-white text-xs font-semibold rounded-lg hover:bg-[#0e9185] transition-colors"
                           >
-                            {exam.status === "submitted" ? "Start Review" : "Review"}
+                            {exam.status === "submitted"
+                              ? "Start Review"
+                              : "Review"}
                           </Link>
                         ) : (
                           <Link
                             href={`/cross-exams/${exam._id}`}
                             className="px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-lg hover:bg-slate-700 transition-colors"
                           >
-                            {["draft", "changes_requested"].includes(exam.status) ? "Edit" : "View"}
+                            {["draft", "changes_requested"].includes(
+                              exam.status,
+                            )
+                              ? "Edit"
+                              : "View"}
                           </Link>
                         )}
                         <Link
@@ -508,7 +562,10 @@ export default function CrossExamsPage() {
                   {exams.length} of {pagination.total} total
                 </p>
                 <div className="flex gap-1.5">
-                  {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
+                  {Array.from(
+                    { length: pagination.pages },
+                    (_, i) => i + 1,
+                  ).map((p) => (
                     <button
                       key={p}
                       onClick={() => setFilters((f) => ({ ...f, page: p }))}
@@ -535,7 +592,9 @@ export default function CrossExamsPage() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <StatusPill status={exam.status} size="sm" />
-                  <span className="text-xs text-slate-400">{fmtDate(exam.updatedAt)}</span>
+                  <span className="text-xs text-slate-400">
+                    {fmtDate(exam.updatedAt)}
+                  </span>
                 </div>
                 <Link href={`/cross-exams/${exam._id}`}>
                   <h3 className="font-semibold text-slate-800 hover:text-[#026665] transition-colors text-lg">
@@ -565,7 +624,9 @@ export default function CrossExamsPage() {
                     href={`/cross-exams/${exam._id}`}
                     className="flex-1 text-center bg-[#026665] hover:bg-[#0e9185] text-white text-xs font-semibold py-2 rounded-lg transition-colors"
                   >
-                    {["draft", "changes_requested"].includes(exam.status) ? "Edit" : "View"}
+                    {["draft", "changes_requested"].includes(exam.status)
+                      ? "Edit"
+                      : "View"}
                   </Link>
                   <Link
                     href={`/cross-exams/${exam._id}/compare`}

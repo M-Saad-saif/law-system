@@ -278,7 +278,7 @@ function AddPaymentForm({ onAdd, onClose }) {
         <p className="text-sm font-bold text-slate-700">Add Payment Entry</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
             Amount (PKR) <span className="text-rose-500">*</span>
@@ -317,7 +317,7 @@ function AddPaymentForm({ onAdd, onClose }) {
         <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
           Payment Method
         </label>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
           {METHODS.map((m) => {
             const Icon = m.icon;
             const isActive = form.method === m.value;

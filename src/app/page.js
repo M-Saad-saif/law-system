@@ -187,17 +187,17 @@ export default function LandingPage() {
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         className="fixed top-0 inset-x-0 z-50 bg-[#000203]/60 backdrop-blur-xl border-b border-white/10"
       >
-        <div className="max-w-7xl mx-auto px-6 py-1 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-1 flex items-center justify-between">
           <motion.div
             whileHover={{ scale: 1.02 }}
-            className="flex items-center gap-2 group cursor-pointer"
+            className="flex items-center gap-2 group cursor-pointer shrink-0"
           >
             <Image
               src={logo}
               width={200}
               height={200}
               alt="Logo"
-              className="object-contain"
+              className="object-contain w-28 sm:w-36 md:w-44 lg:w-[200px] h-auto"
               priority
             />
           </motion.div>
@@ -230,10 +230,10 @@ export default function LandingPage() {
             </a>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
             <Link
               href="/login"
-              className="px-5 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors relative group"
+              className="px-2.5 sm:px-5 py-2 text-xs sm:text-sm font-medium text-white/80 hover:text-white transition-colors relative group"
             >
               Log in
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#027f7e] group-hover:w-full transition-all duration-300" />
@@ -241,7 +241,7 @@ export default function LandingPage() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href={ctaHref}
-                className="px-6 py-2.5 text-sm font-medium bg-gradient-to-r from-[#027f7e] to-[#03605e] text-white rounded-xl hover:shadow-lg hover:shadow-[#027f7e]/30 transition-all duration-300 relative overflow-hidden group"
+                className="px-3.5 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-gradient-to-r from-[#027f7e] to-[#03605e] text-white rounded-xl hover:shadow-lg hover:shadow-[#027f7e]/30 transition-all duration-300 relative overflow-hidden group whitespace-nowrap"
               >
                 <span className="relative z-10">{ctaLabel}</span>
               </Link>

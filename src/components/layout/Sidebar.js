@@ -224,20 +224,26 @@ function NavItem({ item, pathname, isLocked }) {
         >
           <span
             className={`transition-transform duration-200 group-hover:scale-110 ${
-              isActive ? "text-[#0f766e]" : "text-teal-200/70 group-hover:text-white"
+              isActive
+                ? "text-[#0f766e]"
+                : "text-teal-200/70 group-hover:text-white"
             }`}
           >
             <item.icon className="w-5 h-5" />
           </span>
-          <span className={`flex-1 truncate ${isActive ? 'font-semibold' : ''}`}>{item.label}</span>
-          
+          <span
+            className={`flex-1 truncate ${isActive ? "font-semibold" : ""}`}
+          >
+            {item.label}
+          </span>
+
           {item.badge && (
             <span className="text-[10px] font-bold bg-[#0f766e] text-white px-2 py-0.5 rounded-full tracking-wide shadow-sm">
               {item.badge}
             </span>
           )}
         </Link>
-        
+
         {hasSubLinks && (
           <button
             onClick={() => setSubOpen((v) => !v)}
@@ -251,7 +257,7 @@ function NavItem({ item, pathname, isLocked }) {
           </button>
         )}
       </div>
-      
+
       {/* Submenu */}
       {hasSubLinks && subOpen && (
         <div className="ml-6 mt-1 space-y-0.5 pl-3 border-l border-white/10">
@@ -289,8 +295,8 @@ export default function Sidebar() {
     !subLoading && user && user.role !== "admin" && !isAllowed();
 
   return (
-    <aside 
-      className="h-[calc(100vh-1.5rem)] my-3 ml-3 w-64 flex flex-col z-40 select-none shrink-0 rounded-3xl
+    <aside
+      className="hidden lg:flex h-[calc(100vh-1.5rem)] my-3 ml-3 w-56 xl:w-64 flex-col z-40 select-none shrink-0 rounded-3xl
                  bg-gradient-to-b from-[#0f766e] via-[#0d9488] to-[#042f2e]
                  shadow-xl shadow-teal-900/25"
     >
@@ -367,7 +373,7 @@ export default function Sidebar() {
 
       {/* Footer */}
       <div className="px-4 pb-5 pt-2 border-t border-white/10 mt-auto">
-         <button
+        <button
           onClick={logout}
           className="flex items-center justify-center gap-2 w-full py-2.5 rounded-full
             text-sm font-medium text-red-100

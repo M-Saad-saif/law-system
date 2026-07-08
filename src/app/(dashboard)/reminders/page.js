@@ -606,7 +606,7 @@ export default function RemindersPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Date & Time <span className="text-red-500">*</span>

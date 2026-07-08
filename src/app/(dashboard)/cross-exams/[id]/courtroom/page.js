@@ -861,7 +861,7 @@ export default function CourtroomPage() {
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Live stats bar */}
         {(isLive || sessions.length > 0) && (
-          <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
             {[
               { label: "Total", value: totalQ, color: "text-slate-800" },
               { label: "Asked", value: askedQ, color: "text-amber-700" },

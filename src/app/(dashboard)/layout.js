@@ -24,7 +24,7 @@ export default function DashboardLayout({ children }) {
                 <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
                   <Topbar />
                   <div className="relative flex-1 overflow-hidden">
-                    <main className="h-full overflow-y-auto p-6">
+                    <main className="h-full overflow-y-auto p-3 sm:p-4 md:p-6">
                       {children}
                     </main>
                     <RouteLoaderOverlay />
