@@ -739,7 +739,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-10 bg-[#eef5f3]">
+    <div className="min-h-screen bg-gradient-to-br py-10 bg-[#eef5f3] rounded-[12px]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 animate-fade-in-down">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">

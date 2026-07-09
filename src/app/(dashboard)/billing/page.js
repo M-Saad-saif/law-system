@@ -918,7 +918,7 @@ export default function BillingPage() {
   ];
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br bg-[#eef5f3] overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-br bg-[#eef5f3] rounded-[12px] overflow-hidden">
       <style jsx global>{`
         @keyframes shimmer {
           0% {

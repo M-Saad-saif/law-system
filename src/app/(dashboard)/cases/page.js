@@ -111,7 +111,7 @@ export default function CasesPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl p-5 mx-auto rounded-[12px] bg-[#eef5f3]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="page-header mb-0 flex items-center gap-3.5">

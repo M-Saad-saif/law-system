@@ -17,25 +17,44 @@ import {
   Receipt,
   PiggyBank,
   CreditCard,
-  ArrowUpRight,
-  ArrowDownRight,
   Building2,
   FileText,
-  Clock,
   CircleDollarSign,
   Percent,
+  ArrowUpRight,
+  ArrowDownRight,
+  Clock,
+  Layers,
+  Sparkles,
+  History,
+  Target,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// ---- Helpers ----
+// ---- Constants ----
 
 const METHODS = [
-  { value: "cash", label: "Cash", icon: Banknote },
-  { value: "bank_transfer", label: "Bank Transfer", icon: Building2 },
-  { value: "cheque", label: "Cheque", icon: FileText },
-  { value: "online", label: "Online", icon: CreditCard },
-  { value: "other", label: "Other", icon: Receipt },
+  { value: "cash", label: "Cash", icon: Banknote, color: "emerald" },
+  {
+    value: "bank_transfer",
+    label: "Bank Transfer",
+    icon: Building2,
+    color: "blue",
+  },
+  { value: "cheque", label: "Cheque", icon: FileText, color: "purple" },
+  { value: "online", label: "Online", icon: CreditCard, color: "indigo" },
+  { value: "other", label: "Other", icon: Receipt, color: "slate" },
 ];
+
+const colorMap = {
+  emerald: "bg-emerald-50 text-emerald-600 border-emerald-200",
+  blue: "bg-blue-50 text-blue-600 border-blue-200",
+  purple: "bg-purple-50 text-purple-600 border-purple-200",
+  indigo: "bg-indigo-50 text-indigo-600 border-indigo-200",
+  slate: "bg-slate-50 text-slate-600 border-slate-200",
+};
+
+// ---- Helpers ----
 
 function fmt(n) {
   return Number(n || 0).toLocaleString("en-PK", {
@@ -50,102 +69,177 @@ function pct(paid, total) {
   return Math.min(100, Math.round((paid / total) * 100));
 }
 
-// ---- Fee Progress Bar ----
+// ---- Animated Number ----
 
-function FeeProgressBar({ paid, agreed }) {
-  const p = pct(paid, agreed);
-  const isFullyPaid = p >= 100;
-  const progressGradient = isFullyPaid
-    ? "bg-gradient-to-r from-emerald-400 to-emerald-500"
-    : p >= 60
-      ? "bg-gradient-to-r from-amber-400 to-amber-500"
-      : "bg-gradient-to-r from-rose-400 to-rose-500";
+function AnimatedNumber({ value, className }) {
+  return (
+    <motion.span
+      key={value}
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className={className}
+    >
+      {value}
+    </motion.span>
+  );
+}
+
+// ---- Stat Card ----
+
+function StatCard({ icon: Icon, label, value, subtext, color = "blue" }) {
+  const colors = {
+    blue: "bg-blue-50 text-blue-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    amber: "bg-amber-50 text-amber-600",
+    rose: "bg-rose-50 text-rose-600",
+    purple: "bg-purple-50 text-purple-600",
+  };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-5"
+      whileHover={{ y: -2 }}
+      className="bg-white rounded-xl border border-slate-200/60 p-4 shadow-sm hover:shadow-md transition-all"
     >
-      <div className="flex items-end justify-between">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Wallet className="w-3.5 h-3.5" />
-            Amount Paid
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+            {label}
           </p>
-          <motion.p
-            key={paid}
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent"
-          >
-            {fmt(paid)}
-          </motion.p>
-        </div>
-        <div className="text-right space-y-1">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-end gap-1.5">
-            <CircleDollarSign className="w-3.5 h-3.5" />
-            Agreed Fee
-          </p>
-          <p className="text-xl font-semibold text-slate-600">{fmt(agreed)}</p>
-        </div>
-      </div>
-
-      {/* Progress Track */}
-      <div className="space-y-2.5">
-        <div className="relative h-3.5 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${p}%` }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className={`h-full rounded-full transition-all ${progressGradient}`}
-          />
-
-          {/* Percentage label inside bar */}
-          {p > 15 && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[10px] font-bold text-white/90 drop-shadow-sm">
-                {p}%
-              </span>
-            </div>
+          <p className="text-xl font-bold text-slate-800 mt-1">{value}</p>
+          {subtext && (
+            <p className="text-xs text-slate-400 mt-0.5">{subtext}</p>
           )}
         </div>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-xs font-bold ${isFullyPaid ? "text-emerald-600" : "text-slate-500"}`}
-            >
-              {p}% paid
-            </span>
-            {isFullyPaid && (
-              <motion.span
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5" /> Fully Paid
-              </motion.span>
-            )}
-          </div>
-          {!isFullyPaid && agreed > 0 && (
-            <span className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-              <TrendingDown className="w-3.5 h-3.5 text-rose-400" />
-              {fmt(Math.max(0, agreed - paid))} remaining
-            </span>
-          )}
+        <div className={`p-2 rounded-lg ${colors[color]}`}>
+          <Icon className="w-4 h-4" />
         </div>
       </div>
     </motion.div>
   );
 }
 
-// ---- Payment Slider Input ----
+// ---- Fee Progress Bar ----
+
+function FeeProgressBar({ paid, agreed }) {
+  const p = pct(paid, agreed);
+  const isFullyPaid = p >= 100;
+
+  const statusConfig = isFullyPaid
+    ? {
+        gradient:
+          "bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600",
+        text: "text-emerald-600",
+        bg: "bg-emerald-50",
+        label: "Fully Paid",
+        icon: CheckCircle2,
+      }
+    : p >= 75
+      ? {
+          gradient: "bg-gradient-to-r from-emerald-400 to-blue-500",
+          text: "text-blue-600",
+          bg: "bg-blue-50",
+          label: "Near Complete",
+          icon: TrendingUp,
+        }
+      : p >= 50
+        ? {
+            gradient: "bg-gradient-to-r from-amber-400 to-amber-500",
+            text: "text-amber-600",
+            bg: "bg-amber-50",
+            label: "Halfway There",
+            icon: Clock,
+          }
+        : p >= 25
+          ? {
+              gradient: "bg-gradient-to-r from-orange-400 to-orange-500",
+              text: "text-orange-600",
+              bg: "bg-orange-50",
+              label: "In Progress",
+              icon: TrendingUp,
+            }
+          : {
+              gradient: "bg-gradient-to-r from-rose-400 to-rose-500",
+              text: "text-rose-600",
+              bg: "bg-rose-50",
+              label: "Just Started",
+              icon: AlertCircle,
+            };
+
+  const StatusIcon = statusConfig.icon;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="space-y-4"
+    >
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <Wallet className="w-3 h-3" /> Paid
+          </p>
+          <p className="text-lg font-bold text-slate-800">
+            <AnimatedNumber value={fmt(paid)} />
+          </p>
+        </div>
+        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <Target className="w-3 h-3" /> Agreed
+          </p>
+          <p className="text-lg font-bold text-slate-800">{fmt(agreed)}</p>
+        </div>
+      </div>
+
+      {/* Progress Bar */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className={`text-xs font-bold ${statusConfig.text}`}>
+              {p}% Complete
+            </span>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${statusConfig.bg} ${statusConfig.text}`}
+            >
+              <StatusIcon className="w-3 h-3 inline mr-1" />
+              {statusConfig.label}
+            </span>
+          </div>
+          <span className="text-xs text-slate-400">
+            {isFullyPaid ? "✓" : `${fmt(Math.max(0, agreed - paid))} remaining`}
+          </span>
+        </div>
+
+        <div className="relative h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${p}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className={`h-full rounded-full ${statusConfig.gradient} relative`}
+          >
+            {/* Animated shimmer effect */}
+            {p < 100 && p > 0 && (
+              <motion.div
+                animate={{ x: ["0%", "100%"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              />
+            )}
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ---- Quick Payment Slider ----
 
 function PaymentSlider({ agreedAmount, paidSoFar, onQuickAdd }) {
   const remaining = Math.max(0, agreedAmount - paidSoFar);
   const [sliderValue, setSliderValue] = useState(0);
   const [adding, setAdding] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     setSliderValue(0);
@@ -162,28 +256,53 @@ function PaymentSlider({ agreedAmount, paidSoFar, onQuickAdd }) {
     try {
       await onQuickAdd(sliderValue);
       setSliderValue(0);
+      toast.success(`Payment of ${fmt(sliderValue)} recorded`);
     } finally {
       setAdding(false);
     }
   };
 
+  // Presets
+  const presets = [
+    { label: "25%", value: Math.round(remaining * 0.25) },
+    { label: "50%", value: Math.round(remaining * 0.5) },
+    { label: "75%", value: Math.round(remaining * 0.75) },
+  ];
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-slate-50 to-white border border-slate-200/60 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+      className="bg-gradient-to-br from-slate-50 to-white border border-slate-200/60 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
     >
-      <div className="flex items-center gap-2 mb-5">
-        <div className="p-1.5 rounded-lg bg-blue-50">
-          <TrendingUp className="w-4 h-4 text-blue-600" />
+      <div className="flex items-center gap-3 mb-5">
+        <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/20">
+          <Sparkles className="w-4 h-4 text-white" />
         </div>
-        <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-          Quick Payment — drag to amount received
+        <div>
+          <p className="text-sm font-bold text-slate-700">Quick Payment</p>
+          <p className="text-xs text-slate-400">Drag to set amount</p>
+        </div>
+      </div>
+
+      {/* Amount Display */}
+      <div className="text-center mb-4">
+        <p className="text-xs text-slate-400 font-medium">Amount to record</p>
+        <motion.p
+          key={sliderValue}
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          className="text-3xl font-bold text-slate-800 mt-1"
+        >
+          {fmt(sliderValue)}
+        </motion.p>
+        <p className="text-xs text-slate-400 mt-0.5">
+          of {fmt(remaining)} remaining
         </p>
       </div>
 
       {/* Slider */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         <div className="relative">
           <input
             type="range"
@@ -192,50 +311,83 @@ function PaymentSlider({ agreedAmount, paidSoFar, onQuickAdd }) {
             step={Math.max(1, Math.round(remaining / 100))}
             value={sliderValue}
             onChange={(e) => setSliderValue(Number(e.target.value))}
-            className="w-full h-2 rounded-full appearance-none cursor-pointer bg-gradient-to-r from-slate-200 to-slate-300 accent-slate-800"
+            onMouseDown={() => setIsDragging(true)}
+            onMouseUp={() => setIsDragging(false)}
+            className="w-full h-2 rounded-full appearance-none cursor-pointer"
             style={{
-              background: `linear-gradient(to right, #1e293b 0%, #1e293b ${(sliderValue / remaining) * 100}%, #e2e8f0 ${(sliderValue / remaining) * 100}%, #e2e8f0 100%)`,
+              background: `linear-gradient(to right, #0f766e ${(sliderValue / remaining) * 100}%, #e2e8f0 ${(sliderValue / remaining) * 100}%)`,
             }}
           />
-          <div className="flex justify-between text-[10px] text-slate-400 mt-1.5">
-            <span>0</span>
-            <span>{fmt(remaining / 2)}</span>
-            <span>{fmt(remaining)}</span>
-          </div>
+          {/* Custom thumb styling via style tag */}
+          <style jsx>{`
+            input[type="range"]::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              appearance: none;
+              width: 20px;
+              height: 20px;
+              border-radius: 50%;
+              background: #0f766e;
+              cursor: pointer;
+              box-shadow: 0 2px 8px rgba(15, 118, 110, 0.3);
+              transition: all 0.2s;
+            }
+            input[type="range"]::-webkit-slider-thumb:hover {
+              transform: scale(1.1);
+              box-shadow: 0 4px 12px rgba(15, 118, 110, 0.4);
+            }
+            input[type="range"]::-moz-range-thumb {
+              width: 20px;
+              height: 20px;
+              border-radius: 50%;
+              background: #0f766e;
+              cursor: pointer;
+              border: none;
+              box-shadow: 0 2px 8px rgba(15, 118, 110, 0.3);
+            }
+          `}</style>
+        </div>
+
+        {/* Preset buttons */}
+        <div className="flex gap-2">
+          {presets.map((preset) => (
+            <button
+              key={preset.label}
+              onClick={() => setSliderValue(preset.value)}
+              className="flex-1 text-xs font-medium text-slate-500 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              {preset.label}
+            </button>
+          ))}
+          <button
+            onClick={() => setSliderValue(remaining)}
+            className="flex-1 text-xs font-medium text-teal-600 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            Full
+          </button>
         </div>
       </div>
 
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-200/60">
-        <div>
-          <p className="text-xs text-slate-400 font-medium">Selected amount</p>
-          <p className="text-2xl font-bold text-slate-800">
-            {fmt(sliderValue)}
-          </p>
-        </div>
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleAdd}
-          disabled={adding || sliderValue <= 0}
-          className="flex items-center gap-2 bg-gradient-to-r from-slate-800 to-slate-900 hover:shadow-lg hover:shadow-slate-900/20 text-white text-sm font-semibold px-6 py-2.5 rounded-xl disabled:opacity-50 transition-all duration-300"
-        >
-          {adding ? (
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <>
-              <Plus className="w-4 h-4" />
-              Record Payment
-            </>
-          )}
-        </motion.button>
-      </div>
+      <button
+        onClick={handleAdd}
+        disabled={adding || sliderValue <= 0}
+        className="w-full mt-4 bg-gradient-to-r from-teal-600 to-teal-700 hover:shadow-lg hover:shadow-teal-500/20 text-white font-semibold py-3 rounded-xl disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+      >
+        {adding ? (
+          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        ) : (
+          <>
+            <Plus className="w-4 h-4" />
+            Record Payment
+          </>
+        )}
+      </button>
     </motion.div>
   );
 }
 
-// --- Add Payment Form ---
+// ---- Add Payment Form ----
 
-function AddPaymentForm({ onAdd, onClose }) {
+function AddPaymentForm({ onAdd, onClose, remaining }) {
   const [form, setForm] = useState({
     amount: "",
     date: format(new Date(), "yyyy-MM-dd"),
@@ -252,10 +404,14 @@ function AddPaymentForm({ onAdd, onClose }) {
       toast.error("Enter a valid amount.");
       return;
     }
+    if (amount > remaining) {
+      toast.error(`Amount exceeds remaining balance of ${fmt(remaining)}`);
+      return;
+    }
     setSaving(true);
     try {
       await onAdd({ ...form, amount });
-      onClose();
+      toast.success("Payment recorded successfully");
     } catch {
       setSaving(false);
     }
@@ -266,130 +422,144 @@ function AddPaymentForm({ onAdd, onClose }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="border border-slate-200/60 rounded-2xl bg-gradient-to-br from-white to-slate-50 p-6 shadow-sm space-y-5"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="border border-slate-200/60 rounded-2xl bg-gradient-to-br from-white to-slate-50 p-6 shadow-lg"
     >
-      <div className="flex items-center gap-2">
-        <div className="p-1.5 rounded-lg bg-emerald-50">
-          <Receipt className="w-4 h-4 text-emerald-600" />
-        </div>
-        <p className="text-sm font-bold text-slate-700">Add Payment Entry</p>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-            Amount (PKR) <span className="text-rose-500">*</span>
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-              Rs.
-            </span>
-            <input
-              type="number"
-              min={1}
-              value={form.amount}
-              onChange={(e) => set("amount", e.target.value)}
-              placeholder="25,000"
-              className="w-full border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/20">
+            <Receipt className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-slate-700">New Payment</p>
+            <p className="text-xs text-slate-400">
+              Remaining: {fmt(remaining)}
+            </p>
           </div>
         </div>
-        <div>
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-            Date <span className="text-rose-500">*</span>
-          </label>
-          <div className="relative">
-            <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="date"
-              value={form.date}
-              onChange={(e) => set("date", e.target.value)}
-              className="w-full border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            />
+        <button
+          onClick={onClose}
+          className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
+        >
+          <span className="text-sm text-slate-400">✕</span>
+        </button>
+      </div>
+
+      <div className="space-y-4">
+        {/* Amount & Date */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              Amount (PKR)
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+                Rs.
+              </span>
+              <input
+                type="number"
+                min={1}
+                max={remaining}
+                value={form.amount}
+                onChange={(e) => set("amount", e.target.value)}
+                placeholder="25,000"
+                className="w-full border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+              Date
+            </label>
+            <div className="relative">
+              <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="date"
+                value={form.date}
+                onChange={(e) => set("date", e.target.value)}
+                className="w-full border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-          Payment Method
-        </label>
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-          {METHODS.map((m) => {
-            const Icon = m.icon;
-            const isActive = form.method === m.value;
-            return (
-              <motion.button
-                key={m.value}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => set("method", m.value)}
-                className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border-2 transition-all ${
-                  isActive
-                    ? "border-slate-800 bg-slate-800 text-white shadow-lg shadow-slate-900/20"
-                    : "border-slate-200 text-slate-600 hover:border-slate-400 hover:bg-slate-50"
-                }`}
-              >
-                <Icon
-                  className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-500"}`}
-                />
-                <span className="text-[10px] font-medium">{m.label}</span>
-              </motion.button>
-            );
-          })}
+        {/* Payment Method */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+            Payment Method
+          </label>
+          <div className="grid grid-cols-5 gap-2">
+            {METHODS.map((m) => {
+              const Icon = m.icon;
+              const isActive = form.method === m.value;
+              const color = colorMap[m.color] || colorMap.slate;
+              return (
+                <motion.button
+                  key={m.value}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => set("method", m.value)}
+                  className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all ${
+                    isActive
+                      ? `border-teal-500 bg-teal-50 text-teal-700`
+                      : "border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="text-[9px] font-medium">{m.label}</span>
+                </motion.button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-          Note (optional)
-        </label>
-        <div className="relative">
-          <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        {/* Note */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+            Note <span className="font-normal lowercase">(optional)</span>
+          </label>
           <input
             value={form.note}
             onChange={(e) => set("note", e.target.value)}
             placeholder="e.g. Advance for hearing on 15 Jan"
-            className="w-full border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+            className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
           />
         </div>
-      </div>
 
-      <div className="flex gap-3 pt-2">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleSubmit}
-          disabled={saving}
-          className="flex-1 bg-gradient-to-r from-slate-800 to-slate-900 hover:shadow-lg hover:shadow-slate-900/20 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60 transition-all"
-        >
-          {saving ? (
-            <div className="flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Saving...
-            </div>
-          ) : (
-            <>
-              <Plus className="w-4 h-4 inline mr-2" />
-              Add Payment
-            </>
-          )}
-        </motion.button>
-        <button
-          onClick={onClose}
-          className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition-colors"
-        >
-          Cancel
-        </button>
+        {/* Actions */}
+        <div className="flex gap-3 pt-2">
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            className="flex-1 bg-gradient-to-r from-teal-600 to-teal-700 hover:shadow-lg hover:shadow-teal-500/20 text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-60 transition-all"
+          >
+            {saving ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Saving...
+              </div>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 inline mr-2" />
+                Add Payment
+              </>
+            )}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </motion.div>
   );
 }
 
-// --- Agreed Fee Editor ---
+// ---- Agreed Fee Editor ----
 
 function AgreedFeeEditor({ current, notes, onSave }) {
   const [amount, setAmount] = useState(current?.toString() || "");
@@ -407,7 +577,7 @@ function AgreedFeeEditor({ current, notes, onSave }) {
     try {
       await onSave({ agreedAmount: val, notes: feeNotes });
       setOpen(false);
-      toast.success("Fee updated.");
+      toast.success("Fee updated successfully");
     } finally {
       setSaving(false);
     }
@@ -419,9 +589,9 @@ function AgreedFeeEditor({ current, notes, onSave }) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 font-medium transition-colors"
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-teal-600 hover:text-teal-700 transition-colors"
       >
-        <PiggyBank className="w-3.5 h-3.5" />
+        <PiggyBank className="w-3.5 h-3.5 " />
         {current > 0 ? "Edit agreed fee" : "Set agreed fee"}
       </motion.button>
     );
@@ -432,9 +602,9 @@ function AgreedFeeEditor({ current, notes, onSave }) {
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: "auto" }}
       exit={{ opacity: 0, height: 0 }}
-      className="border border-slate-200/60 rounded-2xl bg-white p-5 space-y-4 shadow-sm"
+      className="border border-teal-200/60 rounded-2xl bg-gradient-to-br from-teal-50/50 to-white p-5 space-y-4 shadow-sm"
     >
-      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+      <p className="text-xs font-bold text-teal-600 uppercase tracking-wider flex items-center gap-2">
         <CircleDollarSign className="w-4 h-4" />
         Agreed Fee Settings
       </p>
@@ -442,34 +612,37 @@ function AgreedFeeEditor({ current, notes, onSave }) {
         <label className="block text-xs text-slate-500 font-medium mb-1.5">
           Total Agreed Amount (PKR)
         </label>
-        <input
-          type="number"
-          min={0}
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="150,000"
-          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-        />
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
+            Rs.
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="150,000"
+            className="w-full border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all"
+          />
+        </div>
       </div>
       <div>
         <label className="block text-xs text-slate-500 font-medium mb-1.5">
-          Fee Notes (optional)
+          Fee Notes <span className="font-normal">(optional)</span>
         </label>
         <textarea
           rows={2}
           value={feeNotes}
           onChange={(e) => setFeeNotes(e.target.value)}
           placeholder="e.g. Includes court filing fees. Monthly installments agreed."
-          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none"
+          className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all resize-none"
         />
       </div>
       <div className="flex gap-3">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={handleSave}
           disabled={saving}
-          className="bg-gradient-to-r from-slate-800 to-slate-900 hover:shadow-lg hover:shadow-slate-900/20 text-white text-sm font-semibold px-6 py-2.5 rounded-xl disabled:opacity-60 transition-all"
+          className="bg-gradient-to-r from-teal-600 to-teal-700 hover:shadow-lg hover:shadow-teal-500/20 text-white text-sm font-semibold px-6 py-2.5 rounded-xl disabled:opacity-60 transition-all"
         >
           {saving ? (
             <div className="flex items-center gap-2">
@@ -477,9 +650,9 @@ function AgreedFeeEditor({ current, notes, onSave }) {
               Saving...
             </div>
           ) : (
-            "Save"
+            "Save Fee"
           )}
-        </motion.button>
+        </button>
         <button
           onClick={() => setOpen(false)}
           className="text-sm text-slate-400 hover:text-slate-600 px-4 font-medium"
@@ -491,9 +664,9 @@ function AgreedFeeEditor({ current, notes, onSave }) {
   );
 }
 
-// ---- Payment History Row ----
+// ---- Payment Row ----
 
-function PaymentRow({ payment, onDelete, runningTotal }) {
+function PaymentRow({ payment, onDelete, runningTotal, index }) {
   const [deleting, setDeleting] = useState(false);
   const [confirm, setConfirm] = useState(false);
 
@@ -501,6 +674,7 @@ function PaymentRow({ payment, onDelete, runningTotal }) {
     setDeleting(true);
     try {
       await onDelete(payment._id);
+      toast.success("Payment removed");
     } finally {
       setDeleting(false);
       setConfirm(false);
@@ -509,81 +683,84 @@ function PaymentRow({ payment, onDelete, runningTotal }) {
 
   const methodData = METHODS.find((m) => m.value === payment.method);
   const MethodIcon = methodData?.icon || Banknote;
+  const color = colorMap[methodData?.color] || colorMap.slate;
 
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex items-center gap-4 py-3.5 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 rounded-lg px-2 -mx-2 transition-colors group"
+      transition={{ delay: index * 0.05 }}
+      className="group flex items-center gap-4 py-3 px-2 -mx-2 rounded-xl hover:bg-slate-50 transition-colors"
     >
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center flex-shrink-0">
-        <Banknote className="w-4.5 h-4.5 text-emerald-600" />
+      <div
+        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}
+      >
+        <MethodIcon className="w-4 h-4" />
       </div>
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2.5 flex-wrap">
           <span className="text-sm font-bold text-slate-800">
             {fmt(payment.amount)}
           </span>
-          <span className="inline-flex items-center gap-1 text-[10px] bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded-full font-medium">
-            <MethodIcon className="w-3 h-3" />
+          <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
             {methodData?.label || payment.method}
           </span>
         </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-xs text-slate-400 flex items-center gap-1">
+        <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-400">
+          <span className="flex items-center gap-1">
             <CalendarIcon className="w-3 h-3" />
             {payment.date ? format(new Date(payment.date), "dd MMM yyyy") : "—"}
           </span>
           {payment.note && (
             <>
-              <span className="text-xs text-slate-300">·</span>
-              <span className="text-xs text-slate-400 truncate max-w-[200px] flex items-center gap-1">
-                <FileText className="w-3 h-3" />
-                {payment.note}
-              </span>
+              <span>·</span>
+              <span className="truncate max-w-[150px]">{payment.note}</span>
             </>
           )}
         </div>
       </div>
+
       <div className="text-right flex-shrink-0">
-        <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
-          Running total
-        </p>
+        <p className="text-[10px] text-slate-400 font-medium">Balance</p>
         <p className="text-xs font-bold text-slate-600">{fmt(runningTotal)}</p>
       </div>
-      {!confirm ? (
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setConfirm(true)}
-          className="p-1.5 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
-        >
-          <Trash2 className="w-4 h-4" />
-        </motion.button>
-      ) : (
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          <span className="text-[10px] text-slate-400 font-medium">
-            Delete?
-          </span>
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className="text-[11px] bg-rose-500 hover:bg-rose-600 text-white px-2.5 py-1 rounded-lg font-semibold disabled:opacity-60 transition-colors"
+
+      <AnimatePresence>
+        {confirm ? (
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="flex items-center gap-1.5 flex-shrink-0"
           >
-            {deleting ? (
-              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              "Yes"
-            )}
-          </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="px-2.5 py-1 bg-rose-500 hover:bg-rose-600 text-white text-[10px] font-semibold rounded-lg transition-colors"
+            >
+              {deleting ? (
+                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                "Yes"
+              )}
+            </button>
+            <button
+              onClick={() => setConfirm(false)}
+              className="px-2 py-1 text-[10px] text-slate-400 hover:text-slate-600 font-medium"
+            >
+              No
+            </button>
+          </motion.div>
+        ) : (
           <button
-            onClick={() => setConfirm(false)}
-            className="text-[11px] text-slate-400 hover:text-slate-600 px-1.5 font-medium"
+            onClick={() => setConfirm(true)}
+            className="p-1.5 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
           >
-            No
+            <Trash2 className="w-4 h-4" />
           </button>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -631,7 +808,6 @@ export default function FeeTab({ caseId, onUpdate }) {
       const feeData =
         data?.fee ?? data?.data?.fee ?? data?.data?.case?.fee ?? null;
       setFee(feeData);
-      toast.success("Payment recorded.");
       onUpdate?.();
     } catch (err) {
       toast.error(err.message || "Failed to record payment.");
@@ -645,7 +821,6 @@ export default function FeeTab({ caseId, onUpdate }) {
       const feeData =
         data?.fee ?? data?.data?.fee ?? data?.data?.case?.fee ?? null;
       setFee(feeData);
-      toast.success("Payment removed.");
       onUpdate?.();
     } catch (err) {
       toast.error(err.message || "Failed to remove payment.");
@@ -655,10 +830,13 @@ export default function FeeTab({ caseId, onUpdate }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-48">
+      <div className="flex flex-col items-center justify-center h-64">
         <div className="relative">
-          <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin" />
+          <div className="w-12 h-12 border-4 border-slate-200 border-t-teal-600 rounded-full animate-spin" />
         </div>
+        <p className="text-sm text-slate-400 mt-4 font-medium">
+          Loading fee data...
+        </p>
       </div>
     );
   }
@@ -675,186 +853,242 @@ export default function FeeTab({ caseId, onUpdate }) {
   });
   const totalPaid = running;
   const isFullyPaid = agreed > 0 && totalPaid >= agreed;
+  const remaining = Math.max(0, agreed - totalPaid);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Left Column */}
-      <div className="lg:col-span-2 space-y-6">
-        {/* Progress Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-md transition-shadow p-6 space-y-5"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50">
-                <CircleDollarSign className="w-5 h-5 text-blue-600" />
+    <div className="space-y-6">
+      {/* Stats Row */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+      >
+        <StatCard
+          icon={Wallet}
+          label="Total Paid"
+          value={fmt(totalPaid)}
+          subtext={`${payments.length} payments`}
+          color="emerald"
+        />
+        <StatCard
+          icon={Target}
+          label="Agreed Fee"
+          value={fmt(agreed)}
+          subtext={agreed > 0 ? "Total contract" : "Not set"}
+          color="blue"
+        />
+        <StatCard
+          icon={TrendingDown}
+          label="Remaining"
+          value={isFullyPaid ? "Nil" : fmt(remaining)}
+          subtext={isFullyPaid ? "Fully settled ✓" : "Balance due"}
+          color={isFullyPaid ? "emerald" : "amber"}
+        />
+        <StatCard
+          icon={Percent}
+          label="Progress"
+          value={agreed > 0 ? `${pct(totalPaid, agreed)}%` : "—"}
+          subtext={
+            agreed > 0 ? `${fmt(totalPaid)} of ${fmt(agreed)}` : "Set fee first"
+          }
+          color="purple"
+        />
+      </motion.div>
+
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Progress Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-md transition-shadow p-6"
+          >
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-teal-500 to-teal-600 shadow-lg shadow-teal-500/20">
+                  <Layers className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-800">
+                    Fee Progress
+                  </h3>
+                  <p className="text-xs text-slate-400">Track payment status</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-800">
-                  Fee Status
-                </h3>
-                <p className="text-xs text-slate-400">
-                  Payment overview & progress
+              <AgreedFeeEditor
+                current={agreed}
+                notes={fee?.notes}
+                onSave={handleUpdateFee}
+              />
+            </div>
+
+            {agreed > 0 ? (
+              <FeeProgressBar paid={totalPaid} agreed={agreed} />
+            ) : (
+              <div className="py-12 text-center border-2 border-dashed border-slate-200 rounded-2xl">
+                <Banknote className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <p className="text-sm font-medium text-slate-400">
+                  No agreed fee set
+                </p>
+                <p className="text-xs text-slate-300 mt-1">
+                  Click "Set agreed fee" to start tracking
                 </p>
               </div>
-            </div>
-            <div className="flex gap-2">
-              {isFullyPaid && (
-                <motion.span
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Fully Paid
-                </motion.span>
-              )}
-              {!isFullyPaid && agreed > 0 && (
-                <span className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full">
-                  <AlertCircle className="w-3.5 h-3.5" /> Outstanding
-                </span>
-              )}
-            </div>
-          </div>
-
-          {agreed > 0 ? (
-            <FeeProgressBar paid={totalPaid} agreed={agreed} />
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="py-10 text-center border-2 border-dashed border-slate-200 rounded-2xl"
-            >
-              <Banknote className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-sm text-slate-400 font-medium">
-                No agreed fee set yet
-              </p>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Set the agreed amount to track payments
-              </p>
-            </motion.div>
-          )}
-
-          <div className="flex items-center justify-between">
-            <AgreedFeeEditor
-              current={agreed}
-              notes={fee?.notes}
-              onSave={handleUpdateFee}
-            />
-            {fee?.notes && (
-              <span className="text-xs text-slate-400 flex items-center gap-1">
-                <FileText className="w-3 h-3" />
-                {fee.notes.length > 40
-                  ? `${fee.notes.slice(0, 40)}...`
-                  : fee.notes}
-              </span>
             )}
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Quick Payment Slider */}
-        <PaymentSlider
-          agreedAmount={agreed}
-          paidSoFar={totalPaid}
-          onQuickAdd={(amount) =>
-            handleAddPayment({
-              amount,
-              date: format(new Date(), "yyyy-MM-dd"),
-              method: "cash",
-              note: "Quick entry",
-            })
-          }
-        />
+          {/* Quick Payment */}
+          <PaymentSlider
+            agreedAmount={agreed}
+            paidSoFar={totalPaid}
+            onQuickAdd={(amount) =>
+              handleAddPayment({
+                amount,
+                date: format(new Date(), "yyyy-MM-dd"),
+                method: "cash",
+                note: "Quick entry",
+              })
+            }
+          />
 
-        {/* Add Payment Form */}
-        <AnimatePresence>
-          {showAddForm ? (
-            <AddPaymentForm
-              onAdd={handleAddPayment}
-              onClose={() => setShowAddForm(false)}
-            />
-          ) : (
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
-              onClick={() => setShowAddForm(true)}
-              className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-slate-200 rounded-2xl text-sm text-slate-400 hover:border-slate-400 hover:text-slate-600 transition-all font-medium"
-            >
-              <Plus className="w-4 h-4" /> Add Payment Entry
-            </motion.button>
-          )}
-        </AnimatePresence>
-      </div>
+          {/* Add Payment Form */}
+          <AnimatePresence>
+            {showAddForm ? (
+              <AddPaymentForm
+                onAdd={handleAddPayment}
+                onClose={() => setShowAddForm(false)}
+                remaining={remaining}
+              />
+            ) : (
+              <button
+                onClick={() => setShowAddForm(true)}
+                disabled={agreed <= 0}
+                className="w-full flex items-center justify-center gap-2 py-4 border-2 border-dashed border-slate-200 rounded-2xl text-sm text-slate-400 hover:border-teal-400 hover:text-teal-600 hover:bg-teal-50/50 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Plus className="w-4 h-4" />
+                Add Payment Entry
+                {agreed <= 0 && (
+                  <span className="text-xs">(Set fee first)</span>
+                )}
+              </button>
+            )}
+          </AnimatePresence>
+        </div>
 
-      {/* Right Column - Payment History */}
-      <div className="space-y-4">
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-md transition-shadow p-5"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-slate-100">
-                <Receipt className="w-4 h-4 text-slate-600" />
+        {/* Right Column - Payment History */}
+        <div className="space-y-4">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white border border-slate-200/60 rounded-2xl shadow-sm hover:shadow-md transition-shadow p-5"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-slate-100">
+                  <History className="w-4 h-4 text-slate-600" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-700">
+                  Payment History
+                </h3>
               </div>
-              <h3 className="text-sm font-bold text-slate-700">
-                Payment History
-              </h3>
+              <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
+                {payments.length}
+              </span>
             </div>
-            <span className="text-xs font-semibold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">
-              {payments.length} entries
-            </span>
-          </div>
 
-          {withRunning.length === 0 ? (
-            <div className="text-center py-10">
-              <Banknote className="w-10 h-10 text-slate-200 mx-auto mb-2" />
-              <p className="text-sm text-slate-400 font-medium">
-                No payments yet
-              </p>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Record the first payment
-              </p>
-            </div>
-          ) : (
-            <div className="max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              {[...withRunning].reverse().map((p) => (
-                <PaymentRow
-                  key={p._id}
-                  payment={p}
-                  runningTotal={p.runningTotal}
-                  onDelete={handleDeletePayment}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Summary Footer */}
-          {withRunning.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-slate-100 space-y-1.5">
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-400 font-medium">Total Paid</span>
-                <span className="font-bold text-slate-700">
-                  {fmt(totalPaid)}
-                </span>
+            {withRunning.length === 0 ? (
+              <div className="text-center py-12">
+                <Banknote className="w-12 h-12 text-slate-200 mx-auto mb-3" />
+                <p className="text-sm font-medium text-slate-400">
+                  No payments yet
+                </p>
+                <p className="text-xs text-slate-300 mt-1">
+                  Record your first payment
+                </p>
               </div>
-              {agreed > 0 && (
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-400 font-medium">
-                    Balance Due
-                  </span>
-                  <span
-                    className={`font-bold ${isFullyPaid ? "text-emerald-600" : "text-rose-500"}`}
-                  >
-                    {isFullyPaid ? "Nil" : fmt(agreed - totalPaid)}
+            ) : (
+              <div className="max-h-[420px] overflow-y-auto pr-2 space-y-1 custom-scrollbar">
+                {[...withRunning].reverse().map((p, idx) => (
+                  <PaymentRow
+                    key={p._id}
+                    payment={p}
+                    runningTotal={p.runningTotal}
+                    onDelete={handleDeletePayment}
+                    index={idx}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Summary */}
+            {withRunning.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100 space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-500 font-medium">Total Paid</span>
+                  <span className="font-bold text-slate-800">
+                    {fmt(totalPaid)}
                   </span>
                 </div>
-              )}
-            </div>
+                {agreed > 0 && (
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-500 font-medium">
+                      Balance Due
+                    </span>
+                    <span
+                      className={`font-bold ${isFullyPaid ? "text-emerald-600" : "text-rose-500"}`}
+                    >
+                      {isFullyPaid ? (
+                        <span className="flex items-center gap-1">
+                          <CheckCircle2 className="w-4 h-4" /> Nil
+                        </span>
+                      ) : (
+                        fmt(remaining)
+                      )}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </motion.div>
+
+          {/* Quick Summary Card */}
+          {agreed > 0 && withRunning.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className={`p-4 rounded-2xl border ${isFullyPaid ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}
+            >
+              <div className="flex items-center gap-3">
+                {isFullyPaid ? (
+                  <CheckCircle2 className="w-6 h-6 text-emerald-600" />
+                ) : (
+                  <AlertCircle className="w-6 h-6 text-amber-600" />
+                )}
+                <div>
+                  <p
+                    className={`text-sm font-bold ${isFullyPaid ? "text-emerald-700" : "text-amber-700"}`}
+                  >
+                    {isFullyPaid
+                      ? "All payments complete!"
+                      : "Payment in progress"}
+                  </p>
+                  <p
+                    className={`text-xs ${isFullyPaid ? "text-emerald-600" : "text-amber-600"}`}
+                  >
+                    {isFullyPaid
+                      ? `Total of ${payments.length} payments received`
+                      : `${fmt(remaining)} remaining to be paid`}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
