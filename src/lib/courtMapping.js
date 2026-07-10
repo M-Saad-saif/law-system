@@ -8,8 +8,8 @@ export const COURT_META = {
     province: "Islamabad Capital Territory",
   },
   PHC: { full: "Peshawar High Court", province: "Khyber Pakhtunkhwa" },
-  BHC: { full: "High Court of Balochistan", province: "Balochistan" },
-  SHC: { full: "Sindh High Court", province: "Sindh" },
+  BHC: { full: "Balochistan High Court", province: "Balochistan" },
+  SHC: { full: "High Court of Sindh", province: "Sindh" },
 };
 
 const NAME_TO_ABBR = {
@@ -26,17 +26,30 @@ const NAME_TO_ABBR = {
   "peshawar high court": "PHC",
   phc: "PHC",
 
-  "high court of balochistan": "BHC",
   "balochistan high court": "BHC",
   bhc: "BHC",
 
   "sindh high court": "SHC",
+  "high court of sindh": "SHC",
+  "high court sindh": "SHC",
+  "high court of sindh karachi": "SHC",
+  "sindh high court karachi": "SHC",
   shc: "SHC",
 };
 
+function normaliseCourtName(raw) {
+  return raw
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[.,()[\]{}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function resolveCourtAbbr(raw) {
   if (!raw) return null;
-  const key = raw.toString().trim().toLowerCase();
+  const key = normaliseCourtName(raw);
   if (!key) return null;
 
   if (NAME_TO_ABBR[key]) return NAME_TO_ABBR[key];

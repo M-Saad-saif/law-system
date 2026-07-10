@@ -6,6 +6,8 @@ export function getJudgmentsSheetConfig() {
   };
 }
 
+const MAX_CSV_BYTES = Number(process.env.JUDGMENTS_SHEET_MAX_BYTES || 100 * 1024 * 1024);
+
 export async function fetchSheetCSV({ sheetId, gid }) {
   const url = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
 
@@ -18,7 +20,49 @@ export async function fetchSheetCSV({ sheetId, gid }) {
   }
 
   const contentType = res.headers.get("content-type") || "";
-  const text = await res.text();
+  const contentLength = Number(res.headers.get("content-length") || 0);
+  if (contentLength > MAX_CSV_BYTES) {
+    throw new Error(
+      `Google Sheet CSV is too large (${Math.round(contentLength / 1024 / 1024)}MB). Refusing to load it in one request.`,
+    );
+  }
+
+  if (!res.body) {
+    const text = await res.text();
+    if (text.length > MAX_CSV_BYTES) {
+      throw new Error(
+        `Google Sheet CSV is too large (${Math.round(text.length / 1024 / 1024)}MB). Refusing to load it in one request.`,
+      );
+    }
+    if (contentType.includes("text/html") || text.trim().startsWith("<")) {
+      throw new Error(
+        "Google Sheet did not return CSV (got HTML instead). Check sharing permissions and the sheet/tab id.",
+      );
+    }
+    return text;
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let text = "";
+  let received = 0;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    received += value.byteLength;
+    if (received > MAX_CSV_BYTES) {
+      reader.cancel().catch(() => {});
+      throw new Error(
+        `Google Sheet CSV is too large (${Math.round(received / 1024 / 1024)}MB). Refusing to load it in one request.`,
+      );
+    }
+
+    text += decoder.decode(value, { stream: true });
+  }
+
+  text += decoder.decode();
 
   if (contentType.includes("text/html") || text.trim().startsWith("<")) {
     throw new Error(

@@ -3,14 +3,10 @@ import mongoose from "mongoose";
 const JudgmentSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true, maxlength: 500 },
-    court: {
-      type: String,
-      required: true,
-      enum: ["SCP", "LHC", "IHC", "PHC", "BHC", "SHC"],
-      index: true,
-    },
+    court: { type: String, required: true, trim: true, index: true },
     courtFull: { type: String, required: true },
     courtAbbr: { type: String, required: true },
+    rawCourtName: { type: String, default: null, trim: true },
     province: { type: String, default: null },
     citation: { type: String, default: null, trim: true },
     judge: { type: String, default: null, trim: true },
@@ -18,9 +14,8 @@ const JudgmentSchema = new mongoose.Schema(
     orderDate: { type: Date, default: null, index: true },
     sourceUrl: {
       type: String,
-      default: null,
       trim: true,
-      index: { unique: true, sparse: true },
+      index: true,
     },
     approved: { type: Boolean, default: false },
     fetchedAt: { type: Date, default: Date.now, index: true },

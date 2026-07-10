@@ -76,7 +76,7 @@ const COURT_TABS = [
   },
   {
     abbr: "SHC",
-    label: "Sindh High Court",
+    label: "High Court of Sindh",
     gradient: "from-[#026a69] to-[#0e8e83]",
     bg: "from-[#eef5f3] to-[#e8f0ed]",
     icon: BookOpen,
@@ -420,12 +420,17 @@ export default function JudgmentsPage() {
     setSyncing(true);
     setSyncMessage(null);
     try {
-      const res = await apiFetch("/api/sync-judgments-sheet", {
+      const syncUrl =
+        activeTab !== "ALL"
+          ? `/api/sync-judgments-sheet?courts=${encodeURIComponent(activeTab)}`
+          : "/api/sync-judgments-sheet";
+
+      const res = await apiFetch(syncUrl, {
         method: "POST",
       });
       if (!res.success) throw new Error(res.message || "Sync failed");
       setSyncMessage(
-        `Synced: ${res.inserted} new, ${res.updated} updated, ${res.skipped} skipped.`,
+        `Synced ${activeTab === "ALL" ? "all courts" : activeTab}: ${res.inserted} new, ${res.updated} updated, ${res.skipped} skipped.`,
       );
       await load();
     } catch (err) {
@@ -433,7 +438,28 @@ export default function JudgmentsPage() {
     } finally {
       setSyncing(false);
     }
-  }, [load]);
+  }, [activeTab, load]);
+
+  const handleFullSync = useCallback(async () => {
+    setSyncing(true);
+    setSyncMessage(null);
+    try {
+      const params = new URLSearchParams({ full: "1" });
+      if (activeTab !== "ALL") params.set("courts", activeTab);
+      const res = await apiFetch(`/api/sync-judgments-sheet?${params.toString()}`, {
+        method: "POST",
+      });
+      if (!res.success) throw new Error(res.message || "Full sync failed");
+      setSyncMessage(
+        `Full sync ${activeTab === "ALL" ? "all courts" : activeTab}: ${res.inserted} new, ${res.updated} updated, ${res.skipped} skipped.`,
+      );
+      await load();
+    } catch (err) {
+      setSyncMessage(`Full sync failed: ${err.message}`);
+    } finally {
+      setSyncing(false);
+    }
+  }, [activeTab, load]);
 
   const lastUpdated = fetchedAt
     ? new Date(fetchedAt).toLocaleString("en-PK", {
@@ -470,17 +496,31 @@ export default function JudgmentsPage() {
 
           <div className="flex items-center gap-3">
             {isAdmin && (
-              <button
-                onClick={handleSync}
-                disabled={syncing}
-                className="flex items-center gap-2 text-sm font-semibold bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2.5 transition-all disabled:opacity-50 hover:scale-105"
-                title="Pull the latest rows from the Google Sheet feed"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`}
-                />
-                {syncing ? "Syncing…" : "Sync Now"}
-              </button>
+              <>
+                <button
+                  onClick={handleSync}
+                  disabled={syncing}
+                  className="flex items-center gap-2 text-sm font-semibold bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2.5 transition-all disabled:opacity-50 hover:scale-105"
+                  title="Sync only rows newer than the current checkpoint"
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`}
+                  />
+                  {syncing
+                    ? `Syncing${activeTab === "ALL" ? "" : ` ${activeTab}`}…`
+                    : activeTab === "ALL"
+                      ? "Sync Now"
+                      : `Sync ${activeTab}`}
+                </button>
+                <button
+                  onClick={handleFullSync}
+                  disabled={syncing}
+                  className="flex items-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2.5 transition-all disabled:opacity-50 hover:scale-105"
+                  title="Force a full backfill of matching court rows"
+                >
+                  Full Sync
+                </button>
+              </>
             )}
             <button
               onClick={load}

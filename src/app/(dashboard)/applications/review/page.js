@@ -446,7 +446,7 @@ function ReviewDetailModal({ app, onClose, onUpdated }) {
                 value: app.version ? `v${app.version}` : null,
               },
             ]
-              .filter(([, , v]) => v)
+              .filter((item) => item.value)
               .map(({ icon: Icon, label, value }) => (
                 <div
                   key={label}
