@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { BellRing, Search, FileSignature, Sparkles } from "lucide-react";
 import { DASH_MAIN } from "./motion";
@@ -23,10 +24,13 @@ export default function Hero() {
   const opacity = useTransform(scrollYProgress, [0, 0.4], [0.75, 1]);
 
   return (
-    <section className="relative overflow-hidden hero-dark pt-36 md:pt-44 pb-0" data-testid="hero-section">
+    <section
+      className="relative overflow-hidden hero-dark pt-36 md:pt-44 pb-0"
+      data-testid="hero-section"
+    >
       {/* Law-themed background particles */}
       <LawParticles />
-      
+
       {/* Light beams & structure lines */}
       <span className="hero-beam hero-beam-l" />
       <span className="hero-beam hero-beam-r" />
@@ -55,9 +59,11 @@ export default function Hero() {
           className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-[1.04]"
           data-testid="hero-heading"
         >
-          Run your law chamber{" "}
-          <br className="hidden sm:block" />
-          on <span className="font-heading italic font-semibold text-[#8fe3d8]">one portal.</span>
+          Run your law chamber <br className="hidden sm:block" />
+          on{" "}
+          <span className="font-heading italic font-semibold text-[#8fe3d8]">
+            one portal.
+          </span>
         </motion.h1>
 
         <motion.p
@@ -67,7 +73,8 @@ export default function Hero() {
           className="mt-7 text-base md:text-lg text-white/70 max-w-md mx-auto leading-relaxed"
           data-testid="hero-subtitle"
         >
-          Cases, hearings, judgments, drafting, and updates — all in one clean system.
+          Cases, hearings, judgments, drafting, and updates — all in one clean
+          system.
         </motion.p>
 
         <motion.div
@@ -76,20 +83,31 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.45 }}
           className="mt-9 flex flex-col items-center gap-4"
         >
-          <button
-            data-testid="hero-trial-btn"
-            className="btn-glow inline-flex items-center gap-2 px-8 py-4 bg-white text-[#053433] font-semibold rounded-full shadow-xl shadow-black/25"
-          >
-            <Sparkles size={16} className="text-[#0f7e75]" />
-            Start Your Free Trial
-          </button>
-          <button data-testid="hero-signin-btn" className="text-sm font-medium text-white/60 hover:text-white transition-colors duration-300">
-            Already a member? Sign In →
-          </button>
+          <Link href="/register">
+            <button
+              data-testid="hero-trial-btn"
+              className="btn-glow inline-flex items-center gap-2 px-8 py-4 bg-white text-[#053433] font-semibold rounded-full shadow-xl shadow-black/25"
+            >
+              <Sparkles size={16} className="text-[#0f7e75]" />
+              Start Your Free Trial
+            </button>
+          </Link>
+          <Link href="/login">
+            <button
+              data-testid="hero-signin-btn"
+              className="text-sm font-medium text-white/60 hover:text-white transition-colors duration-300"
+            >
+              Already a member? Sign In →
+            </button>
+          </Link>
         </motion.div>
 
         {/* Screenshot with Apple-style scroll tilt */}
-        <div ref={shotRef} className="mt-8 md:mt-12 perspective-1200 relative" data-testid="hero-dashboard-frame">
+        <div
+          ref={shotRef}
+          className="mt-8 md:mt-12 perspective-1200 relative"
+          data-testid="hero-dashboard-frame"
+        >
           <div className="absolute inset-x-0 bottom-0 top-1/4 bg-[#8fe3d8]/30 blur-[150px] rounded-full pointer-events-none" />
           <motion.div
             style={{ rotateX, scale, opacity, transformStyle: "preserve-3d" }}
@@ -100,9 +118,16 @@ export default function Hero() {
                 <span className="h-3 w-3 rounded-full bg-white/15" />
                 <span className="h-3 w-3 rounded-full bg-[#0f7e75]/60" />
                 <span className="h-3 w-3 rounded-full bg-[#0c9c8f]/70" />
-                <span className="ml-4 text-xs text-white/50 bg-white/8 border border-white/10 rounded-full px-4 py-1">app.legalportal.pk/dashboard</span>
+                <span className="ml-4 text-xs text-white/50 bg-white/8 border border-white/10 rounded-full px-4 py-1">
+                  app.legalportal.pk/dashboard
+                </span>
               </div>
-              <img src={DASH_MAIN} alt="Legal Portal dashboard" className="w-full block" loading="eager" />
+              <img
+                src={DASH_MAIN}
+                alt="Legal Portal dashboard"
+                className="w-full block"
+                loading="eager"
+              />
             </div>
           </motion.div>
         </div>

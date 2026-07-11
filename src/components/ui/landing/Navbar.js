@@ -65,18 +65,22 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-2.5">
-            <button
-              data-testid="navbar-signin-btn"
-              className="px-5 py-2.5 text-sm font-semibold text-[#053433] rounded-full border border-[#053433]/15 hover:bg-[#eef5f3] transition-all duration-300"
-            >
-              Sign In
-            </button>
-            <button
-              data-testid="navbar-trial-btn"
-              className="btn-glow px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-[#0f7e75] to-[#0c9c8f] rounded-full whitespace-nowrap"
-            >
-              Start Free Trial
-            </button>
+            <Link href="/login">
+              <button
+                data-testid="navbar-signin-btn"
+                className="px-5 py-2.5 text-sm font-semibold text-[#053433] rounded-full border border-[#053433]/15 hover:bg-[#eef5f3] transition-all duration-300"
+              >
+                Sign In
+              </button>
+            </Link>
+            <Link href="/register">
+              <button
+                data-testid="navbar-trial-btn"
+                className="btn-glow px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-[#0f7e75] to-[#0c9c8f] rounded-full whitespace-nowrap"
+              >
+                Start Free Trial
+              </button>
+            </Link>
           </div>
 
           <button

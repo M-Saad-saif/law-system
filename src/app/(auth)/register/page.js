@@ -22,7 +22,6 @@ import {
 import { api } from "@/utils/api";
 import BackgroundPattern from "@/components/auth/BackgroundPattern";
 import { Field } from "@/components/auth/Field";
-import logo from "/public/Horizontal-Logo.png";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -151,19 +150,8 @@ export default function RegisterPage() {
 
       <BackgroundPattern />
 
-      <div className="w-full max-w-7xl min-h-screen lg:min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-5 sm:px-8 lg:px-24 py-8 sm:py-12 relative z-10">
+      <div className="w-full max-w-7xl min-h-screen lg:min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-5 sm:px-8 lg:px-24 py-8 sm:py-12 relative z-10 mt-9">
         <div className="lg:col-span-5 flex flex-col justify-center">
-          <div className="flex items-center gap-2.5 mb-5 group cursor-pointer animate-scale-in">
-            <Image
-              src={logo}
-              width={260}
-              height={220}
-              alt="Logo"
-              className="object-contain"
-              priority
-            />
-          </div>
-
           {/* Header with Slide Up Animation */}
           <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
             <h1 className="text-3xl lg:text-4xl font-normal tracking-tight text-slate-800 mb-2">

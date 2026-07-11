@@ -22,21 +22,6 @@ function LoadingSpinner({ className = "" }) {
   );
 }
 
-function Logo() {
-  return (
-    <div className="flex items-center gap-2.5 mb-5 group cursor-pointer animate-scale-in">
-      <Image
-        src={logo}
-        width={260}
-        height={220}
-        alt="Logo"
-        className="object-contain"
-        priority
-      />
-    </div>
-  );
-}
-
 export default function LoginPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -160,10 +145,8 @@ export default function LoginPage() {
 
       <BackgroundPattern />
 
-      <div className="w-full max-w-7xl min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-5 sm:px-8 lg:px-24 py-8 sm:py-12 relative z-10">
+      <div className="w-full max-w-7xl min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-5 sm:px-8 lg:px-24 py-8 sm:py-12 relative z-10 mt-9">
         <div className="lg:col-span-5 flex flex-col justify-center">
-          <Logo />
-
           <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
             <h1 className="text-2xl lg:text-4xl font-normal tracking-tight text-slate-800 mb-2">
               Welcome to LegalPortal

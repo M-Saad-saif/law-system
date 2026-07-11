@@ -3,6 +3,7 @@ import { ShieldCheck, Lock, KeyRound, Users2, DatabaseBackup } from "lucide-reac
 import { fadeUp, stagger } from "./motion";
 const productTourVideo = "/videos/product-tour.mp4";
 import CustomVideoPlayer from "./CustomVideoPlayer";
+import Link from "next/link";
 
 const steps = [
   { n: "01", t: "Add your cases", d: "Or start with just one case." },
@@ -74,9 +75,9 @@ export default function HowItWorks() {
             <h2 className="font-heading text-4xl md:text-5xl font-bold text-[#053433] tracking-tight mb-4" data-testid="security-heading">
               Your data stays <span className="italic gradient-text">protected.</span>
             </h2>
-            <a href="/privacy" className="inline-block mt-4 px-6 py-3 bg-[#053433] text-white text-sm font-semibold rounded-full hover:bg-[#0f7e75] transition-colors duration-300" data-testid="security-privacy-btn">
+            <Link href="/privacy" className="inline-block mt-4 px-6 py-3 bg-[#053433] text-white text-sm font-semibold rounded-full hover:bg-[#0f7e75] transition-colors duration-300" data-testid="security-privacy-btn">
               Read Privacy & Security
-            </a>
+            </Link>
           </motion.div>
           <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }} className="space-y-3">
             {security.map(({ icon: Icon, t }) => (
