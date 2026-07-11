@@ -7,7 +7,6 @@ import Link from "next/link";
 import { Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { api } from "@/utils/api";
 import {
-  Logo,
   ForgotPasswordIllustration,
 } from "@/components/auth/forgetPassSide";
 import BackgroundPattern from "@/components/auth/BackgroundPattern";
@@ -140,7 +139,6 @@ export default function ForgotPasswordPage() {
 
       <div className="w-full max-w-7xl min-h-screen grid grid-cols-1 lg:grid-cols-12 items-center px-5 sm:px-8 lg:px-24 py-8 sm:py-12 relative z-10">
         <div className="lg:col-span-5 flex flex-col justify-center">
-          <Logo />
 
           <div className="animate-slide-up" style={{ animationDelay: "100ms" }}>
             <h1 className="text-3xl lg:text-4xl font-normal tracking-tight text-slate-800 mb-2">

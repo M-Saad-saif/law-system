@@ -5,36 +5,41 @@ import { fadeUp, stagger } from "./motion";
 
 export const plans = [
   {
-    name: "Starter",
-    tag: "Solo",
-    price: "Rs 2,500",
+    name: "Monthly",
+    tag: "Team",
+    price: "Rs 4,999",
     period: "/month",
-    desc: "For individual advocates.",
+    desc: "For chambers with associates.",
     features: [
       "My Cases",
       "Hearing reminders",
       "Draft generator",
       "Judgment search (basic)",
       "Legal updates",
+      "Cross Examination",
+      "Multi-user roles ",
     ],
     cta: "Start Free Trial",
-    href:"/register",
+    href: "/register",
     highlighted: false,
   },
   {
-    name: "Chamber",
+    name: "Year",
     tag: "Team",
-    price: "Rs 7,500",
-    period: "/month",
+    price: "Rs 49,999",
+    period: "/year",
     desc: "For chambers with associates.",
     features: [
-      "Everything in Starter",
-      "Multi-user roles & permissions",
-      "Judgment library & favourites",
-      "Cross-exam review workflow",
+     "My Cases",
+      "Hearing reminders",
+      "Draft generator",
+      "Judgment search (basic)",
+      "Legal updates",
+      "Cross Examination",
+      "Multi-user roles ",
     ],
     cta: "Start Free Trial",
-    href:"/register",
+    href: "/register",
     highlighted: true,
   },
   {
@@ -49,7 +54,7 @@ export const plans = [
       "All future updates",
     ],
     cta: "Contact to Purchase",
-    href:"/register",
+    href: "/register",
     highlighted: false,
   },
 ];
@@ -117,17 +122,17 @@ export function PlanCard({ p, mini = false }) {
         ))}
       </ul>
       <Link href={p.href}>
-      <button
-        data-testid={`plan-cta-${p.name.toLowerCase()}`}
-        className={`btn-glow w-full py-3.5 rounded-full font-semibold text-sm ${
-          p.highlighted
-          ? "bg-gradient-to-r from-[#0f7e75] to-[#0c9c8f] text-white"
-          : "bg-[#053433] text-white hover:bg-[#0f7e75]"
+        <button
+          data-testid={`plan-cta-${p.name.toLowerCase()}`}
+          className={`btn-glow w-full py-3.5 rounded-full font-semibold text-sm ${
+            p.highlighted
+              ? "bg-gradient-to-r from-[#0f7e75] to-[#0c9c8f] text-white"
+              : "bg-[#053433] text-white hover:bg-[#0f7e75]"
           } transition-colors duration-300`}
-          >
-        {p.cta}
-      </button>
-        </Link>
+        >
+          {p.cta}
+        </button>
+      </Link>
     </motion.div>
   );
 }

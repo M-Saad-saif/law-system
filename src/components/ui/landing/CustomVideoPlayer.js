@@ -90,7 +90,16 @@ export default function CustomVideoPlayer({ src, poster }) {
           poster={poster || DASH_MAIN}
           className="w-full h-full object-cover"
           onClick={togglePlay}
+          playsInline
+          preload="metadata"
+          controls={false}
         />
+
+        {!src && (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#053433] text-white text-center px-6">
+            Video is unavailable.
+          </div>
+        )}
         
         {/* Big play/pause overlay - only shows when paused */}
         {!isPlaying && (

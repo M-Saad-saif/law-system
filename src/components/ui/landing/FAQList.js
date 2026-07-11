@@ -14,7 +14,7 @@ export const faqs = [
   },
   {
     q: "How do I pay?",
-    a: "Pay by bank transfer. Send payment proof (screenshot) to genzomate@gmail.com.",
+    a: "Pay by bank transfer, EasyPaisa, Raast. After payment attach proof (screenshot)",
   },
   {
     q: "When will my account activate after payment?",
@@ -38,7 +38,7 @@ export const faqs = [
   },
   {
     q: "Can Legal Portal read my password?",
-    a: "No. Passwords are stored in hashed form — we can't read them.",
+    a: "No. Passwords are stored in hashed form — we can't read them. (Its fully secure)",
   },
   {
     q: "Is this only for Pakistan?",

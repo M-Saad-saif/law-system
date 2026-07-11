@@ -103,7 +103,6 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="font-body antialiased">
-        <Navbar />
         <ToastProvider />
         <LogoutOverlay />
         {children}

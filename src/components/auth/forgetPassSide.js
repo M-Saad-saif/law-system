@@ -1,25 +1,8 @@
 "use client";
 
 import { Scale, Key, Shield, Mail } from "lucide-react";
-import Image from "next/image";
-import logo from "/public/Horizontal-Logo.png";
 
-function Logo() {
-  return (
-    <div className="flex items-center gap-2.5 mb-5 group cursor-pointer animate-scale-in">
-      <Image
-        src={logo}
-        width={260}
-        height={220}
-        alt="Logo"
-        className="object-contain"
-        priority
-      />
-    </div>
-  );
-}
-
-function ForgotPasswordIllustration() {
+export function ForgotPasswordIllustration() {
   return (
     <div className="hidden lg:flex lg:col-span-7 items-center justify-center relative">
       <div className="relative animate-float-device">
@@ -78,4 +61,4 @@ function ForgotPasswordIllustration() {
   );
 }
 
-export { Logo, ForgotPasswordIllustration };
+

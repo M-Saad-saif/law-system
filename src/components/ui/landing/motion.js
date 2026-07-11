@@ -1,16 +1,28 @@
 export const fadeUp = {
   hidden: { opacity: 0, y: 32 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+  },
 };
 
 export const fadeLeft = {
   hidden: { opacity: 0, x: -40 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+  },
 };
 
 export const fadeRight = {
   hidden: { opacity: 0, x: 40 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+  },
 };
 
 export const stagger = {
@@ -35,6 +47,9 @@ export const SHOT_LIBRARY =
 
 export const SHOT_REMINDERS =
   "https://customer-assets.emergentagent.com/job_legal-portal-hub-1/artifacts/9492cmod_image.png";
+
+export const SHOT_APPLICATION_GENERATOR =
+  "https://customer-assets.emergentagent.com/job_legal-portal-hub-1/artifacts/s7lerlny_Liabrary.png";
 
 export const SHOT_JUDGMENTS =
   "https://customer-assets.emergentagent.com/job_legal-portal-hub-1/artifacts/jilbvbss_image.png";
