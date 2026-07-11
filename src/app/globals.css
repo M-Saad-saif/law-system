@@ -1,6 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --lp-primary: #0f7e75;
+  --lp-secondary: #0c9c8f;
+  --lp-dark: #053433;
+  --lp-light: #eef5f3;
+  --lp-white: #fffffe;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--lp-white);
+  color: var(--lp-dark);
+}
+
+.font-heading {
+  font-family: 'Playfair Display', serif;
+}
+
+::selection {
+  background: var(--lp-secondary);
+  color: var(--lp-white);
+}
+
+.gradient-hero {
+  background: linear-gradient(160deg, #053433 0%, #0a5c55 45%, #0f7e75 75%, #0c9c8f 100%);
+}
+
+.hero-dark {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 108%, rgba(12, 156, 143, 1) 0%, rgba(15, 126, 117, 0.75) 38%, transparent 72%),
+    radial-gradient(ellipse 55% 35% at 50% 100%, rgba(143, 227, 216, 0.35) 0%, transparent 60%),
+    linear-gradient(180deg, #010d0c 0%, #02201e 40%, #075049 70%, #0c9c8f 100%);
+}
+
+.hero-beam {
+  position: absolute;
+  width: 1px;
+  height: 55%;
+  top: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(143, 227, 216, 0.5) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+.hero-beam-l {
+  left: 12%;
+  transform: rotate(24deg);
+  transform-origin: top;
+}
+
+.hero-beam-r {
+  right: 12%;
+  transform: rotate(-24deg);
+  transform-origin: top;
+}
+
+.hero-hline {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(143, 227, 216, 0.35) 20%, rgba(143, 227, 216, 0.35) 80%, transparent);
+  pointer-events: none;
+}
+
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+.gradient-cta {
+  background: linear-gradient(120deg, #053433 0%, #0f7e75 60%, #0c9c8f 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 10s ease infinite;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #0f7e75, #0c9c8f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.glass-dark {
+  background: rgba(255, 255, 254, 0.06);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 254, 0.14);
+}
+
+.glass-light {
+  background: rgba(255, 255, 254, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 254, 0.9);
+}
+
+.btn-glow {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 32px rgba(12, 156, 143, 0.55);
+  transform: translateY(-2px);
+}
+
+.card-lift {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 24px 48px -12px rgba(5, 52, 51, 0.18);
+}
+
+.noise-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 178 82% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 178 82% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 178 82% 11%;
+    --primary: 175 79% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 150 26% 95%;
+    --secondary-foreground: 178 82% 11%;
+    --muted: 150 26% 95%;
+    --muted-foreground: 178 20% 35%;
+    --accent: 174 86% 33%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 160 15% 88%;
+    --input: 160 15% 88%;
+    --ring: 175 79% 28%;
+    --radius: 1rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-neutral-200;
+  }
+}
+
+@layer base {
+  [data-debug-wrapper="true"] {
+    display: contents !important;
+  }
+
+  [data-debug-wrapper="true"]>* {
+    margin-left: inherit;
+    margin-right: inherit;
+    margin-top: inherit;
+    margin-bottom: inherit;
+    padding-left: inherit;
+    padding-right: inherit;
+    padding-top: inherit;
+    padding-bottom: inherit;
+    column-gap: inherit;
+    row-gap: inherit;
+    gap: inherit;
+    border-left-width: inherit;
+    border-right-width: inherit;
+    border-top-width: inherit;
+    border-bottom-width: inherit;
+    border-left-style: inherit;
+    border-right-style: inherit;
+    border-top-style: inherit;
+    border-bottom-style: inherit;
+    border-left-color: inherit;
+    border-right-color: inherit;
+    border-top-color: inherit;
+    border-bottom-color: inherit;
+  }
+}
 
 :root {
   --font-display: Georgia, 'Times New Roman', serif;
@@ -60,7 +273,7 @@ body {
   }
 
   .card-hover {
-    @apply card transition-shadow duration-200 hover:shadow-card-hover;
+    @apply card transition-shadow duration-200 shadow-card-hover;
   }
 
   .btn {
@@ -185,9 +398,6 @@ body {
 }
 
 /* Auth page background */
-/* Add to your existing globals.css */
-
-/* Override or add new background for auth pages */
 .auth-bg {
   background: #000000;
   min-height: 100vh;
@@ -314,4 +524,3 @@ body {
   animation: shimmer 1.5s infinite;
   border-radius: 6px;
 }
-
