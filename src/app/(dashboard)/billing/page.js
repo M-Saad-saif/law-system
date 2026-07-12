@@ -28,6 +28,14 @@ import {
   ChevronRight,
   Sparkles,
   Crown,
+  Banknote,
+  Copy,
+  AlertCircle,
+  Building2,
+  User,
+  Landmark,
+  Smartphone,
+  Wallet,
 } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 
@@ -35,7 +43,7 @@ const PLAN_OPTIONS = [
   {
     type: "monthly",
     label: "Monthly Plan",
-    price: 10000,
+    price: 4999,
     duration: "30 days",
     icon: Calendar,
     description: "Pay month-to-month. Renew every 30 days.",
@@ -43,10 +51,10 @@ const PLAN_OPTIONS = [
   {
     type: "yearly",
     label: "Yearly Plan",
-    price: 50000,
+    price: 49999,
     duration: "365 days",
     icon: Zap,
-    description: "Best value. Save PKR 70,000 vs monthly.",
+    description: "Best value. Save PKR 10,000 vs monthly.",
     badge: "Best Value",
   },
 ];
@@ -316,6 +324,7 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedPaymentTab, setSelectedPaymentTab] = useState("sadapay"); // New state
 
   const plan =
     PLAN_OPTIONS.find((p) => p.type === selectedPlan) || PLAN_OPTIONS[0];
@@ -366,14 +375,6 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
     }
   };
 
-  const paymentMethods = [
-    { value: "raast", label: "Raast" },
-    { value: "easypaisa", label: "Easypaisa" },
-    { value: "jazzcash", label: "JazzCash" },
-    { value: "bank_transfer", label: "Bank Transfer" },
-    { value: "other", label: "Other" },
-  ];
-
   return (
     <div className="relative bg-white rounded-2xl shadow-[0_2px_16px_rgba(2,102,101,0.06)] border border-[#026665]/10 overflow-hidden transition-shadow duration-300 hover:shadow-[0_4px_24px_rgba(2,102,101,0.1)]">
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#026665] via-[#0d8c81] to-[#026665] bg-[length:200%_100%] animate-[shimmer_3s_linear_infinite]" />
@@ -401,52 +402,143 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
           </p>
         </div>
 
-        <div className="bg-[#026665]/5 border border-[#026665]/10 rounded-xl p-4 mb-5 text-sm text-gray-700 space-y-1.5">
-          <p className="font-semibold flex items-center gap-1.5 text-[#026665]">
-            <Info className="w-4 h-4" /> Payment Instructions
-          </p>
-          <p className="text-xs">
-            Send <strong>PKR {plan.price.toLocaleString()}</strong> (exact
-            amount) to:
-          </p>
-          <div className="mt-2 space-y-1.5 font-mono text-xs bg-white rounded-lg p-3 border border-[#026665]/10">
-            <p>
-              <strong>Raast ID:</strong>{" "}
-              {process.env.NEXT_PUBLIC_RAAST_ID || "03XX-XXXXXXX"}
-            </p>
-            <p>
-              <strong>EasyPaisa / JazzCash:</strong>{" "}
-              {process.env.NEXT_PUBLIC_MOBILE_WALLET}
-            </p>
-            <p>
-              <strong>Account Name:</strong>{" "}
-              {process.env.NEXT_PUBLIC_ACCOUNT_NAME || "LawPortal"}
-            </p>
-          </div>
-          <p className="text-xs text-[#026665] mt-1">
-            ⚠ Use the <em>unique amount</em> from your invoice
-          </p>
+        {/* Payment Method Tabs */}
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => {
+              setSelectedPaymentTab("sadapay");
+              setForm({ ...form, payment_method: "sadapay" });
+            }}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              selectedPaymentTab === "sadapay"
+                ? "bg-[#026665] text-white shadow-md"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            <Smartphone className="w-4 h-4 inline mr-1.5" />
+            SadaPay
+          </button>
+          <button
+            onClick={() => {
+              setSelectedPaymentTab("bank transfer");
+              setForm({ ...form, payment_method: "bank transfer" });
+            }}
+            className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              selectedPaymentTab === "bank_transfer"
+                ? "bg-[#026665] text-white shadow-md"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            <Building2 className="w-4 h-4 inline mr-1.5" />
+            Bank Transfer
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
-              Payment Method
-            </label>
-            <select
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-800 focus:border-[#026665] focus:ring-4 focus:ring-[#026665]/10 transition-all duration-200 text-sm"
-              value={form.payment_method}
-              onChange={(e) =>
-                setForm({ ...form, payment_method: e.target.value })
-              }
-            >
-              {paymentMethods.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
+        {/* Payment Details - Conditional Rendering */}
+        <div className="bg-white rounded-xl border border-[#026665]/15 p-5 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-[#026665]/10 flex items-center justify-center">
+              <Banknote className="w-4 h-4 text-[#026665]" />
+            </div>
+            <h3 className="text-sm font-semibold text-gray-700">
+              Payment Details
+            </h3>
           </div>
+
+          <div className="space-y-4">
+            {/* SadaPay Section */}
+            {selectedPaymentTab === "sadapay" && (
+              <div>
+                <div className="text-[18px] font-semibold text-[#026665] uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <Smartphone className="w-3.7 h-3.7" />
+                  <span>SadaPay</span>
+                  <div className="flex-1 h-px bg-[#026665]/10"></div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 bg-[#f8fbfa] rounded-lg p-3">
+                  <div>
+                    <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
+                      <User className="w-3 h-3" />
+                      Name
+                    </div>
+                    <div className="font-mono text-sm font-semibold text-gray-800 mt-0.5">
+                      {process.env.NEXT_PUBLIC_SADAPAY_NAME || "—"}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
+                      <Phone className="w-3 h-3" />
+                      Number
+                    </div>
+                    <div className="font-mono text-sm font-semibold text-gray-800 mt-0.5">
+                      {process.env.NEXT_PUBLIC_SADAPAY_NUMBER || "—"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Bank Section */}
+            {selectedPaymentTab === "bank transfer" && (
+              <div>
+                <div className="text-[18px] font-semibold text-[#026665] uppercase tracking-wider mb-2 flex items-center gap-2">
+                  <Wallet className="w-3.7 h-3.7" />
+                  <span>Bank Account</span>
+                  <div className="flex-1 h-px bg-[#026665]/10"></div>
+                </div>
+                <div className="bg-[#f8fbfa] rounded-lg p-3 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
+                        <Building2 className="w-3 h-3" />
+                        Bank
+                      </div>
+                      <div className="text-sm font-semibold text-gray-800 mt-0.5">
+                        Meezan Bank Limited
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
+                        <User className="w-3 h-3" />
+                        Account Title
+                      </div>
+                      <div className="font-mono text-sm font-semibold text-gray-800 mt-0.5">
+                        {process.env.NEXT_PUBLIC_ACCOUNT_NAME || "—"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* IBAN - Highlighted */}
+                  <div className="bg-white rounded-lg border-2 border-[#026665]/20 p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] text-gray-500 font-medium uppercase tracking-wider flex items-center gap-1">
+                        <Landmark className="w-3 h-3" />
+                        IBAN Number
+                      </span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(
+                            process.env.NEXT_PUBLIC_ACCOUNT_IBAN || "",
+                          );
+                        }}
+                        className="text-[10px] text-[#026665] hover:text-[#171a2a] font-medium flex items-center gap-1 transition-colors"
+                      >
+                        <Copy className="w-3 h-3" />
+                        Copy
+                      </button>
+                    </div>
+                    <div className="font-mono text-base font-bold text-[#026665] tracking-wider select-all break-all">
+                      {process.env.NEXT_PUBLIC_ACCOUNT_IBAN || "Not Set"}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4 mt-5">
+          {/* Hidden field to maintain form data */}
+          <input type="hidden" value={form.payment_method} />
 
           <div>
             <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
@@ -512,7 +604,6 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
     </div>
   );
 }
-
 function PaymentHistory({ payments }) {
   const [selectedScreenshot, setSelectedScreenshot] = useState(null);
 

@@ -13,7 +13,7 @@ export const PLAN_TYPE = Object.freeze({
 
 // Plan pricing and duration config — single source of truth
 export const PLAN_CONFIG = Object.freeze({
-  monthly: { price: 10000, durationDays: 30, label: "Monthly Plan" },
+  monthly: { price: 5000, durationDays: 30, label: "Monthly Plan" },
   yearly: { price: 50000, durationDays: 365, label: "Yearly Plan" },
 });
 
@@ -33,8 +33,8 @@ const paymentRequestSchema = new mongoose.Schema(
     },
     payment_method: {
       type: String,
-      enum: ["raast", "easypaisa", "jazzcash", "bank transfer", "other"],
-      default: "easypaisa",
+      enum: ["sadapay", "bank transfer"],
+      default: "sadapay",
     },
     reference_id: { type: String, trim: true },
     screenshot_url: { type: String, trim: true },
