@@ -1,7 +1,6 @@
 import ToastProvider from "@/components/ui/ToastProvider";
 import LogoutOverlay from "@/components/layout/LogoutOverlay";
 import "./globals.css";
-import Navbar from "@/components/ui/landing/Navbar";
 
 
 export const metadata = {
@@ -103,6 +102,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="font-body antialiased">
+        
         <ToastProvider />
         <LogoutOverlay />
         {children}

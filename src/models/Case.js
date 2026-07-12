@@ -52,7 +52,8 @@ const feePaymentSchema = new mongoose.Schema(
     date: { type: Date, required: true, default: Date.now },
     method: {
       type: String,
-      enum: ["cash", "bank_transfer", "cheque", "online", "other"],
+      // Accept both underscore and spaced variants for backward compatibility
+      enum: ["cash", "bank_transfer", "bank transfer", "cheque", "online", "other"],
       default: "cash",
     },
     note: { type: String, default: "", trim: true },

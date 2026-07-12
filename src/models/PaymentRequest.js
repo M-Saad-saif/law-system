@@ -33,7 +33,7 @@ const paymentRequestSchema = new mongoose.Schema(
     },
     payment_method: {
       type: String,
-      enum: ["raast", "easypaisa", "jazzcash", "bank_transfer", "other"],
+      enum: ["raast", "easypaisa", "jazzcash", "bank transfer", "other"],
       default: "easypaisa",
     },
     reference_id: { type: String, trim: true },

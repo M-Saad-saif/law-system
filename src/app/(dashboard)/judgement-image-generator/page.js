@@ -5,12 +5,14 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import JudgementForm from "@/components/judgement-image/JudgementForm";
 import JudgementCard from "@/components/judgement-image/JudgementCard";
+import AIJudgementImage from "@/components/judgement-image/AIJudgementImage";
 
 export default function JudgementImageGenerator() {
   const [showPreview, setShowPreview] = useState(false);
   const [formData, setFormData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("template"); // "template" | "ai"
 
   const handleFormSubmit = async (data) => {
     setFormData(data);
@@ -107,10 +109,41 @@ export default function JudgementImageGenerator() {
                 <span className="text-sm text-gray-500">Saving image...</span>
               )}
             </div>
-            <JudgementCard
-              data={formData}
-              onImageGenerated={handleImageGenerated}
-            />
+
+            {/* Tab Switcher */}
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex bg-gray-100 rounded-xl p-1">
+                <button
+                  onClick={() => setActiveTab("template")}
+                  className={`px-5 py-2 text-sm font-medium rounded-lg transition-all ${
+                    activeTab === "template"
+                      ? "bg-white shadow text-[#171a2a]"
+                      : "text-gray-500 hover:text-[#171a2a]"
+                  }`}
+                >
+                  Branded Template
+                </button>
+                <button
+                  onClick={() => setActiveTab("ai")}
+                  className={`px-5 py-2 text-sm font-medium rounded-lg transition-all ${
+                    activeTab === "ai"
+                      ? "bg-white shadow text-[#171a2a]"
+                      : "text-gray-500 hover:text-[#171a2a]"
+                  }`}
+                >
+                  AI Generated Image
+                </button>
+              </div>
+            </div>
+
+            {activeTab === "template" ? (
+              <JudgementCard
+                data={formData}
+                onImageGenerated={handleImageGenerated}
+              />
+            ) : (
+              <AIJudgementImage data={formData} />
+            )}
           </div>
         )}
       </div>
