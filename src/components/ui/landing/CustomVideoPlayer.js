@@ -1,6 +1,13 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Rewind, FastForward, Maximize } from "lucide-react";
+import {
+  Play,
+  Pause,
+  Rewind,
+  FastForward,
+  Maximize,
+  Minimize,
+} from "lucide-react";
 import { DASH_MAIN } from "./motion";
 
 export default function CustomVideoPlayer({ src, poster }) {
@@ -23,6 +30,15 @@ export default function CustomVideoPlayer({ src, poster }) {
         video.removeEventListener("loadedmetadata", handleLoadedMetadata);
       };
     }
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
   const handleTimeUpdate = () => {
@@ -74,13 +90,15 @@ export default function CustomVideoPlayer({ src, poster }) {
     );
   };
 
-  const handleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
+  const handleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await containerRef.current?.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (err) {
+      setIsFullscreen(!!document.fullscreenElement);
     }
   };
 
@@ -104,17 +122,20 @@ export default function CustomVideoPlayer({ src, poster }) {
       </h3>
       <div
         ref={containerRef}
-        className="relative rounded-[2rem] overflow-hidden shadow-2xl aspect-video bg-[#053433]"
+        className={`relative rounded-[2rem] overflow-hidden shadow-2xl bg-[#053433] ${
+          isFullscreen ? "w-screen h-screen" : "aspect-video"
+        }`}
         onMouseEnter={() => setShowControls(true)}
         onMouseLeave={() => isPlaying && setShowControls(false)}
       >
         <video
           ref={videoRef}
           poster={poster || DASH_MAIN}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain bg-black"
           onClick={togglePlay}
           onCanPlay={() => setVideoError(false)}
           onError={handleMediaError}
+          onDoubleClick={handleFullscreen}
           playsInline
           preload="metadata"
           controls={false}
@@ -151,7 +172,9 @@ export default function CustomVideoPlayer({ src, poster }) {
           >
             <div
               className="h-full bg-white rounded-full relative"
-              style={{ width: `${(currentTime / duration) * 100}%` }}
+              style={{
+                width: `${duration ? (currentTime / duration) * 100 : 0}%`,
+              }}
             >
               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg" />
             </div>
@@ -189,8 +212,22 @@ export default function CustomVideoPlayer({ src, poster }) {
               </button>
             </div>
 
-            <div className="text-white/90 text-sm font-medium">
-              {formatTime(currentTime)} / {formatTime(duration)}
+            <div className="flex items-center gap-4">
+              <div className="text-white/90 text-sm font-medium">
+                {formatTime(currentTime)} / {formatTime(duration)}
+              </div>
+
+              <button
+                onClick={handleFullscreen}
+                className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center hover:bg-white/30 transition-all duration-200"
+                title={isFullscreen ? "Exit fullscreen" : "Expand video"}
+              >
+                {isFullscreen ? (
+                  <Minimize size={18} className="text-white" />
+                ) : (
+                  <Maximize size={18} className="text-white" />
+                )}
+              </button>
             </div>
           </div>
         </div>
