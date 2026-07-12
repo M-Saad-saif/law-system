@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/authtoken";
 import connectDB from "@/lib/db";
-import { runActorAndWait, fetchDatasetItems } from "@/lib/apify";
 import Judgment from "@/models/Judgment";
 
 export const maxDuration = 300;

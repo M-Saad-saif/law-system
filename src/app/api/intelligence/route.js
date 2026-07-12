@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import JudgmentAlert from "@/models/JudgmentAlert";
 import { withAuth } from "@/lib/api";
-import { seedIntelligenceFeed } from "../seed/intelligence-seed-snippet";
 
 export const GET = withAuth(async (req) => {
   await dbConnect();
