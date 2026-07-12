@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Scale } from "lucide-react";
 import {
   subscribeLogoutOverlay,
   getLogoutOverlaySnapshot,
   resolveLogoutOverlay,
 } from "@/lib/logoutOverlayStore";
+import Image from "next/image";
 
 const MESSAGES = [
   "Securing your session...",
@@ -15,7 +15,7 @@ const MESSAGES = [
   "See you again soon...",
 ];
 
-const TOTAL_MS = 3000; 
+const TOTAL_MS = 3000;
 const EXIT_START_MS = TOTAL_MS - 280;
 const MESSAGE_INTERVAL = TOTAL_MS / MESSAGES.length;
 
@@ -39,9 +39,7 @@ export default function LogoutOverlay() {
     const timers = [];
     MESSAGES.forEach((_, i) => {
       if (i === 0) return;
-      timers.push(
-        setTimeout(() => setMessageIndex(i), MESSAGE_INTERVAL * i),
-      );
+      timers.push(setTimeout(() => setMessageIndex(i), MESSAGE_INTERVAL * i));
     });
     timers.push(setTimeout(() => setExiting(true), EXIT_START_MS));
     timers.push(setTimeout(() => resolveLogoutOverlay(), TOTAL_MS));
@@ -74,7 +72,6 @@ export default function LogoutOverlay() {
           role="alert"
           aria-live="assertive"
         >
-         
           <div
             aria-hidden
             style={{
@@ -108,7 +105,11 @@ export default function LogoutOverlay() {
               <motion.span
                 className="absolute inset-0 rounded-2xl bg-teal-500/20"
                 animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
               />
               <motion.span
                 className="absolute inset-0 rounded-2xl border border-teal-400/40"
@@ -117,10 +118,19 @@ export default function LogoutOverlay() {
               />
               <motion.div
                 animate={{ scale: [1, 1.06, 1] }}
-                transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+                transition={{
+                  duration: 1.6,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
                 className="relative w-14 h-14 rounded-2xl bg-[#026665] flex items-center justify-center shadow-lg shadow-black/30"
               >
-                <Scale className="w-7 h-7 text-white" />
+                <Image
+                  src="/Monogram.png"
+                  height={50}
+                  width={50}
+                  alt="Monogram"
+                />
               </motion.div>
             </div>
 

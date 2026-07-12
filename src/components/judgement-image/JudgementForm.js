@@ -29,7 +29,7 @@ const FormField = ({
   className = "",
 }) => (
   <div
-    className={`bg-white shadow-[4px_4px_23px_-13px_rgba(0,0,0,0.25)] rounded-xl border border-[#b7e3dd]/20 shadow-sm p-4 ${className}`}
+    className={`bg-white shadow-[4px_4px_23px_-13px_rgba(0,0,0,0.25)] rounded-xl border border-[#b7e3dd]/20  p-4 ${className}`}
   >
     <label className="flex items-center gap-1.5 text-[15px] font-semibold text-gray-700 mb-2">
       <Icon className="w-3.5 h-3.5 text-[#0d9286]" />

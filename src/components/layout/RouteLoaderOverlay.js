@@ -1,9 +1,9 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Scale } from "lucide-react";
 import { useRouteTransition } from "@/hooks/useRouteTransition";
 import { Skeleton } from "@/components/ui";
+import Image from "next/image";
 
 export default function RouteLoaderOverlay() {
   const { isLoading } = useRouteTransition();
@@ -48,7 +48,12 @@ export default function RouteLoaderOverlay() {
                 }}
                 className="relative w-12 h-12 rounded-2xl bg-[#026665] flex items-center justify-center shadow-lg shadow-teal-900/15"
               >
-                <Scale className="w-6 h-6 text-white" />
+                <Image
+                  src="/Monogram.png"
+                  height={50}
+                  width={50}
+                  alt="Monogram"
+                />
               </motion.div>
             </div>
 
