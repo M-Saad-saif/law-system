@@ -102,7 +102,7 @@ export default function Navbar() {
           {links.map((l) => (
             <Link
               key={l.label}
-              to={l.to}
+              href={l.to}
               className="block py-3 text-[#053433] font-medium border-b border-gray-100 last:border-0"
             >
               {l.label}
