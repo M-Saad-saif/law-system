@@ -1,6 +1,51 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Scale,
+  FileText,
+  Hash,
+  Building2,
+  Calendar,
+  Gavel,
+  User,
+  Users,
+  AlertCircle,
+  Search,
+  Plus,
+  X,
+  Sparkles,
+  BookOpen,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
+
+
+const FormField = ({
+  icon: Icon,
+  label,
+  required,
+  children,
+  className = "",
+}) => (
+  <div
+    className={`bg-white shadow-[4px_4px_23px_-13px_rgba(0,0,0,0.25)] rounded-xl border border-[#b7e3dd]/20 shadow-sm p-4 ${className}`}
+  >
+    <label className="flex items-center gap-1.5 text-[15px] font-semibold text-gray-700 mb-2">
+      <Icon className="w-3.5 h-3.5 text-[#0d9286]" />
+      {label}
+      {required && <span className="text-[#026e6d]">*</span>}
+    </label>
+    {children}
+  </div>
+);
+
+const ErrorMessage = ({ message }) => (
+  <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+    <AlertCircle className="w-3 h-3" />
+    {message}
+  </p>
+);
 
 const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
   const [formData, setFormData] = useState({
@@ -19,9 +64,11 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoadingCase, setIsLoadingCase] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -66,6 +113,9 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
   };
 
   const loadFromCase = async (caseId) => {
+    if (!caseId.trim()) return;
+
+    setIsLoadingCase(true);
     try {
       const response = await fetch(
         `/api/cases?search=${encodeURIComponent(caseId)}&limit=1`,
@@ -88,153 +138,120 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
       }));
     } catch (error) {
       console.error("Failed to load case:", error);
+    } finally {
+      setIsLoadingCase(false);
     }
   };
 
+  const getInputClasses = (fieldName) => `
+    w-full px-3.5 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#0d9286] 
+    focus:border-[#0d9286] outline-none transition-all duration-200 bg-white text-sm
+    ${
+      errors[fieldName]
+        ? "border-red-400 bg-red-50"
+        : "border-[#b7e3dd]/50 hover:border-[#0d9286]/50"
+    }
+  `;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto p-6">
-      <div className="bg-gradient-to-br from-[#171a2a] via-[#1e2235] to-[#026665] text-white p-8 rounded-2xl shadow-xl">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
+    <form onSubmit={handleSubmit} className="max-w-5xl mx-auto space-y-5">
+      {/* Header */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#171a2a] to-[#026e6d] text-white px-6 py-5 rounded-2xl shadow-lg">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-[#0d9286]/10 rounded-full blur-2xl" />
+        <div className="relative flex items-center gap-4">
+          <div className="bg-white/15 rounded-xl p-2.5">
+            <Scale className="w-5 h-5" />
           </div>
-          <h2 className="text-3xl font-bold tracking-tight">
-            Auto Judgement Image Generator
-          </h2>
+          <div>
+            <h2 className="text-xl font-bold">Generate Judgement Image</h2>
+            <p className="text-white/70 text-xs mt-0.5">
+              Fill in the case details to create a professional legal document
+            </p>
+          </div>
         </div>
-        <p className="text-white/80 text-sm ml-13">
-          Fill in the details below to generate a professional, branded
-          judgement image
-        </p>
       </div>
 
-      {/* Quick Load Card */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-        <label className="block text-sm font-semibold text-[#171a2a] mb-3">
-          Quick Load from Existing Case
-        </label>
-        <div className="flex gap-3">
-          <input
-            type="text"
-            placeholder="Enter Case ID or FIR Number"
-            className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all"
-            id="caseSearch"
-          />
+      {/* Quick Load */}
+      <div className="bg-white rounded-xl border border-[#b7e3dd]/30 shadow-sm p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <Search className="w-4 h-4 text-[#026e6d]" />
+          <label className="text-sm font-semibold text-[#171a2a]">
+            Quick Load from Existing Case
+          </label>
+        </div>
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Enter Case ID or FIR Number"
+              className="w-full pl-9 pr-3 py-2.5 border border-[#b7e3dd]/40 rounded-lg focus:ring-2 focus:ring-[#0d9286] focus:border-[#0d9286] outline-none text-sm bg-[#eef5f3]/20"
+              id="caseSearch"
+              onKeyPress={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  loadFromCase(e.target.value);
+                }
+              }}
+            />
+          </div>
           <button
             type="button"
             onClick={() =>
               loadFromCase(document.getElementById("caseSearch").value)
             }
-            className="px-6 py-2.5 bg-[#171a2a] text-white rounded-lg hover:bg-[#026665] transition-all duration-200 font-medium"
+            disabled={isLoadingCase}
+            className="px-4 py-2.5 bg-[#026e6d] text-white rounded-lg hover:bg-[#0d9286] transition-all text-sm font-medium flex items-center gap-2 disabled:opacity-50"
           >
-            Load Case
+            {isLoadingCase ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ArrowRight className="w-4 h-4" />
+            )}
+            {isLoadingCase ? "Loading..." : "Load"}
           </button>
         </div>
       </div>
 
-      {/* Firm Logo URL */}
-      <div className="card p-5 border border-[#026665]/20">
-        <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-          Firm Logo URL{" "}
-          <span className="text-gray-400 font-normal text-xs">
-            (optional — appears on generated image)
-          </span>
-        </label>
-        <input
-          type="url"
-          name="logoUrl"
-          value={formData.logoUrl}
-          onChange={handleChange}
-          placeholder="https://yourdomain.com/logo.png"
-          className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all"
-        />
-        {formData.logoUrl && (
-          <div className="mt-2 flex items-center gap-2">
-            <img
-              src={formData.logoUrl}
-              alt="Logo preview"
-              className="h-10 max-w-[160px] object-contain border border-gray-200 rounded p-1 bg-white"
-            />
-            <span className="text-xs text-gray-400">Preview</span>
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Judgement Title / Case Name{" "}
-              <span className="text-[#026665]">*</span>
-            </label>
+      {/* Form Fields Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Left Column */}
+        <div className="space-y-4">
+          <FormField icon={FileText} label="Judgement Title" required>
             <input
               type="text"
               name="judgementTitle"
               value={formData.judgementTitle}
               onChange={handleChange}
-              placeholder="e.g., State vs. Accused Name"
-              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all ${
-                errors.judgementTitle
-                  ? "border-red-400 bg-red-50"
-                  : "border-gray-200"
-              }`}
+              onInput={handleChange}
+              placeholder="State vs. Accused Name"
+              className={getInputClasses("judgementTitle")}
             />
             {errors.judgementTitle && (
-              <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                <span>⚠️</span> {errors.judgementTitle}
-              </p>
+              <ErrorMessage message={errors.judgementTitle} />
             )}
-          </div>
+          </FormField>
 
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Case Number / Citation <span className="text-[#026665]">*</span>
-            </label>
+          <FormField icon={Hash} label="Case Number" required>
             <input
               type="text"
               name="caseNumber"
               value={formData.caseNumber}
               onChange={handleChange}
-              placeholder="e.g., 2024 SCMR 1002"
-              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all ${
-                errors.caseNumber
-                  ? "border-red-400 bg-red-50"
-                  : "border-gray-200"
-              }`}
+              onInput={handleChange}
+              placeholder="2024 SCMR 1002"
+              className={getInputClasses("caseNumber")}
             />
-            {errors.caseNumber && (
-              <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                <span>⚠️</span> {errors.caseNumber}
-              </p>
-            )}
-          </div>
+            {errors.caseNumber && <ErrorMessage message={errors.caseNumber} />}
+          </FormField>
 
-          {/* Court Name */}
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Court Name <span className="text-[#026665]">*</span>
-            </label>
+          <FormField icon={Building2} label="Court Name" required>
             <select
               name="courtName"
               value={formData.courtName}
               onChange={handleChange}
-              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all bg-white ${
-                errors.courtName
-                  ? "border-red-400 bg-red-50"
-                  : "border-gray-200"
-              }`}
+              onInput={handleChange}
+              className={getInputClasses("courtName")}
             >
               <option value="">Select Court</option>
               <option>Supreme Court of Pakistan</option>
@@ -246,126 +263,96 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
               <option>Sessions Court</option>
               <option>Special Court (Anti-Terrorism)</option>
             </select>
-            {errors.courtName && (
-              <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                <span>⚠️</span> {errors.courtName}
-              </p>
-            )}
-          </div>
+            {errors.courtName && <ErrorMessage message={errors.courtName} />}
+          </FormField>
 
-          {/* Judgement Date */}
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Judgement Date
-            </label>
+          <FormField icon={Calendar} label="Judgement Date">
             <input
               type="date"
               name="judgementDate"
               value={formData.judgementDate}
               onChange={handleChange}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all"
+              onInput={handleChange}
+              className={getInputClasses("judgementDate")}
             />
-          </div>
+          </FormField>
 
-          {/* Judge Name */}
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Judge Name
-            </label>
+          <FormField icon={Gavel} label="Judge Name">
             <input
               type="text"
               name="judgeName"
               value={formData.judgeName}
               onChange={handleChange}
-              placeholder="e.g., Justice Qazi Faez Isa"
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all"
+              onInput={handleChange}
+              placeholder="Justice Qazi Faez Isa"
+              className={getInputClasses("judgeName")}
             />
-          </div>
+          </FormField>
         </div>
 
-        <div className="space-y-6">
-          {/* Petitioner */}
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Petitioner / Appellant
-            </label>
+        {/* Right Column */}
+        <div className="space-y-4">
+          <FormField icon={User} label="Petitioner / Appellant">
             <input
               type="text"
               name="petitioner"
               value={formData.petitioner}
               onChange={handleChange}
-              placeholder="e.g., Muhammad Ali"
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all"
+              onInput={handleChange}
+              placeholder="Muhammad Ali"
+              className={getInputClasses("petitioner")}
             />
-          </div>
+          </FormField>
 
-          {/* Respondent */}
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Respondent / State
-            </label>
+          <FormField icon={Users} label="Respondent / State">
             <input
               type="text"
               name="respondent"
               value={formData.respondent}
               onChange={handleChange}
-              placeholder="e.g., The State"
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all"
+              onInput={handleChange}
+              placeholder="The State"
+              className={getInputClasses("respondent")}
             />
-          </div>
+          </FormField>
 
-          {/* Key Findings */}
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Key Findings / Observations
-            </label>
+          <FormField icon={BookOpen} label="Key Findings">
             <textarea
               name="keyFindings"
               value={formData.keyFindings}
               onChange={handleChange}
+              onInput={handleChange}
               rows="3"
-              placeholder="Summarize the key legal principles established..."
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all resize-none"
+              placeholder="Summarize the key legal principles..."
+              className={`${getInputClasses("keyFindings")} resize-none`}
             />
-          </div>
+          </FormField>
 
-          {/* Final Decision */}
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Final Decision <span className="text-[#026665]">*</span>
-            </label>
+          <FormField icon={Scale} label="Final Decision" required>
             <textarea
               name="finalDecision"
               value={formData.finalDecision}
               onChange={handleChange}
+              onInput={handleChange}
               rows="2"
-              placeholder="e.g., Bail granted, Appeal allowed, Conviction upheld..."
-              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all resize-none ${
-                errors.finalDecision
-                  ? "border-red-400 bg-red-50"
-                  : "border-gray-200"
-              }`}
+              placeholder="Bail granted, Appeal allowed..."
+              className={`${getInputClasses("finalDecision")} resize-none`}
             />
             {errors.finalDecision && (
-              <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
-                <span>⚠️</span> {errors.finalDecision}
-              </p>
+              <ErrorMessage message={errors.finalDecision} />
             )}
-          </div>
+          </FormField>
 
-          {/* Relevant Sections */}
-          <div>
-            <label className="block text-sm font-semibold text-[#171a2a] mb-2">
-              Relevant Laws / Sections
-            </label>
-            <div className="flex gap-3 mb-3">
+          <FormField icon={BookOpen} label="Relevant Laws / Sections">
+            <div className="flex gap-2 mb-2">
               <input
                 type="text"
                 name="sectionInput"
                 value={formData.sectionInput}
                 onChange={handleChange}
-                placeholder="e.g., Section 302 PPC"
-                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#026665] focus:border-[#026665] outline-none transition-all"
+                onInput={handleChange}
+                placeholder="Section 302 PPC"
+                className="flex-1 px-3.5 py-2.5 border border-[#b7e3dd]/40 rounded-lg focus:ring-2 focus:ring-[#0d9286] focus:border-[#0d9286] outline-none text-sm bg-white"
                 onKeyPress={(e) =>
                   e.key === "Enter" && (e.preventDefault(), addSection())
                 }
@@ -373,45 +360,49 @@ const JudgementForm = ({ onSubmit, initialData = {}, isEditing = false }) => {
               <button
                 type="button"
                 onClick={addSection}
-                className="px-5 py-2.5 bg-[#026665] text-white rounded-lg hover:bg-[#048b8a] transition-all duration-200 font-medium"
+                className="px-3 py-2.5 bg-[#026e6d] text-white rounded-lg hover:bg-[#0d9286] transition-all text-sm font-medium flex items-center gap-1.5"
               >
+                <Plus className="w-3.5 h-3.5" />
                 Add
               </button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {formData.relevantSections.map((section, idx) => (
-                <span
-                  key={idx}
-                  className="px-3 py-1.5 bg-[#026665]/10 text-[#026665] text-sm rounded-lg flex items-center gap-2 border border-[#026665]/20"
-                >
-                  {section}
-                  <button
-                    type="button"
-                    onClick={() => removeSection(idx)}
-                    className="text-[#171a2a] hover:text-red-600 transition-colors ml-1"
+            {formData.relevantSections.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {formData.relevantSections.map((section, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#eef5f3] text-[#026e6d] text-xs rounded-md border border-[#0d9286]/20"
                   >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
+                    {section}
+                    <button
+                      type="button"
+                      onClick={() => removeSection(idx)}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </FormField>
         </div>
       </div>
 
       {/* Submit Button */}
-      <div className="flex gap-4 pt-6">
+      <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          className="flex-1 px-6 py-3.5 bg-gradient-to-r from-[#171a2a] via-[#1e2235] to-[#026665] text-white rounded-xl hover:shadow-lg hover:shadow-[#026665]/20 transition-all duration-300 font-semibold text-lg"
+          className="flex-1 px-6 py-3 bg-gradient-to-r from-[#171a2a] to-[#026e6d] text-white rounded-xl hover:shadow-lg hover:shadow-[#026e6d]/20 transition-all duration-300 font-semibold text-sm flex items-center justify-center gap-2 group"
         >
+          <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
           Generate Judgement Image
         </button>
         {isEditing && (
           <button
             type="button"
             onClick={() => window.history.back()}
-            className="px-6 py-3.5 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium"
+            className="px-6 py-3 border-2 border-[#b7e3dd]/40 rounded-xl hover:bg-[#eef5f3] transition-all duration-200 font-medium text-sm text-gray-600"
           >
             Cancel
           </button>

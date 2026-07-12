@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
 import JudgementImage from "@/models/JudgementImage";
 import connectDB from "@/lib/db";
 import { withAuth } from "@/lib/api";
 import { generateJudgementImage } from "@/lib/ai/imageService";
+
+export const dynamic = "force-dynamic";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 // POST - Generate a brand-new AI image from case details (not a screenshot)
 export const POST = withAuth(async (request, context, user) => {
@@ -26,27 +33,29 @@ export const POST = withAuth(async (request, context, user) => {
 
     await connectDB();
 
-    const buffer = Buffer.from(result.base64, "base64");
-    const timestamp = Date.now();
-    const ext = result.mimeType?.includes("png") ? "png" : "jpg";
-    const filename = `judgement_ai_${timestamp}.${ext}`;
+    const mimeType = result.mimeType || "image/png";
+    const dataUri = `data:${mimeType};base64,${result.base64}`;
 
-    const uploadDir = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "judgement-images",
-    );
-    const filePath = path.join(uploadDir, filename);
-
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(filePath, buffer);
-
-    const imageUrl = `/uploads/judgement-images/${filename}`;
+    let uploadResult;
+    try {
+      uploadResult = await cloudinary.uploader.upload(dataUri, {
+        folder: "lawportal/judgement-images",
+        resource_type: "image",
+        public_id: `judgement_ai_${Date.now()}`,
+        transformation: [{ quality: "auto", fetch_format: "auto" }],
+      });
+    } catch (uploadError) {
+      console.error("Cloudinary upload error:", uploadError);
+      return NextResponse.json(
+        { error: "Failed to upload AI image to Cloudinary" },
+        { status: 500 },
+      );
+    }
 
     const judgementImage = await JudgementImage.create({
       userId: user.id,
-      imageUrl,
+      imageUrl: uploadResult.secure_url,
+      cloudinaryId: uploadResult.public_id,
       inputData,
       templateVersion: "ai-v1",
     });
@@ -55,7 +64,7 @@ export const POST = withAuth(async (request, context, user) => {
       {
         success: true,
         image: judgementImage,
-        imageUrl,
+        imageUrl: uploadResult.secure_url,
       },
       { status: 201 },
     );

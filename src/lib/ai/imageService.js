@@ -39,15 +39,15 @@ function formatDate(date) {
   }
 }
 
-// Estimate how many characters fit in a given pixel width for a serif
-// font at a given size, so wrapping adapts to the actual column width
-// instead of a hardcoded guess.
 function estimateMaxChars(widthPx, fontSize, factor = 0.52) {
   return Math.max(10, Math.floor(widthPx / (fontSize * factor)));
 }
 
 function wrapLines(text, maxChars) {
-  const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+  const words = String(text || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
   if (!words.length) return [];
   const lines = [];
   let current = "";
@@ -63,9 +63,6 @@ function wrapLines(text, maxChars) {
   return lines;
 }
 
-// Splits free-text findings/observations into bullet points. Prefers
-// newline/semicolon-separated input; falls back to sentence splitting.
-// No cap on count or length — everything the user typed is shown.
 function toBullets(text) {
   if (!text) return [];
   let parts = String(text)
@@ -89,8 +86,6 @@ function decisionBadge(finalDecision = "") {
   if (/(disposed)/.test(lower)) return "CASE DISPOSED";
   return "DECISION RECORDED";
 }
-
-// ---- Icon helpers (simplified, recognizable line-art) ----
 
 function scalesIcon(cx, cy, s = 1, color = COLORS.green) {
   const armY = cy - 32 * s;
@@ -163,18 +158,29 @@ function buildSvg(data = {}) {
   const sections = (data.relevantSections || []).filter(Boolean);
 
   // ---------- Pass 1: wrap all text up front so we can compute heights ----------
-  const titleLines = wrapLines(caseTitle, estimateMaxChars(900, 30, 0.5)).slice(0, 2);
+  const titleLines = wrapLines(caseTitle, estimateMaxChars(900, 30, 0.5)).slice(
+    0,
+    2,
+  );
 
   const FINDINGS_COL_WIDTH = 800; // left column of the two-column box
   const DECISION_COL_WIDTH = 380; // right column
   const findingsCharW = estimateMaxChars(FINDINGS_COL_WIDTH, 19);
   const decisionCharW = estimateMaxChars(DECISION_COL_WIDTH, 20);
 
-  const bullets = toBullets(data.keyFindings).map((b) => wrapLines(b, findingsCharW));
-  const findingsLineCount = bullets.reduce((sum, lines) => sum + lines.length, 0);
+  const bullets = toBullets(data.keyFindings).map((b) =>
+    wrapLines(b, findingsCharW),
+  );
+  const findingsLineCount = bullets.reduce(
+    (sum, lines) => sum + lines.length,
+    0,
+  );
   const findingsGapCount = Math.max(0, bullets.length - 1);
 
-  const decisionLines = wrapLines(data.finalDecision || "Not specified.", decisionCharW);
+  const decisionLines = wrapLines(
+    data.finalDecision || "Not specified.",
+    decisionCharW,
+  );
 
   const SECTION_COL_WIDTH = (CONTENT_WIDTH - 60) / 3;
   const sectionCharW = estimateMaxChars(SECTION_COL_WIDTH - 50, 18);
@@ -216,7 +222,11 @@ function buildSvg(data = {}) {
   const boxTopY = y;
   const findingsBodyHeight = findingsLineCount * 26 + findingsGapCount * 14;
   const decisionBodyHeight = decisionLines.length * 30;
-  const boxInnerHeight = Math.max(findingsBodyHeight, decisionBodyHeight + 70, 160);
+  const boxInnerHeight = Math.max(
+    findingsBodyHeight,
+    decisionBodyHeight + 70,
+    160,
+  );
   const boxHeaderHeight = 60;
   const boxHeight = boxHeaderHeight + boxInnerHeight + 40;
   y = boxTopY + boxHeight + 30;
@@ -273,7 +283,8 @@ function buildSvg(data = {}) {
         `<text x="${decisionColX}" y="${boxTopY + boxHeaderHeight + 34 + i * 30}" font-family="Georgia, 'Times New Roman', serif" font-size="20" fill="${COLORS.ink}">${escapeXml(line)}</text>`,
     )
     .join("\n");
-  const decisionTextBottomY = boxTopY + boxHeaderHeight + 34 + decisionLines.length * 30;
+  const decisionTextBottomY =
+    boxTopY + boxHeaderHeight + 34 + decisionLines.length * 30;
 
   const scalesIconCy = boxTopY + boxHeaderHeight + boxInnerHeight / 2 + 10;
   const scalesIconCx = MARGIN_X + FINDINGS_COL_WIDTH + 40;
@@ -394,16 +405,26 @@ function buildSvg(data = {}) {
  */
 export async function generateJudgementImage(caseData) {
   if (!caseData || (!caseData.judgementTitle && !caseData.caseNumber)) {
-    return { ok: false, error: "No case details provided to generate an image from." };
+    return {
+      ok: false,
+      error: "No case details provided to generate an image from.",
+    };
   }
 
   try {
     const svg = buildSvg(caseData);
     const buffer = await sharp(Buffer.from(svg)).png().toBuffer();
-    return { ok: true, base64: buffer.toString("base64"), mimeType: "image/png" };
+    return {
+      ok: true,
+      base64: buffer.toString("base64"),
+      mimeType: "image/png",
+    };
   } catch (err) {
     console.error("[imageService] generateJudgementImage error:", err.message);
-    return { ok: false, error: "Failed to generate the judgement image. Please try again." };
+    return {
+      ok: false,
+      error: "Failed to generate the judgement image. Please try again.",
+    };
   }
 }
 

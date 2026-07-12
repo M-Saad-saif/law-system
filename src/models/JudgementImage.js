@@ -17,6 +17,11 @@ const JudgementImageSchema = new mongoose.Schema({
     required: true,
   },
 
+  cloudinaryId: {
+    type: String,
+    default: null,
+  },
+
   inputData: {
     judgementTitle: String,
     courtName: String,
