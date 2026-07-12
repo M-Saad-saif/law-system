@@ -4,7 +4,7 @@ import "./globals.css";
 
 
 export const metadata = {
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   icons: {
     icon: "/Monogram.png",
   },
@@ -33,7 +33,7 @@ export const metadata = {
   openGraph: {
     type: "website",
     locale: "en_PK",
-    url: "http://localhost:3000",
+    url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     siteName: "LegalPortal",
     title: "LegalPortal — Law Firm Management for Pakistani Lawyers",
     description:
@@ -57,7 +57,7 @@ export const metadata = {
   },
 
   alternates: {
-    canonical: "http://localhost:3000",
+    canonical: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   },
   robots: {
     index: true,
@@ -84,7 +84,7 @@ export default function RootLayout({ children }) {
               name: "LegalPortal",
               applicationCategory: "BusinessApplication",
               operatingSystem: "Web",
-              url: "http://localhost:3000",
+              url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
               description:
                 "Professional law firm management system for Pakistani lawyers. Manage cases, clients, billing, and chambers.",
               offers: {
@@ -95,7 +95,7 @@ export default function RootLayout({ children }) {
               provider: {
                 "@type": "Organization",
                 name: "LegalPortal",
-                url: "http://localhost:3000",
+                url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
               },
             }),
           }}
