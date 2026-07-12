@@ -44,6 +44,7 @@ const PLAN_OPTIONS = [
     type: "monthly",
     label: "Monthly Plan",
     price: 4999,
+    originalPrice: 7000,
     duration: "30 days",
     icon: Calendar,
     description: "Pay month-to-month. Renew every 30 days.",
@@ -52,6 +53,7 @@ const PLAN_OPTIONS = [
     type: "yearly",
     label: "Yearly Plan",
     price: 49999,
+    originalPrice: 84000,
     duration: "365 days",
     icon: Zap,
     description: "Best value. Save PKR 10,000 vs monthly.",
@@ -302,10 +304,23 @@ function PlanSelector({ selected, onChange }) {
                     <CheckCircle className="w-4 h-4 text-[#026665] ml-auto animate-in zoom-in-50 duration-200" />
                   )}
                 </div>
-                <p className="text-2xl font-bold text-gray-900 tracking-tight">
-                  PKR {plan.price.toLocaleString()}
-                </p>
+
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <p className="text-2xl font-bold text-gray-900 tracking-tight">
+                    PKR {plan.price.toLocaleString()}
+                  </p>
+                  {plan.originalPrice && (
+                    <p className="text-sm text-gray-400 line-through">
+                      PKR {plan.originalPrice.toLocaleString()}
+                    </p>
+                  )}
+                </div>
                 <p className="text-xs text-gray-500 mt-0.5">{plan.duration}</p>
+                {plan.originalPrice && (
+                  <p className="text-xs font-semibold text-emerald-600 mt-1">
+                    Save PKR {(plan.originalPrice - plan.price).toLocaleString()}
+                  </p>
+                )}
                 <p className="text-xs text-gray-400 mt-2">{plan.description}</p>
               </button>
             );
@@ -424,7 +439,7 @@ function PaymentForm({ chamber, selectedPlan, onSuccess }) {
               setForm({ ...form, payment_method: "bank transfer" });
             }}
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
-              selectedPaymentTab === "bank_transfer"
+              selectedPaymentTab === "bank transfer"
                 ? "bg-[#026665] text-white shadow-md"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
