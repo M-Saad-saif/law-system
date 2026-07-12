@@ -200,12 +200,12 @@ function LockedNavItem({ item }) {
 }
 
 function NavItem({ item, pathname, isLocked }) {
-  if (isLocked) return <LockedNavItem item={item} />;
-
   const isActive =
     pathname === item.href || pathname.startsWith(item.href + "/");
   const [subOpen, setSubOpen] = useState(isActive);
   const hasSubLinks = item.subLinks && item.subLinks.length > 0;
+
+  if (isLocked) return <LockedNavItem item={item} />;
 
   return (
     <div>

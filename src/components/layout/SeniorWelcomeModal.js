@@ -267,7 +267,7 @@ export default function SeniorWelcomeModal({ user, onDismiss }) {
     }, 200);
   }, [isAnimating, isFirst]);
 
-  const handleDismiss = async () => {
+  const handleDismiss = useCallback(async () => {
     if (closing) return;
     setClosing(true);
     try {
@@ -276,7 +276,7 @@ export default function SeniorWelcomeModal({ user, onDismiss }) {
     } finally {
       onDismiss?.();
     }
-  };
+  }, [closing, onDismiss]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -287,7 +287,7 @@ export default function SeniorWelcomeModal({ user, onDismiss }) {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [goNext, goPrev]);
+  }, [goNext, goPrev, handleDismiss]);
 
   return (
     <div className="fixed inset-0 z-[100] bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
