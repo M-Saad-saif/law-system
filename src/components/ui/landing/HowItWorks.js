@@ -86,7 +86,6 @@ export default function HowItWorks() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="relative rounded-[2rem] overflow-hidden shadow-2xl aspect-video"
             data-testid="product-tour-video"
           >
             <CustomVideoPlayer

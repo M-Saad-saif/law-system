@@ -91,14 +91,14 @@ const STEPS = [
       {
         icon: CreditCard,
         color: "text-violet-600 bg-violet-50 border-violet-100",
-        title: "Monthly — PKR 10,000 / month",
+        title: "Monthly — PKR 4,999 / month",
         desc: "Pay month to month with full flexibility. Perfect if you want to try the paid plan without committing long-term.",
       },
       {
         icon: Star,
         color: "text-amber-600 bg-amber-50 border-amber-100",
-        title: "Yearly — PKR 50,000 / year",
-        desc: "Best value — save PKR 70,000 compared to monthly. Ideal for established chambers with long-term needs.",
+        title: "Yearly — PKR 49,999 / year",
+        desc: "Best value — save PKR 10,000 (17%) compared to monthly. Ideal for established chambers with long-term needs.",
       },
       {
         icon: RefreshCw,
