@@ -16,20 +16,10 @@ import {
   Users,
   Settings,
   CheckCircle2,
-  Mail,
-  Phone,
-  Award,
-  Key,
-  UserCheck,
   Activity,
-  ArrowRight,
   Building2,
-  Scale,
   Briefcase,
   Camera,
-  Copy,
-  ExternalLink,
-  Sparkles,
   X,
 } from "lucide-react";
 
@@ -209,6 +199,16 @@ export default function SettingsPage() {
   });
   const [savingPwd, setSavingPwd] = useState(false);
 
+  const resetPwdForm = useCallback(() => {
+    setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "security") {
+      resetPwdForm();
+    }
+  }, [activeTab, resetPwdForm]);
+
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (pwdForm.newPassword !== pwdForm.confirmPassword) {
@@ -244,6 +244,17 @@ export default function SettingsPage() {
   const [creatingJunior, setCreatingJunior] = useState(false);
   const [showJuniorForm, setShowJuniorForm] = useState(false);
 
+  const resetJuniorForm = useCallback(() => {
+    setJuniorForm({ name: "", email: "", password: "" });
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "team") {
+      setShowJuniorForm(false);
+      resetJuniorForm();
+    }
+  }, [activeTab, resetJuniorForm]);
+
   const fetchJuniors = useCallback(async () => {
     setLoadingList(true);
     try {
@@ -272,7 +283,7 @@ export default function SettingsPage() {
     try {
       await api.post("/api/senior/junior-lawyers", juniorForm);
       toast.success(`Account created successfully for ${juniorForm.name}.`);
-      setJuniorForm({ name: "", email: "", password: "" });
+      resetJuniorForm();
       setShowJuniorForm(false);
       await fetchJuniors();
     } catch (err) {
@@ -431,6 +442,7 @@ export default function SettingsPage() {
           </label>
           <input
             type="password"
+            autoComplete="current-password"
             className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
             placeholder="Verify past credentials"
             value={pwdForm.currentPassword}
@@ -448,6 +460,7 @@ export default function SettingsPage() {
             </label>
             <input
               type="password"
+              autoComplete="new-password"
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
               placeholder="Minimum 8 characters"
               value={pwdForm.newPassword}
@@ -465,6 +478,7 @@ export default function SettingsPage() {
             </label>
             <input
               type="password"
+              autoComplete="new-password"
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300 text-sm hover:border-gray-300"
               placeholder="Match character block"
               value={pwdForm.confirmPassword}
@@ -510,7 +524,13 @@ export default function SettingsPage() {
             </p>
           </div>
           <button
-            onClick={() => setShowJuniorForm((v) => !v)}
+            onClick={() => {
+              setShowJuniorForm((v) => {
+                const next = !v;
+                if (!next) resetJuniorForm();
+                return next;
+              });
+            }}
             className={`px-5 py-2.5 font-semibold text-xs rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 ${
               showJuniorForm
                 ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -547,6 +567,7 @@ export default function SettingsPage() {
                 </label>
                 <input
                   type="email"
+                  autoComplete="off"
                   className="w-full px-4 py-2.5 border-2 border-gray-200 bg-white rounded-xl text-sm focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300"
                   placeholder="User Email"
                   value={juniorForm.email}
@@ -563,6 +584,7 @@ export default function SettingsPage() {
               </label>
               <input
                 type="password"
+                autoComplete="new-password"
                 className="w-full px-4 py-2.5 border-2 border-gray-200 bg-white rounded-xl text-sm focus:border-[#027675] focus:ring-4 focus:ring-[#027675]/10 transition-all duration-300"
                 placeholder="Min 8 characters"
                 value={juniorForm.password}
@@ -576,7 +598,10 @@ export default function SettingsPage() {
             <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => setShowJuniorForm(false)}
+                onClick={() => {
+                  setShowJuniorForm(false);
+                  resetJuniorForm();
+                }}
                 className="px-5 py-2.5 text-sm text-gray-600 border-2 border-gray-200 rounded-xl bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-300"
               >
                 Cancel
