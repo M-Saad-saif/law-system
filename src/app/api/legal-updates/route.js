@@ -86,7 +86,7 @@ export const GET = withAuth(async (req) => {
       await Promise.all([
         Judgment.countDocuments(filter),
         Judgment.find(filter)
-          .sort({ orderDate: -1, fetchedAt: -1 })
+          .sort({ orderDate: -1, fetchedAt: -1, _id: -1 })
           .skip((page - 1) * limit)
           .limit(limit)
           .lean(),

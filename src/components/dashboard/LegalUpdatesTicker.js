@@ -209,24 +209,45 @@ export default function LegalUpdatesTicker() {
   const [source, setSource] = useState(null);
   const [activeTab, setActiveTab] = useState("ALL");
 
-  // Fetch
+  // Fetch (and keep in sync with newly published/synced judgments)
   useEffect(() => {
-    async function load() {
+    let cancelled = false;
+
+    async function load(isBackgroundRefresh) {
       try {
-        setLoading(true);
+        if (!isBackgroundRefresh) setLoading(true);
         const res = await apiFetch("/api/legal-updates?limit=60");
+        if (cancelled) return;
         if (!res.success)
           throw new Error(res.error || "Failed to fetch legal updates");
         setAllJudgments(res.data || []);
         setFetchedAt(res.fetchedAt);
         setSource(res.source);
+        setError(null);
       } catch (err) {
-        setError(err.message);
+        if (!cancelled) setError(err.message);
       } finally {
-        setLoading(false);
+        if (!cancelled && !isBackgroundRefresh) setLoading(false);
       }
     }
-    load();
+
+    load(false);
+
+    // Periodically re-fetch so newly synced/published judgments (e.g. added
+    // via "Sync now" on /judgments) show up here without a full page reload.
+    const intervalId = setInterval(() => load(true), 60000);
+
+    // Also refresh whenever the tab/window regains focus.
+    function handleFocus() {
+      load(true);
+    }
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
 
   // Filtered view
