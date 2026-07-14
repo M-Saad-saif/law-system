@@ -182,9 +182,9 @@ export default function DashboardPage() {
         </div>
 
         {/* Legal Updates Ticker - Styled Container */}
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden p-1">
+        {/* <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden p-1">
           <LegalUpdatesTicker />
-        </div>
+        </div> */}
 
         {/* Recent Cases Section */}
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[400px]">

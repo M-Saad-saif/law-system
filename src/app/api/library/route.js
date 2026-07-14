@@ -56,12 +56,37 @@ export const GET = withAuth(async (request, context, user) => {
 });
 
 export const POST = withAuth(async (request, context, user) => {
+  let body;
   try {
     await connectDB();
-    const body = await request.json();
+    body = await request.json();
+
+    // If this save is linked to a judgment (sourceUrl set), avoid creating
+    // a duplicate entry for the same user — just return the existing one.
+    if (body.sourceUrl) {
+      const existing = await JudgementLibrary.findOne({
+        userId: user.id,
+        sourceUrl: body.sourceUrl,
+      });
+      if (existing) {
+        return apiSuccess({ entry: existing, alreadySaved: true }, 200);
+      }
+    }
+
     const entry = await JudgementLibrary.create({ ...body, userId: user.id });
-    return apiSuccess({ entry }, 201);
+    return apiSuccess({ entry, alreadySaved: false }, 201);
   } catch (error) {
+    // Race-condition safety net: duplicate key from the unique index.
+    if (error?.code === 11000 && body?.sourceUrl) {
+      const existing = await JudgementLibrary.findOne({
+        userId: user.id,
+        sourceUrl: body.sourceUrl,
+      });
+      if (existing) {
+        return apiSuccess({ entry: existing, alreadySaved: true }, 200);
+      }
+      return apiError("This judgment is already saved to your library.", 409);
+    }
     console.error(error);
     return apiError("Failed to save to library.", 500);
   }

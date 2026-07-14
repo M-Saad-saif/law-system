@@ -37,7 +37,7 @@ const judgementLibrarySchema = new mongoose.Schema(
     tags: [{ type: String, trim: true }],
     isFavourite: { type: Boolean, default: false },
     isMostImportant: { type: Boolean, default: false },
-
+    pdfUrl: { type: String, trim: true },
     // Private notes
     notes: { type: [noteSchema], default: [] },
 
@@ -50,6 +50,10 @@ const judgementLibrarySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Case",
     },
+    // Reference back to the judgment (from the Court Judgments feed) this
+    // entry was saved from. Used to de-duplicate saves and to show a
+    // "Saved" state on the Judgements page.
+    sourceUrl: { type: String, trim: true },
   },
   { timestamps: true },
 );
@@ -57,6 +61,12 @@ const judgementLibrarySchema = new mongoose.Schema(
 judgementLibrarySchema.index({ userId: 1, isMostImportant: -1, createdAt: -1 });
 judgementLibrarySchema.index({ userId: 1, isFavourite: 1 });
 judgementLibrarySchema.index({ citation: 1 });
+// Prevent the same judgment being saved twice for the same user, while
+// allowing many entries with no sourceUrl (manually created entries).
+judgementLibrarySchema.index(
+  { userId: 1, sourceUrl: 1 },
+  { unique: true, sparse: true },
+);
 judgementLibrarySchema.index(
   { title: "text", citation: "text", offenceName: "text", tags: "text" },
   { name: "library_text_search" },

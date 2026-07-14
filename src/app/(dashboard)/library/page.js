@@ -28,6 +28,8 @@ import {
   ChevronRight,
   FolderOpen,
   Scale,
+   ChevronUp,
+  ChevronDown,
   Gavel,
   Download,
   Share2,
@@ -798,76 +800,285 @@ function LibraryCard({
   onDelete,
   isHovered,
 }) {
+  const pdfLink = entry.pdfUrl || entry.sourceUrl;
+  const summaryText = entry.voiceSummary || entry.rawText || "";
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showFullSummary, setShowFullSummary] = useState(false);
+  
+  // Generate a gradient based on importance and court
+  const getCardGradient = () => {
+    if (entry.isMostImportant) {
+      return "from-amber-50 via-yellow-50 to-amber-50/30";
+    }
+    if (entry.isFavourite) {
+      return "from-rose-50 via-pink-50 to-rose-50/30";
+    }
+    return "from-slate-50 via-white to-slate-50/30";
+  };
+
+  // Get accent color based on importance
+  const getAccentColor = () => {
+    if (entry.isMostImportant) return "amber";
+    if (entry.isFavourite) return "rose";
+    return "primary";
+  };
+
+  const accent = getAccentColor();
+  
+  // Court badge color
+  const getCourtBadgeColor = (court) => {
+    if (!court) return "slate";
+    if (court.includes("Supreme Court")) return "purple";
+    if (court.includes("High Court")) return "blue";
+    if (court.includes("Sessions")) return "green";
+    if (court.includes("Special")) return "orange";
+    return "slate";
+  };
+
+  const courtColor = getCourtBadgeColor(entry.courtName);
+
+  const badgeColors = {
+    purple: "bg-purple-100 text-purple-700 border-purple-200",
+    blue: "bg-blue-100 text-blue-700 border-blue-200",
+    green: "bg-green-100 text-green-700 border-green-200",
+    orange: "bg-orange-100 text-orange-700 border-orange-200",
+    slate: "bg-slate-100 text-slate-700 border-slate-200",
+    amber: "bg-amber-100 text-amber-700 border-amber-200",
+    rose: "bg-rose-100 text-rose-700 border-rose-200",
+    primary: "bg-primary-100 text-primary-700 border-primary-200",
+  };
+
+  // Determine if summary is long enough to need truncation
+  const needsTruncation = summaryText.length > 150;
+  const displaySummary = showFullSummary ? summaryText : summaryText.slice(0, 150);
+
+  // Toggle summary expansion
+  const toggleSummary = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowFullSummary(!showFullSummary);
+  };
+
   return (
     <div
-      className={`group relative bg-white rounded-2xl p-6 flex flex-col gap-3 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden ${
+      className={`group relative bg-gradient-to-br ${getCardGradient()} rounded-2xl p-6 flex flex-col gap-3 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border ${
         entry.isMostImportant
-          ? "ring-2 ring-amber-400/50 bg-gradient-to-br from-amber-50/50 to-yellow-50/50"
-          : ""
-      } ${isHovered ? "scale-105 translate-y-[-4px]" : ""}`}
+          ? "border-amber-300/60 ring-2 ring-amber-400/30"
+          : entry.isFavourite
+          ? "border-rose-300/40"
+          : "border-slate-200/60"
+      } ${isHovered ? "scale-[1.02] translate-y-[-6px] shadow-2xl" : ""}`}
     >
-      {/* Glow Effect on Important Cards */}
+      {/* Premium Glow Effect - Enhanced */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className={`absolute -top-20 -right-20 w-60 h-60 bg-${accent}-400/5 rounded-full blur-3xl transition-all duration-700 ${isHovered ? "scale-150 opacity-100" : "opacity-0"}`} />
+        <div className={`absolute -bottom-20 -left-20 w-60 h-60 bg-${accent}-400/5 rounded-full blur-3xl transition-all duration-700 ${isHovered ? "scale-150 opacity-100" : "opacity-0"}`} style={{ transitionDelay: "100ms" }} />
+      </div>
+
+      {/* Shimmer Effect */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full transition-transform duration-1000 ${isHovered ? "translate-x-full" : ""}`} />
+      </div>
+
+      {/* Premium Badge for Important */}
       {entry.isMostImportant && (
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-amber-400/0 via-amber-400/5 to-amber-400/0 animate-shine"
-          aria-hidden="true"
-        />
+        <div className="absolute -top-1 -right-1">
+          <div className="relative">
+            <div className="absolute inset-0 bg-amber-400 rounded-full blur-md animate-ping opacity-60" />
+            <div className="relative bg-gradient-to-r from-amber-400 to-amber-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg shadow-amber-500/30">
+              <Trophy className="w-3 h-3" />
+              Landmark
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Top row */}
-      <div className="relative flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
+      {/* Top Row - Enhanced */}
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0 space-y-1.5">
+          {/* Citation with Premium Style */}
           {entry.citation && (
-            <p className="text-xs font-mono text-teal-600 font-bold mb-1 truncate group-hover:text-teal-700 transition-colors duration-300">
-              <span className="inline-block px-2 py-0.5 bg-teal-50 rounded-md border border-teal-200">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-4 bg-gradient-to-b from-primary-500 to-primary-400 rounded-full" />
+              <p className="text-[11px] font-mono font-bold text-primary-700 bg-primary-50/80 px-3 py-1 rounded-full border border-primary-200/60 backdrop-blur-sm">
                 {entry.citation}
-              </span>
-            </p>
+              </p>
+            </div>
           )}
-          <h3 className="font-bold text-slate-800 text-sm leading-snug line-clamp-2 group-hover:text-slate-900 transition-colors duration-300">
+
+          {/* Title with Gradient on Hover */}
+          <h3 className={`font-bold text-slate-800 text-sm leading-snug line-clamp-2 transition-all duration-300 ${
+            isHovered ? "text-slate-900" : ""
+          }`}>
             {entry.title}
           </h3>
         </div>
-        {entry.isMostImportant && (
-          <div className="relative">
-            <div className="absolute inset-0 bg-amber-400 rounded-full blur-sm animate-pulse" />
-            <Trophy className="relative w-5 h-5 text-amber-500 shrink-0 mt-0.5 transition-all duration-300 group-hover:scale-125 group-hover:rotate-12" />
-          </div>
+
+        {/* Quick Action Buttons - Premium Style */}
+        <div className="flex items-center gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleImportant?.();
+            }}
+            title={entry.isMostImportant ? "Remove landmark status" : "Mark as Landmark"}
+            className={`p-2 rounded-xl transition-all duration-300 hover:scale-110 ${
+              entry.isMostImportant
+                ? "bg-amber-50 text-amber-500 shadow-sm shadow-amber-500/20"
+                : "text-slate-300 hover:text-amber-500 hover:bg-amber-50/50"
+            }`}
+          >
+            <Trophy className={`w-4 h-4 transition-transform duration-300 ${entry.isMostImportant ? "scale-110" : ""}`} />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onToggleFavourite?.();
+            }}
+            title={entry.isFavourite ? "Remove favourite" : "Mark favourite"}
+            className={`p-2 rounded-xl transition-all duration-300 hover:scale-110 ${
+              entry.isFavourite
+                ? "bg-rose-50 text-rose-500 shadow-sm shadow-rose-500/20"
+                : "text-slate-300 hover:text-rose-500 hover:bg-rose-50/50"
+            }`}
+          >
+            {entry.isFavourite ? (
+              <Star className="w-4 h-4 fill-rose-400" />
+            ) : (
+              <StarOff className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Court & Date - Enhanced Badge */}
+      <div className="relative flex flex-wrap items-center gap-2">
+        {entry.courtName && (
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border ${badgeColors[courtColor] || badgeColors.slate} transition-all duration-300 group-hover:shadow-sm`}>
+            <Scale className="w-3 h-3" />
+            {entry.courtName}
+          </span>
+        )}
+        {entry.judgementDate && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium text-slate-500 bg-slate-50/80 border border-slate-200/60 backdrop-blur-sm">
+            <Calendar className="w-3 h-3" />
+            {new Date(entry.judgementDate).toLocaleDateString("en-PK", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
+        )}
+        {entry.offenceName && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium text-slate-600 bg-slate-50/80 border border-slate-200/60 backdrop-blur-sm">
+            <Gavel className="w-3 h-3" />
+            {entry.offenceName}
+          </span>
         )}
       </div>
 
-      {/* Meta */}
-      {entry.courtName && (
-        <p className="text-xs text-slate-500 group-hover:text-slate-600 transition-colors duration-300 flex items-center gap-1.5">
-          <Scale className="w-3 h-3" />
-          {entry.courtName}
-        </p>
-      )}
-
-      {/* Final decision snippet */}
+      {/* Final Decision - Enhanced with Style */}
       {entry.finalDecision && (
-        <p className="text-xs text-slate-600 line-clamp-2 bg-slate-50 rounded-xl px-3 py-2 border border-slate-100 group-hover:border-slate-200 group-hover:bg-slate-100/50 transition-all duration-300">
-          {entry.finalDecision}
-        </p>
-      )}
-
-      {/* Tags */}
-      {entry.tags?.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {entry.tags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-[11px] font-semibold border border-primary-200 hover:bg-primary-100 hover:border-primary-300 transition-all duration-300 cursor-default"
-            >
-              <Tag className="w-3 h-3" />
-              {tag}
-            </span>
-          ))}
+        <div className="relative mt-1">
+          <div className="flex items-start gap-2 p-3 bg-gradient-to-r from-slate-50/80 to-white/50 rounded-xl border border-slate-200/60 backdrop-blur-sm transition-all duration-300 group-hover:border-slate-300/80 group-hover:shadow-sm">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+              {entry.finalDecision}
+            </p>
+          </div>
         </div>
       )}
 
-      {/* Actions */}
-      <div className="flex items-center gap-1 pt-3 mt-2 border-t border-slate-100 group-hover:border-slate-200 transition-colors duration-300">
+      {/* Summary - Enhanced with Dropdown/Expandable Feature */}
+      {summaryText && (
+        <div className="relative mt-1">
+          <div className="p-3 bg-gradient-to-r from-primary-50/50 to-blue-50/50 rounded-xl border border-primary-200/40 backdrop-blur-sm transition-all duration-300 group-hover:border-primary-300/60 group-hover:shadow-sm">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-start gap-2">
+                <Sparkles className="w-4 h-4 text-primary-500 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className={`text-xs text-slate-600 leading-relaxed transition-all duration-300 ${
+                    !showFullSummary && needsTruncation ? "line-clamp-3" : ""
+                  }`}>
+                    {summaryText}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Expand/Collapse Button - Only show if text is long enough */}
+              {needsTruncation && (
+                <button
+                  onClick={toggleSummary}
+                  className="flex items-center justify-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-700 transition-all duration-300 hover:scale-105 mt-1 pt-1 border-t border-primary-200/40"
+                >
+                  {showFullSummary ? (
+                    <>
+                      <ChevronUp className="w-3.5 h-3.5" />
+                      Show Less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-3.5 h-3.5" />
+                      Read Full Summary
+                      <span className="text-[10px] text-primary-400">({summaryText.length} chars)</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Laws Discussed - Optional */}
+      {entry.lawsDiscussed && (
+        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-slate-500 bg-slate-50/80 rounded-lg px-3 py-1.5 border border-slate-200/60 transition-all duration-300 group-hover:border-slate-300/80">
+          <BookOpen className="w-3 h-3 text-primary-400" />
+          <span className="font-medium">Laws:</span>
+          <span className="line-clamp-1">{entry.lawsDiscussed}</span>
+        </div>
+      )}
+
+      {/* Tags - Premium Style */}
+      {entry.tags?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {entry.tags.slice(0, 4).map((tag) => (
+            <span
+              key={tag}
+              className="group/tag inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white text-primary-700 text-[10px] font-semibold border border-primary-200/60 shadow-sm hover:shadow-md hover:border-primary-300 transition-all duration-300 cursor-default hover:scale-105"
+            >
+              <Tag className="w-2.5 h-2.5 opacity-60" />
+              {tag}
+            </span>
+          ))}
+          {entry.tags.length > 4 && (
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold text-slate-500 bg-slate-100 border border-slate-200">
+              +{entry.tags.length - 4}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* PDF Link - Enhanced Button */}
+      {pdfLink && (
+        <a
+          href={pdfLink}
+          target="_blank"
+          rel="noreferrer"
+          className="group/link inline-flex items-center justify-center gap-2 text-xs font-semibold text-primary-700 bg-primary-50/80 border border-primary-200/60 rounded-xl px-4 py-2.5 transition-all duration-300 hover:bg-primary-100 hover:border-primary-300 hover:shadow-md hover:scale-[1.02]"
+        >
+          <Download className="w-3.5 h-3.5 transition-transform duration-300 group-hover/link:scale-110" />
+          View Full PDF
+          <ArrowUpRight className="w-3 h-3 opacity-0 group-hover/link:opacity-100 transition-all duration-300 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
+        </a>
+      )}
+
+      {/* Actions - Enhanced Footer */}
+      <div className="flex items-center gap-1 pt-3 mt-1 border-t border-slate-200/60 group-hover:border-slate-300/80 transition-all duration-300">
         <button
           type="button"
           onClick={(e) => {
@@ -875,52 +1086,10 @@ function LibraryCard({
             e.stopPropagation();
             onView?.();
           }}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-primary-50 rounded-xl text-xs font-semibold text-slate-600 hover:text-primary-600 transition-all duration-300 group/btn"
+          className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-gradient-to-r from-slate-50 to-white hover:from-primary-50 hover:to-primary-50/50 rounded-xl text-xs font-semibold text-slate-600 hover:text-primary-600 transition-all duration-300 border border-slate-200/60 hover:border-primary-300 hover:shadow-md hover:scale-[1.02] group/btn"
         >
-          <Eye className="w-3.5 h-3.5 group-hover/btn:scale-110 transition-transform duration-300" />
-          View
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onToggleFavourite?.();
-          }}
-          title={entry.isFavourite ? "Remove favourite" : "Mark favourite"}
-          className={`p-2 rounded-xl transition-all duration-300 hover:scale-110 ${
-            entry.isFavourite
-              ? "text-yellow-500 bg-yellow-50 hover:bg-yellow-100"
-              : "text-slate-400 hover:text-yellow-500 hover:bg-yellow-50"
-          }`}
-        >
-          {entry.isFavourite ? (
-            <Star className="w-4 h-4 fill-yellow-400 transition-transform duration-300 hover:rotate-12" />
-          ) : (
-            <StarOff className="w-4 h-4" />
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            onToggleImportant?.();
-          }}
-          title={
-            entry.isMostImportant
-              ? "Remove important flag"
-              : "Mark as Most Important"
-          }
-          className={`p-2 rounded-xl transition-all duration-300 hover:scale-110 ${
-            entry.isMostImportant
-              ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
-              : "text-slate-400 hover:text-amber-500 hover:bg-amber-50"
-          }`}
-        >
-          <Trophy
-            className={`w-4 h-4 transition-transform duration-300 ${entry.isMostImportant ? "scale-110" : ""}`}
-          />
+          <Eye className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:scale-110" />
+          View Details
         </button>
         <button
           type="button"
@@ -929,7 +1098,7 @@ function LibraryCard({
             e.stopPropagation();
             onDelete?.();
           }}
-          className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all duration-300 hover:scale-110"
+          className="p-2.5 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all duration-300 hover:scale-110 border border-transparent hover:border-red-200"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -1052,6 +1221,17 @@ function EntryDetailModal({ entry, onClose, onUpdated }) {
                   year: "numeric",
                 })}
               </span>
+            )}
+            {(data.pdfUrl || data.sourceUrl) && (
+              <a
+                href={data.pdfUrl || data.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-[#026a69] hover:text-[#0e8e83] bg-slate-50 border border-slate-200 rounded-full px-3 py-1 transition-all duration-300 hover:bg-slate-100"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Open PDF
+              </a>
             )}
           </div>
           <button
@@ -1242,6 +1422,7 @@ function AddEntryModal({ onClose, onAdded }) {
     citation: "",
     courtName: "",
     judgementDate: "",
+    pdfUrl: "",
     offenceName: "",
     lawsDiscussed: "",
     finalDecision: "",
@@ -1331,6 +1512,16 @@ function AddEntryModal({ onClose, onAdded }) {
                   onChange={(e) =>
                     setForm({ ...form, judgementDate: e.target.value })
                   }
+                />
+              </div>
+              <div>
+                <label className="label">PDF Link</label>
+                <input
+                  type="url"
+                  className="input rounded-xl border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-300"
+                  placeholder="https://..."
+                  value={form.pdfUrl}
+                  onChange={(e) => setForm({ ...form, pdfUrl: e.target.value })}
                 />
               </div>
               <div className="sm:col-span-2">

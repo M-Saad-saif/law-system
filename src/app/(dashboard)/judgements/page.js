@@ -25,7 +25,11 @@ import {
   Layers,
   TrendingUp,
   Zap,
+  Bookmark,
+  BookmarkCheck,
+  Loader2,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import { apiFetch } from "@/utils/api";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -117,12 +121,46 @@ function formatDate(iso) {
   });
 }
 
-function JudgmentCard({ judgment }) {
+function JudgmentCard({ judgment, isSaved, onSaved }) {
   const [expanded, setExpanded] = useState(false);
+  const [saving, setSaving] = useState(false);
   const date = formatDate(judgment.orderDate);
   const keywords = judgment.keywords ?? [];
   const visibleKeywords = keywords.slice(0, 3);
   const extraKeywordCount = keywords.length - visibleKeywords.length;
+  const sourceKey = judgment.sourceUrl || judgment._id || judgment.id;
+
+  const handleSaveToLibrary = async () => {
+    if (saving || isSaved) return;
+    setSaving(true);
+    try {
+      const res = await apiFetch("/api/library", {
+        method: "POST",
+        body: JSON.stringify({
+          title: judgment.title,
+          citation: judgment.citation || "",
+          courtName: judgment.courtFull || judgment.court || "",
+          judgementDate: judgment.orderDate || undefined,
+          voiceSummary: judgment.summary || "",
+          rawText: judgment.summary || "",
+          tags: keywords,
+          sourceUrl: sourceKey,
+          pdfUrl: judgment.sourceUrl || "",
+        }),
+      });
+      if (!res.success) throw new Error(res.message || "Failed to save");
+      toast.success(
+        res.data?.alreadySaved
+          ? "Already in your library"
+          : "Saved to your Library",
+      );
+      onSaved?.(sourceKey);
+    } catch (err) {
+      toast.error(err.message || "Failed to save to library");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="group relative bg-white border border-[#eef5f3] rounded-2xl p-5 hover:border-[#0e8e83] hover:shadow-lg hover:shadow-[#026a69]/5 transition-all duration-300 flex flex-col gap-3">
@@ -241,17 +279,42 @@ function JudgmentCard({ judgment }) {
         </div>
       )}
 
-      {judgment.sourceUrl && (
-        <a
-          href={judgment.sourceUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-auto inline-flex items-center gap-1.5 text-xs font-semibold text-[#026a69] hover:text-[#0e8e83] no-underline group/link"
+      <div className="mt-auto flex items-center justify-between gap-2">
+        {judgment.sourceUrl ? (
+          <a
+            href={judgment.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#026a69] hover:text-[#0e8e83] no-underline group/link"
+          >
+            <span className="group-hover/link:underline">View judgment</span>
+            <ArrowUpRight className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+          </a>
+        ) : (
+          <span />
+        )}
+
+        <button
+          type="button"
+          onClick={handleSaveToLibrary}
+          disabled={saving || isSaved}
+          title={isSaved ? "Already in your Library" : "Save to Library"}
+          className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border transition-all shrink-0 ${
+            isSaved
+              ? "bg-[#eef5f3] text-[#026a69] border-[#d0e8e4] cursor-default"
+              : "bg-white text-black border-[#eef5f3] hover:border-[#0e8e83] hover:text-[#026a69] hover:shadow-sm disabled:opacity-60"
+          }`}
         >
-          <span className="group-hover/link:underline">View judgment</span>
-          <ArrowUpRight className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
-        </a>
-      )}
+          {saving ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : isSaved ? (
+            <BookmarkCheck className="w-3 h-3" />
+          ) : (
+            <Bookmark className="w-3 h-3" />
+          )}
+          {saving ? "Saving…" : isSaved ? "Saved" : "Save to Library"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -371,8 +434,30 @@ export default function JudgmentsPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState(null);
 
+  const [savedSources, setSavedSources] = useState(() => new Set());
+
   const debouncedSearch = useDebouncedValue(search, 350);
   const requestId = useRef(0);
+
+  const loadSavedSources = useCallback(async () => {
+    try {
+      const res = await apiFetch("/api/library/sources");
+      if (res.success) {
+        setSavedSources(new Set(res.data?.sourceUrls ?? []));
+      }
+    } catch {
+      // Non-critical — the Save button just won't show "already saved" state.
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSavedSources();
+  }, [loadSavedSources]);
+
+  const handleJudgmentSaved = useCallback((sourceKey) => {
+    if (!sourceKey) return;
+    setSavedSources((prev) => new Set(prev).add(sourceKey));
+  }, []);
 
   const load = useCallback(async () => {
     const myRequestId = ++requestId.current;
@@ -446,9 +531,12 @@ export default function JudgmentsPage() {
     try {
       const params = new URLSearchParams({ full: "1" });
       if (activeTab !== "ALL") params.set("courts", activeTab);
-      const res = await apiFetch(`/api/sync-judgments-sheet?${params.toString()}`, {
-        method: "POST",
-      });
+      const res = await apiFetch(
+        `/api/sync-judgments-sheet?${params.toString()}`,
+        {
+          method: "POST",
+        },
+      );
       if (!res.success) throw new Error(res.message || "Full sync failed");
       setSyncMessage(
         `Full sync ${activeTab === "ALL" ? "all courts" : activeTab}: ${res.inserted} new, ${res.updated} updated, ${res.skipped} skipped.`,
@@ -638,7 +726,12 @@ export default function JudgmentsPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {judgments.map((j, i) => (
-              <JudgmentCard key={j._id || j.sourceUrl || i} judgment={j} />
+              <JudgmentCard
+                key={j._id || j.sourceUrl || i}
+                judgment={j}
+                isSaved={savedSources.has(j.sourceUrl || j._id || j.id)}
+                onSaved={handleJudgmentSaved}
+              />
             ))}
           </div>
 
