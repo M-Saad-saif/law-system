@@ -37,6 +37,10 @@ const documentSchema = new mongoose.Schema({
   fileType: { type: String },
   size: { type: Number },
   uploadedAt: { type: Date, default: Date.now },
+  sharedWithClient: { type: Boolean, default: false },
+  uploadedByClient: { type: Boolean, default: false },
+  uploadedBy: { type: mongoose.Schema.Types.ObjectId, refPath: "documents.uploadedByModel", default: null },
+  uploadedByModel: { type: String, enum: ["User", "Client"], default: "User" },
 });
 
 const noteSchema = new mongoose.Schema({
@@ -77,6 +81,17 @@ const caseSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    isSharedWithClient: { type: Boolean, default: false },
+    client: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Client",
+      default: null,
     },
     caseTitle: { type: String, required: true, trim: true },
     caseNumber: { type: String, trim: true },
@@ -162,5 +177,6 @@ caseSchema.index({ userId: 1, status: 1 });
 caseSchema.index({ userId: 1, nextHearingDate: 1 });
 caseSchema.index({ userId: 1, nextProceedingDate: 1 });
 caseSchema.index({ caseNumber: 1 });
+caseSchema.index({ client: 1, isSharedWithClient: 1 });
 
 export default mongoose.models.Case || mongoose.model("Case", caseSchema);

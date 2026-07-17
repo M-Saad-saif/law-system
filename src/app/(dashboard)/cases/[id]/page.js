@@ -21,6 +21,8 @@ import NotesTab from "@/components/cases/NotesTab";
 import AccusedTab from "@/components/cases/AccusedTab";
 import FeeTab from "@/components/cases/FeeTab";
 import DownloadReportButton from "@/components/cases/Downloadreportbutton";
+import ShareWithClientButton from "@/components/cases/ShareWithClientButton";
+import GenerateDocButton from "@/components/cases/GenerateDocButton";
 import {
   Pencil,
   Trash2,
@@ -202,56 +204,68 @@ export default function CaseDetailPage() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2 lg:self-start">
-                <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
-                  <button
-                    onClick={toggleStatus}
-                    disabled={statusLoading}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                      isClosed
-                        ? "bg-white text-emerald-600 shadow-sm hover:shadow-md"
-                        : "bg-slate-800 text-white shadow-lg shadow-slate-800/20 hover:bg-slate-700"
-                    }`}
-                  >
-                    {statusLoading ? (
-                      <Spinner
-                        size="sm"
-                        className={isClosed ? "" : "text-white"}
-                      />
-                    ) : isClosed ? (
-                      <RotateCcw className="w-4 h-4" />
-                    ) : (
-                      <CheckCircle className="w-4 h-4" />
-                    )}
-                    {isClosed ? "Reopen Case" : "Close Case"}
-                  </button>
-                </div>
-
-                {!isClosed && (
-                  <Link
-                    href={`/cases/${id}/edit`}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm"
-                  >
-                    <Pencil className="w-4 h-4" />
-                    Edit
-                  </Link>
-                )}
-
+            <div className="w-full h-[1px] bg-slate-200/90 mt-2 mb-2"></div>
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2 lg:self-start">
+              <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
                 <button
-                  onClick={() => setShowDelete(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-all duration-200 shadow-sm"
+                  onClick={toggleStatus}
+                  disabled={statusLoading}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                    isClosed
+                      ? "bg-white text-emerald-600 shadow-sm hover:shadow-md"
+                      : "bg-slate-800 text-white shadow-lg shadow-slate-800/20 hover:bg-slate-700"
+                  }`}
                 >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
+                  {statusLoading ? (
+                    <Spinner
+                      size="sm"
+                      className={isClosed ? "" : "text-white"}
+                    />
+                  ) : isClosed ? (
+                    <RotateCcw className="w-4 h-4" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4" />
+                  )}
+                  {isClosed ? "Reopen Case" : "Close Case"}
                 </button>
-
-                <DownloadReportButton
-                  caseId={id}
-                  caseTitle={caseData.caseTitle}
-                />
               </div>
+
+              {!isClosed && (
+                <Link
+                  href={`/cases/${id}/edit`}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 shadow-sm"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Edit
+                </Link>
+              )}
+
+              <button
+                onClick={() => setShowDelete(true)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 hover:border-red-300 transition-all duration-200 shadow-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+
+              <DownloadReportButton
+                caseId={id}
+                caseTitle={caseData.caseTitle}
+              />
+
+              <GenerateDocButton caseId={id} caseTitle={caseData.caseTitle} />
+
+              <ShareWithClientButton
+                caseId={id}
+                isSharedWithClient={caseData.isSharedWithClient}
+                client={caseData.client}
+                onAccessChanged={(update) =>
+                  setCaseData((prev) => ({ ...prev, ...update }))
+                }
+              />
             </div>
 
             {/* Quick Stats */}
@@ -540,6 +554,44 @@ function OverviewTab({ c }) {
             </div>
           </div>
         </div>
+
+        {/* Client Portal Access Card */}
+        {c.isSharedWithClient && c.client && (
+          <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#026665] to-[#0d8e83] flex items-center justify-center shadow-lg shadow-[#026665]/20">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Portal Access
+                </h3>
+              </div>
+              <div className="space-y-2">
+                <InfoRow
+                  icon={User}
+                  label="Granted To"
+                  value={c.client.name}
+                  accent="emerald"
+                />
+                <InfoRow
+                  icon={Users}
+                  label="Email"
+                  value={c.client.email}
+                  accent="emerald"
+                />
+                {c.client.phone && (
+                  <InfoRow
+                    icon={Phone}
+                    label="Contact"
+                    value={c.client.phone}
+                    accent="emerald"
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Opposite Counsel Card */}
         <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">

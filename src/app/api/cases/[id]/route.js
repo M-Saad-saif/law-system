@@ -6,7 +6,10 @@ import { withAuth } from "@/lib/api";
 export const GET = withAuth(async (request, { params }, user) => {
   try {
     await connectDB();
-    const caseDoc = await Case.findOne({ _id: params.id, userId: user.id });
+    const caseDoc = await Case.findOne({
+      _id: params.id,
+      userId: user.id,
+    }).populate("client", "name email phone");
     if (!caseDoc) {
       return NextResponse.json(
         { success: false, message: "Case not found." },

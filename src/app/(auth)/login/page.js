@@ -37,9 +37,14 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await api.post("/api/auth/login", form);
-      toast.success("Welcome back!");
-      router.replace("/dashboard");
+      const res = await api.post("/api/auth/login", form);
+      toast.success("Welcome back !");
+      
+      if (res?.data?.accountType === "client") {
+        router.replace("/portal/dashboard");
+      } else {
+        router.replace("/dashboard");
+      }
       router.refresh();
     } catch (err) {
       const errorMessage =

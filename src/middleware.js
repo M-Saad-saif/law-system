@@ -18,7 +18,10 @@ const PUBLIC_PATHS = [
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
   "/api/internal/subscription-status",
+  "/api/client-portal/auth/login",
 ];
+
+const CLIENT_PORTAL_PREFIXES = ["/portal", "/api/client-portal"];
 
 const ADMIN_ONLY_PATHS = ["/admin/payments", "/api/admin", "/admin/users"];
 
@@ -83,6 +86,10 @@ export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("token")?.value;
 
+  if (pathname === "/portal/login" || pathname.startsWith("/portal/login/")) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
   // ---- Public paths ----
   const isPublic = PUBLIC_PATHS.some(
     (p) => pathname === p || pathname.startsWith(p + "/"),
@@ -99,10 +106,60 @@ export async function middleware(request) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       } catch {}
     }
+
+    if (!token && pathname.startsWith("/login")) {
+      const clientToken = request.cookies.get("client_token")?.value;
+      if (clientToken) {
+        try {
+          const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+          const { payload } = await jwtVerify(clientToken, secret);
+          if (payload.type === "client") {
+            return NextResponse.redirect(new URL("/portal/dashboard", request.url));
+          }
+        } catch {}
+      }
+    }
+
     return NextResponse.next();
   }
 
-  // ---- Token required ----
+  // ---- Client portal branch: completely separate from staff auth below ----
+  const isClientPortalPath = CLIENT_PORTAL_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(p + "/"),
+  );
+
+  if (isClientPortalPath) {
+    const clientToken = request.cookies.get("client_token")?.value;
+
+    if (!clientToken) {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json(
+          { success: false, message: "Unauthorized. Please login to the client portal." },
+          { status: 401 },
+        );
+      }
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    try {
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+      const { payload } = await jwtVerify(clientToken, secret);
+      if (payload.type !== "client") throw new Error("wrong token type");
+    } catch {
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json(
+          { success: false, message: "Invalid or expired session." },
+          { status: 401 },
+        );
+      }
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    // Client sessions never touch subscription/admin/staff logic below.
+    return NextResponse.next();
+  }
+
+  // ---- Token required (staff) ----
   if (!token) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
