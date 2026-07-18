@@ -13,7 +13,7 @@ export const metadata = {
     template: "%s | LegalPortal",
   },
   description:
-    "LegalPortal is a professional law firm management system built for Pakistani lawyers. Manage cases, clients, billing, and your chamber — all in one place.",
+    "LegalPortal is a professional law firm management system built for Pakistani lawyers. Manage cases, clients, billing, and your chamber - all in one place.",
 
   keywords: [
     "law firm management Pakistan",
