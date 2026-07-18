@@ -2,9 +2,10 @@ import ToastProvider from "@/components/ui/ToastProvider";
 import LogoutOverlay from "@/components/layout/LogoutOverlay";
 import "./globals.css";
 
-
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  ),
   icons: {
     icon: "/Monogram.png",
   },
@@ -13,17 +14,50 @@ export const metadata = {
     template: "%s | LegalPortal",
   },
   description:
-    "LegalPortal is a professional law firm management system built for Pakistani lawyers. Manage cases, clients, billing, and your chamber - all in one place.",
+    "LegalPortal is Pakistan's all-in-one law firm management software for lawyers and advocates. Manage cases, clients, billing, hearings, documents, and your legal practice with ease.",
 
   keywords: [
-    "law firm management Pakistan",
+    "lawportal",
+    "LegalPort1al",
+    "law firm management software",
     "legal practice management software",
-    "Pakistani lawyer software",
-    "chamber management system",
-    "case management Pakistan",
-    "advocate management system",
-    "legal billing software Pakistan",
-    "law portal Pakistan",
+    "law practice management software",
+    "lawyer software",
+    "lawyer software Pakistan",
+    "law firm software",
+    "law firm software Pakistan",
+    "legal software",
+    "legal software Pakistan",
+    "legal management system",
+    "case management software",
+    "legal case management software",
+    "case management system",
+    "court case management software",
+    "law office management software",
+    "legal document management",
+    "legal CRM",
+    "client management for lawyers",
+    "lawyer billing software",
+    "legal billing software",
+    "court diary software",
+    "court hearing reminder",
+    "legal calendar software",
+    "litigation management software",
+    "advocate management software",
+    "advocate software Pakistan",
+    "digital chamber management",
+    "AI legal assistant",
+    "AI legal software",
+    "judgment search Pakistan",
+    "Pakistan court judgments",
+    "Pakistan legal research",
+    "Pakistan legal database",
+    "cloud law practice management",
+    "online law firm software",
+    "legal workflow automation",
+    "law firm productivity software",
+    "best law firm management software",
+    "best legal software Pakistan",
   ],
 
   authors: [{ name: "LegalPortal" }],
@@ -53,7 +87,7 @@ export const metadata = {
     title: "LegalPortal — Law Firm Management for Pakistani Lawyers",
     description:
       "Manage your chamber, cases, clients, and billing with LegalPortal — built for Pakistani law firms.",
-    images: ["/og-image.png"],
+    images: ["/opengrapgImg.png"],
   },
 
   alternates: {
@@ -102,7 +136,6 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="font-body antialiased">
-        
         <ToastProvider />
         <LogoutOverlay />
         {children}
