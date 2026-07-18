@@ -7,14 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { api } from "@/utils/api";
-import { formatDate, formatDateTime } from "@/utils/helpers";
-import {
-  StatusBadge,
-  PageLoader,
-  ConfirmDialog,
-  TabBar,
-  Spinner,
-} from "@/components/ui";
+import { formatDate } from "@/utils/helpers";
 import ProceedingsTab from "@/components/cases/ProceedingsTab";
 import CitationsTab from "@/components/cases/CitationsTab";
 import NotesTab from "@/components/cases/NotesTab";
@@ -23,6 +16,7 @@ import FeeTab from "@/components/cases/FeeTab";
 import DownloadReportButton from "@/components/cases/Downloadreportbutton";
 import ShareWithClientButton from "@/components/cases/ShareWithClientButton";
 import GenerateDocButton from "@/components/cases/GenerateDocButton";
+import OverviewTab from "@/components/cases/OverviewTab";
 import {
   Pencil,
   Trash2,
@@ -33,7 +27,6 @@ import {
   Scale,
   Calendar,
   Hash,
-  Phone,
   Gavel,
   FileText,
   StickyNote,
@@ -41,12 +34,16 @@ import {
   Banknote,
   Star,
   Clock,
-  MapPin,
-  AlertCircle,
   Users,
   ChevronRight,
-  Shield,
 } from "lucide-react";
+import {
+  StatusBadge,
+  PageLoader,
+  ConfirmDialog,
+  TabBar,
+  Spinner,
+} from "@/components/ui";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: Scale },
@@ -390,268 +387,6 @@ function QuickStat({ icon: Icon, label, value, accent = "blue" }) {
           {label}
         </div>
         <div className="text-sm font-bold text-slate-800 mt-0.5">{value}</div>
-      </div>
-    </div>
-  );
-}
-
-// Info Row Component
-function InfoRow({ icon: Icon, label, value, accent = "slate" }) {
-  if (!value) return null;
-
-  const accentColors = {
-    slate: "bg-slate-100 text-slate-600",
-    blue: "bg-blue-100 text-blue-600",
-    emerald: "bg-emerald-100 text-emerald-600",
-    purple: "bg-purple-100 text-purple-600",
-    orange: "bg-orange-100 text-orange-600",
-  };
-
-  return (
-    <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-slate-50/80 transition-colors group">
-      <div
-        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${accentColors[accent]} transition-transform group-hover:scale-110`}
-      >
-        <Icon className="w-5 h-5" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-          {label}
-        </div>
-        <div className="text-sm font-semibold text-slate-800 break-words">
-          {value}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Overview Tab
-function OverviewTab({ c }) {
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Main Content */}
-      <div className="lg:col-span-2 space-y-6">
-        {/* Case Details Card */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Scale className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Case Details</h3>
-            </div>
-            <div className="divide-y divide-slate-100">
-              <InfoRow
-                icon={Scale}
-                label="Case Type"
-                value={c.caseType}
-                accent="blue"
-              />
-              <InfoRow
-                icon={Gavel}
-                label="Court"
-                value={[c.courtType, c.courtName].filter(Boolean).join(" — ")}
-                accent="purple"
-              />
-              <InfoRow
-                icon={Hash}
-                label="Case Number"
-                value={c.caseNumber}
-                accent="slate"
-              />
-              <InfoRow
-                icon={Hash}
-                label="Suit / File No."
-                value={c.suitNo}
-                accent="slate"
-              />
-              <InfoRow
-                icon={Hash}
-                label="FIR No."
-                value={c.firNo}
-                accent="slate"
-              />
-              <InfoRow
-                icon={User}
-                label="Counsel For"
-                value={c.counselFor}
-                accent="blue"
-              />
-              <InfoRow
-                icon={User}
-                label="Judge"
-                value={c.judgeName}
-                accent="purple"
-              />
-              <InfoRow
-                icon={Calendar}
-                label="Filing Date"
-                value={formatDate(c.filingDate)}
-                accent="emerald"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Legal Provisions */}
-        {c.provisions?.length > 0 && (
-          <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
-                  <Shield className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  Legal Provisions
-                </h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {c.provisions.map((p, i) => (
-                  <span
-                    key={i}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 text-sm font-semibold border border-amber-200/60 shadow-sm hover:shadow-md transition-all cursor-default"
-                  >
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Sidebar */}
-      <div className="space-y-6">
-        {/* Client Card */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                <User className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Client</h3>
-            </div>
-            <div className="space-y-2">
-              <InfoRow
-                icon={User}
-                label="Name"
-                value={c.clientName}
-                accent="emerald"
-              />
-              <InfoRow
-                icon={Phone}
-                label="Contact"
-                value={c.clientContact}
-                accent="emerald"
-              />
-              <InfoRow
-                icon={Phone}
-                label="Case Phone"
-                value={c.phone}
-                accent="emerald"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Client Portal Access Card */}
-        {c.isSharedWithClient && c.client && (
-          <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#026665] to-[#0d8e83] flex items-center justify-center shadow-lg shadow-[#026665]/20">
-                  <Shield className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900">
-                  Portal Access
-                </h3>
-              </div>
-              <div className="space-y-2">
-                <InfoRow
-                  icon={User}
-                  label="Granted To"
-                  value={c.client.name}
-                  accent="emerald"
-                />
-                <InfoRow
-                  icon={Users}
-                  label="Email"
-                  value={c.client.email}
-                  accent="emerald"
-                />
-                {c.client.phone && (
-                  <InfoRow
-                    icon={Phone}
-                    label="Contact"
-                    value={c.client.phone}
-                    accent="emerald"
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Opposite Counsel Card */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-                <Users className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">
-                Opposite Counsel
-              </h3>
-            </div>
-            <div className="space-y-2">
-              <InfoRow
-                icon={User}
-                label="Name"
-                value={c.oppositeCounsel?.name}
-                accent="purple"
-              />
-              <InfoRow
-                icon={Phone}
-                label="Contact"
-                value={c.oppositeCounsel?.contact}
-                accent="purple"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Schedule Card */}
-        <div className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                <Calendar className="w-5 h-5 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Schedule</h3>
-            </div>
-            <div className="space-y-2">
-              <InfoRow
-                icon={Calendar}
-                label="Next Hearing"
-                value={formatDate(c.nextHearingDate) || "Not scheduled"}
-                accent="blue"
-              />
-              <InfoRow
-                icon={Calendar}
-                label="Next Proceeding"
-                value={formatDate(c.nextProceedingDate) || "Not scheduled"}
-                accent="blue"
-              />
-              <InfoRow
-                icon={Clock}
-                label="Last Updated"
-                value={formatDateTime(c.updatedAt)}
-                accent="orange"
-              />
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
