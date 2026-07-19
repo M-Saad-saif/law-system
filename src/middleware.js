@@ -18,6 +18,7 @@ const PUBLIC_PATHS = [
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
   "/api/internal/subscription-status",
+  "/google22df216bb21f61fa.html",
 ];
 
 const ADMIN_ONLY_PATHS = ["/admin/payments", "/api/admin", "/admin/users"];
@@ -102,7 +103,6 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // ---- Token required ----
   if (!token) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
