@@ -18,7 +18,7 @@ const PUBLIC_PATHS = [
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
   "/api/internal/subscription-status",
-  "/api/client-portal/auth/login",
+  "/google22df216bb21f61fa.html",
 ];
 
 const CLIENT_PORTAL_PREFIXES = ["/portal", "/api/client-portal"];
@@ -114,7 +114,9 @@ export async function middleware(request) {
           const secret = new TextEncoder().encode(process.env.JWT_SECRET);
           const { payload } = await jwtVerify(clientToken, secret);
           if (payload.type === "client") {
-            return NextResponse.redirect(new URL("/portal/dashboard", request.url));
+            return NextResponse.redirect(
+              new URL("/portal/dashboard", request.url),
+            );
           }
         } catch {}
       }
@@ -134,7 +136,10 @@ export async function middleware(request) {
     if (!clientToken) {
       if (pathname.startsWith("/api/")) {
         return NextResponse.json(
-          { success: false, message: "Unauthorized. Please login to the client portal." },
+          {
+            success: false,
+            message: "Unauthorized. Please login to the client portal.",
+          },
           { status: 401 },
         );
       }
