@@ -3,7 +3,7 @@ export default function robots() {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin", "/dashboard", "/client-portal", "/api"],
+      disallow: ["/admin", "/dashboard", "/portal", "/api"],
     },
     sitemap: `https://legalportal.site/sitemap.xml`,
   };
