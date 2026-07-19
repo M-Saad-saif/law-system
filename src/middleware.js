@@ -19,6 +19,8 @@ const PUBLIC_PATHS = [
   "/api/auth/reset-password",
   "/api/internal/subscription-status",
   "/google22df216bb21f61fa.html",
+  "/robots.js",
+  "/sitemap.js",
 ];
 
 const ADMIN_ONLY_PATHS = ["/admin/payments", "/api/admin", "/admin/users"];
