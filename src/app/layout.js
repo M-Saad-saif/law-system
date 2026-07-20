@@ -14,7 +14,7 @@ export const metadata = {
     template: "%s | LegalPortal",
   },
   description:
-    "LegalPortal is Pakistan's all-in-one law firm management software for lawyers and advocates. Manage cases, clients, billing, hearings, documents, and your legal practice with ease.",
+    "LegalPortal is Pakistan all-in-one law firm management software for lawyers and advocates. Manage cases, clients, billing, hearings, documents, and your legal practice with ease.",
 
   keywords: [
     "lawportal",
