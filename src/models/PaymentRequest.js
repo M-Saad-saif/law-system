@@ -33,7 +33,7 @@ const paymentRequestSchema = new mongoose.Schema(
     },
     payment_method: {
       type: String,
-      enum: ["sadapay", "bank transfer"],
+      enum: ["sadapay", "bank transfer", "easypaisa"],
       default: "sadapay",
     },
     reference_id: { type: String, trim: true },

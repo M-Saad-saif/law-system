@@ -333,13 +333,13 @@ function PlanSelector({ selected, onChange }) {
 
 function PaymentForm({ chamber, selectedPlan, onSuccess }) {
   const [form, setForm] = useState({
-    payment_method: "easypaisa",
+    payment_method: "sadapay",
     reference_id: "",
   });
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [selectedPaymentTab, setSelectedPaymentTab] = useState("sadapay"); // New state
+  const [selectedPaymentTab, setSelectedPaymentTab] = useState("sadapay");
 
   const plan =
     PLAN_OPTIONS.find((p) => p.type === selectedPlan) || PLAN_OPTIONS[0];
