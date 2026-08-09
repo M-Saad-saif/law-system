@@ -101,12 +101,15 @@ export async function createPaymentRequest(
   chamberId,
   {
     plan_type = PLAN_TYPE.MONTHLY,
-    payment_method = "raast",
+    payment_method = "sadapay",
     reference_id,
     screenshot_url,
   } = {},
 ) {
   await connectDB();
+
+  const normalizedPaymentMethod =
+    payment_method === "easypaisa" ? "sadapay" : payment_method;
 
   await PaymentRequest.deleteMany({
     chamber: chamberId,
@@ -121,7 +124,7 @@ export async function createPaymentRequest(
     invoice_id,
     plan_type,
     payable_amount: plan.price,
-    payment_method,
+    payment_method: normalizedPaymentMethod,
     reference_id,
     screenshot_url,
     status: PAYMENT_STATUS.PENDING,
