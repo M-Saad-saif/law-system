@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectDB from "@/lib/db";
 import Case from "@/models/Case";
 import { withAuth } from "@/lib/api";
@@ -9,15 +10,28 @@ export const GET = withAuth(async (request, { params }, user) => {
     const caseDoc = await Case.findOne({
       _id: params.id,
       userId: user.id,
-    }).populate("client", "name email phone");
+    });
     if (!caseDoc) {
       return NextResponse.json(
         { success: false, message: "Case not found." },
         { status: 404 },
       );
     }
-    return NextResponse.json({ success: true, data: { case: caseDoc } });
+
+    const caseData = caseDoc.toObject();
+    if (caseData.client && mongoose.Types.ObjectId.isValid(caseData.client)) {
+      caseData.client = await mongoose
+        .model("Client")
+        .findById(caseData.client)
+        .select("name email phone")
+        .lean();
+    } else {
+      caseData.client = null;
+    }
+
+    return NextResponse.json({ success: true, data: { case: caseData } });
   } catch (error) {
+    console.error("[cases/id] GET:", error);
     return NextResponse.json(
       { success: false, message: "Failed to fetch case." },
       { status: 500 },
@@ -40,8 +54,21 @@ export const PUT = withAuth(async (request, { params }, user) => {
         { status: 404 },
       );
     }
-    return NextResponse.json({ success: true, data: { case: caseDoc } });
+
+    const caseData = caseDoc.toObject();
+    if (caseData.client && mongoose.Types.ObjectId.isValid(caseData.client)) {
+      caseData.client = await mongoose
+        .model("Client")
+        .findById(caseData.client)
+        .select("name email phone")
+        .lean();
+    } else {
+      caseData.client = null;
+    }
+
+    return NextResponse.json({ success: true, data: { case: caseData } });
   } catch (error) {
+    console.error("[cases/id] PUT:", error);
     if (error.name === "ValidationError") {
       const messages = Object.values(error.errors)
         .map((e) => e.message)
@@ -76,6 +103,7 @@ export const DELETE = withAuth(async (request, { params }, user) => {
       message: "Case deleted successfully.",
     });
   } catch (error) {
+    console.error("[cases/id] DELETE:", error);
     return NextResponse.json(
       { success: false, message: "Failed to delete case." },
       { status: 500 },
