@@ -166,7 +166,7 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // ---- Token required (staff) ----
+  // ---- Token required ----
   if (!token) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(

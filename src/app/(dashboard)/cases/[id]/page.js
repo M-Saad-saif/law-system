@@ -14,9 +14,6 @@ import NotesTab from "@/components/cases/NotesTab";
 import AccusedTab from "@/components/cases/AccusedTab";
 import FeeTab from "@/components/cases/FeeTab";
 import DownloadReportButton from "@/components/cases/Downloadreportbutton";
-import ShareWithClientButton from "@/components/cases/ShareWithClientButton";
-import GenerateDocButton from "@/components/cases/GenerateDocButton";
-import OverviewTab from "@/components/cases/OverviewTab";
 import {
   Pencil,
   Trash2,
@@ -44,6 +41,9 @@ import {
   TabBar,
   Spinner,
 } from "@/components/ui";
+import ShareWithClientButton from "@/components/cases/ShareWithClientButton";
+import GenerateDocButton from "@/components/cases/GenerateDocButton";
+import OverviewTab from "@/components/cases/OverviewTab";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: Scale },
