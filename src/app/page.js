@@ -6,7 +6,7 @@ import Hero from "@/components/ui/landing/Hero";
 import FeatureGrid from "@/components/ui/landing/FeatureGrid";
 import AdvancedTools from "@/components/ui/landing/AdvancedTools";
 import HowItWorks from "@/components/ui/landing/HowItWorks";
-import PricingTeaser from "@/components/ui/landing/PricingTeaser";
+// import PricingTeaser from "@/components/ui/landing/PricingTeaser";
 import FAQList from "@/components/ui/landing/FAQList";
 import FinalCTA from "@/components/ui/landing/FinalCTA";
 import { fadeUp } from "@/components/ui/landing/motion";
@@ -62,10 +62,10 @@ export default function Home() {
         </section>
 
         {/* Pricing Teaser Section */}
-        <section className="relative bg-white overflow-hidden">
+        {/* <section className="relative bg-white overflow-hidden">
           <PricingTeaser />
           <WaveDivider className="-bottom-px h-[60px]" fillColor="#eef5f3" />
-        </section>
+        </section> */}
 
         {/* FAQ Section */}
         <section

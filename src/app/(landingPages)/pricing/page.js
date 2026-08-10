@@ -18,6 +18,7 @@ import { plans, PlanCard } from "@/components/ui/landing/PricingTeaser";
 import FAQList from "@/components/ui/landing/FAQList";
 import FinalCTA from "@/components/ui/landing/FinalCTA";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 const badges = [
   "7-day free trial",
@@ -83,6 +84,12 @@ function WaveDivider({ className = "", fillColor = "currentColor" }) {
 }
 
 export default function PricingPage() {
+  const showNotFound = true;
+
+  if (showNotFound) {
+    notFound();
+  }
+  
   return (
     <main data-testid="pricing-page" className="overflow-hidden">
       <section className="relative bg-[#eef5f3] pt-36 md:pt-44 pb-24 md:pb-28 overflow-hidden">

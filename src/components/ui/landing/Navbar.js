@@ -10,7 +10,7 @@ import { LOGO_HORIZONTAL } from "./motion";
 const links = [
   { label: "Home", to: "/" },
   { label: "Features", to: "/features" },
-  { label: "Pricing", to: "/pricing" },
+  // { label: "Pricing", to: "/pricing" },
   { label: "FAQs", to: "/faqs" },
   { label: "Terms", to: "/terms" },
   { label: "Privacy", to: "/privacy" },
