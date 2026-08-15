@@ -109,18 +109,22 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="flex gap-3 mt-4">
-            <button
-              className="flex-1 py-3 text-sm font-semibold text-[#053433] rounded-full border border-[#053433]/15"
-              data-testid="mobile-signin-btn"
-            >
-              Sign In
-            </button>
-            <button
-              className="flex-1 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#0f7e75] to-[#0c9c8f] rounded-full"
-              data-testid="mobile-trial-btn"
-            >
-              Start Free Trial
-            </button>
+            <Link href="/login" className="flex-1">
+              <button
+                className="w-full py-3 text-sm font-semibold text-[#053433] rounded-full border border-[#053433]/15"
+                data-testid="mobile-signin-btn"
+              >
+                Sign In
+              </button>
+            </Link>
+            <Link href="/register" className="flex-1">
+              <button
+                className="w-full py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#0f7e75] to-[#0c9c8f] rounded-full"
+                data-testid="mobile-trial-btn"
+              >
+                Start Free Trial
+              </button>
+            </Link>
           </div>
         </div>
       )}
