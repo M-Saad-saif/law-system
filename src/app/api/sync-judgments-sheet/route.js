@@ -168,6 +168,8 @@ async function runSync({
   dryRun = false,
   requestedCourts = null,
   fullSync = false,
+  offset = 0,
+  limit = 0,
 } = {}) {
   const stats = {
     inserted: 0,
@@ -203,7 +205,7 @@ async function runSync({
     stats.checkpoint = null;
   }
 
-  const validItems = rawRows
+  let validItems = rawRows
     .map((row) => normaliseRow(row, diagnostics))
     .filter(Boolean)
     .filter((item) => !requestedCourts || requestedCourts.includes(item.court))
@@ -219,6 +221,12 @@ async function runSync({
     unresolvedCourt: diagnostics.unresolvedCourt,
     unresolvedCourtSamples: diagnostics.unresolvedCourtSamples,
   };
+
+  if (limit > 0) {
+    validItems = validItems.slice(offset, offset + limit);
+  }
+  stats.processedInThisChunk = validItems.length;
+  stats.hasMore = offset + validItems.length < stats.total;
 
   const courtBreakdown = {};
   for (const item of validItems) {
@@ -251,25 +259,8 @@ async function runSync({
   for (let i = 0; i < validItems.length; i += BATCH) {
     const batch = validItems.slice(i, i + BATCH);
     const ops = batch.map((item) => {
-      let filter;
-      if (item.caseNumber) {
-        filter = { caseNumber: item.caseNumber, court: item.court };
-      } else if (item.sourceUrl && sourceUrlCounts.get(item.sourceUrl) === 1) {
-        filter = { sourceUrl: item.sourceUrl };
-      } else {
-        filter = {
-          title: item.title,
-          court: item.court,
-          orderDate: item.orderDate,
-        };
-      }
-
+      const filter = { sourceUrl: item.sourceUrl };
       const update = { ...item };
-      if (item.sourceUrl && sourceUrlCounts.get(item.sourceUrl) > 1) {
-        delete update.sourceUrl;
-      } else if (!update.sourceUrl) {
-        delete update.sourceUrl;
-      }
 
       return {
         updateOne: {
@@ -292,7 +283,6 @@ async function runSync({
       stats.errors += batch.length;
     }
   }
-
   return stats;
 }
 
@@ -318,6 +308,8 @@ export async function POST(request) {
         .map((c) => c.trim().toUpperCase())
         .filter(Boolean)
     : null;
+  const offset = parseInt(searchParams.get("offset") || "0", 10);
+  const limit = parseInt(searchParams.get("limit") || "0", 10);
 
   const start = Date.now();
   try {
@@ -329,7 +321,7 @@ export async function POST(request) {
       resetCount = result.deletedCount ?? 0;
     }
 
-    const stats = await runSync({ dryRun, requestedCourts, fullSync });
+    const stats = await runSync({ dryRun, requestedCourts, fullSync, offset, limit });
     stats.resetCount = resetCount;
     const durationMs = Date.now() - start;
 

@@ -505,17 +505,28 @@ export default function JudgmentsPage() {
     setSyncing(true);
     setSyncMessage(null);
     try {
-      const syncUrl =
-        activeTab !== "ALL"
-          ? `/api/sync-judgments-sheet?courts=${encodeURIComponent(activeTab)}`
-          : "/api/sync-judgments-sheet";
+      let currentOffset = 0;
+      let hasMore = true;
+      let totalInserted = 0, totalUpdated = 0;
 
-      const res = await apiFetch(syncUrl, {
-        method: "POST",
-      });
-      if (!res.success) throw new Error(res.message || "Sync failed");
+      while (hasMore) {
+        setSyncMessage(`Syncing... (processed ${currentOffset} items)`);
+        const params = new URLSearchParams({ offset: currentOffset.toString(), limit: "500" });
+        if (activeTab !== "ALL") params.set("courts", activeTab);
+
+        const res = await apiFetch(`/api/sync-judgments-sheet?${params.toString()}`, { method: "POST" });
+        if (!res.success) throw new Error(res.message || "Sync failed");
+
+        totalInserted += res.inserted || 0;
+        totalUpdated += res.updated || 0;
+        hasMore = res.hasMore;
+        currentOffset += res.processedInThisChunk || 500;
+
+        if (res.processedInThisChunk === 0) break;
+      }
+
       setSyncMessage(
-        `Synced ${activeTab === "ALL" ? "all courts" : activeTab}: ${res.inserted} new, ${res.updated} updated, ${res.skipped} skipped.`,
+        `Synced ${activeTab === "ALL" ? "all courts" : activeTab}: ${totalInserted} new, ${totalUpdated} updated.`
       );
       await load();
     } catch (err) {
@@ -529,17 +540,28 @@ export default function JudgmentsPage() {
     setSyncing(true);
     setSyncMessage(null);
     try {
-      const params = new URLSearchParams({ full: "1" });
-      if (activeTab !== "ALL") params.set("courts", activeTab);
-      const res = await apiFetch(
-        `/api/sync-judgments-sheet?${params.toString()}`,
-        {
-          method: "POST",
-        },
-      );
-      if (!res.success) throw new Error(res.message || "Full sync failed");
+      let currentOffset = 0;
+      let hasMore = true;
+      let totalInserted = 0, totalUpdated = 0;
+
+      while (hasMore) {
+        setSyncMessage(`Full Syncing... (processed ${currentOffset} items)`);
+        const params = new URLSearchParams({ full: "1", offset: currentOffset.toString(), limit: "500" });
+        if (activeTab !== "ALL") params.set("courts", activeTab);
+
+        const res = await apiFetch(`/api/sync-judgments-sheet?${params.toString()}`, { method: "POST" });
+        if (!res.success) throw new Error(res.message || "Full sync failed");
+
+        totalInserted += res.inserted || 0;
+        totalUpdated += res.updated || 0;
+        hasMore = res.hasMore;
+        currentOffset += res.processedInThisChunk || 500;
+
+        if (res.processedInThisChunk === 0) break;
+      }
+
       setSyncMessage(
-        `Full sync ${activeTab === "ALL" ? "all courts" : activeTab}: ${res.inserted} new, ${res.updated} updated, ${res.skipped} skipped.`,
+        `Full sync ${activeTab === "ALL" ? "all courts" : activeTab}: ${totalInserted} new, ${totalUpdated} updated.`
       );
       await load();
     } catch (err) {

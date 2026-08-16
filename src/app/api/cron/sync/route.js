@@ -25,38 +25,63 @@ export async function GET(request) {
       (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
       "http://localhost:3000";
 
-    const syncUrl = `${appBase}/api/sync-judgments-sheet`;
+    let currentOffset = 0;
+    let hasMore = true;
+    let totalInserted = 0;
+    let totalUpdated = 0;
+    let totalSkipped = 0;
+    let totalDurationMs = 0;
+    let lastResult = null;
 
-    const response = await fetch(syncUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-cron-secret": cronSecret ?? "",
-      },
-      body: JSON.stringify({}),
-    });
+    while (hasMore) {
+      const syncUrl = `${appBase}/api/sync-judgments-sheet?offset=${currentOffset}&limit=100`;
 
-    const result = await response.json().catch(() => ({}));
+      const response = await fetch(syncUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-cron-secret": cronSecret ?? "",
+        },
+        body: JSON.stringify({}),
+      });
 
-    if (!response.ok || !result.success) {
-      const msg = result.message ?? `HTTP ${response.status}`;
-      console.error(`[cron/sync] Sync failed: ${msg}`);
-      return NextResponse.json(
-        { success: false, message: msg, details: result },
-        { status: 500 },
-      );
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.success) {
+        const msg = result.message ?? `HTTP ${response.status}`;
+        console.error(`[cron/sync] Sync failed: ${msg}`);
+        return NextResponse.json(
+          { success: false, message: msg, details: result },
+          { status: 500 },
+        );
+      }
+
+      totalInserted += result.inserted || 0;
+      totalUpdated += result.updated || 0;
+      totalSkipped += result.skipped || 0;
+      totalDurationMs += result.durationMs || 0;
+      hasMore = result.hasMore;
+      currentOffset += result.processedInThisChunk || 100;
+      lastResult = result;
+
+      if (result.processedInThisChunk === 0) break;
     }
 
     console.log(
       `[cron/sync] Sync complete – ` +
-        `inserted=${result.inserted} updated=${result.updated} ` +
-        `skipped=${result.skipped} duration=${result.durationMs}ms`,
+        `inserted=${totalInserted} updated=${totalUpdated} ` +
+        `skipped=${totalSkipped} duration=${totalDurationMs}ms`,
     );
 
     return NextResponse.json({
       success: true,
       triggeredAt: new Date().toISOString(),
-      syncResult: result,
+      syncResult: {
+        inserted: totalInserted,
+        updated: totalUpdated,
+        skipped: totalSkipped,
+        durationMs: totalDurationMs,
+      },
     });
   } catch (err) {
     return NextResponse.json(
