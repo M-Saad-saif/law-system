@@ -351,12 +351,10 @@ function CourtTabs({ active, onChange, counts }) {
             }
             title={label}
           >
-            {/* Hover glow effect for inactive tabs */}
             {!isActive && (
               <span className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#026a69]/5 to-[#0e8e83]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             )}
 
-            {/* Icon with animated scale */}
             <Icon
               className={`
                 w-3.5 h-3.5 transition-all duration-300
@@ -401,6 +399,77 @@ function CourtTabs({ active, onChange, counts }) {
   );
 }
 
+function CourtHub({ counts, onSelectCourt }) {
+  const courts = COURT_TABS;
+  const totalJudgments = counts.total || 1;
+
+  const getBorderColor = (abbr) => {
+    switch (abbr) {
+      case "SHC":
+        return "#1a73e8";
+      case "BHC":
+        return "#e37400";
+      case "IHC":
+        return "#188038";
+      case "PHC":
+        return "#d93025";
+      case "SCP":
+        return "#4338ca";
+      case "LHC":
+        return "#026a69";
+      case "ALL":
+        return "#111827";
+      default:
+        return "#026a69";
+    }
+  };
+
+  return (
+    <div className="space-y-6 mb-6">
+      <div>
+        <h2 className="text-base font-medium text-black/60 mb-4">
+          Court Statistics
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {courts.map((court) => {
+            const count =
+              court.abbr === "ALL"
+                ? counts.total || 0
+                : counts[court.abbr] || 0;
+            const percentage = ((count / totalJudgments) * 100).toFixed(2);
+            return (
+              <div
+                key={court.abbr}
+                onClick={() => onSelectCourt(court.abbr)}
+                className="bg-[#fafafa] border border-[#eef5f3] hover:border-[#0e8e83] hover:shadow-md cursor-pointer transition-all rounded-xl p-5 relative overflow-hidden flex flex-col group h-36"
+              >
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1"
+                  style={{ backgroundColor: getBorderColor(court.abbr) }}
+                />
+                <span className="text-[10px] font-semibold text-black/40 mb-1 uppercase tracking-wider pl-1">
+                  COURT
+                </span>
+                <h3 className="text-sm font-semibold text-black mb-4 group-hover:text-[#0e8e83] transition-colors pl-1">
+                  {court.label}
+                </h3>
+                <div className="mt-auto pl-1 flex flex-col">
+                  <div className="text-3xl font-light text-black mb-0.5">
+                    {count.toLocaleString()}
+                  </div>
+                  <div className="text-[10px] text-black/40">
+                    {percentage}% of total
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SkeletonCard() {
   return (
     <div className="bg-white border border-[#eef5f3] rounded-2xl p-5 animate-pulse flex flex-col gap-3">
@@ -424,7 +493,7 @@ export default function JudgmentsPage() {
   const [fetchedAt, setFetchedAt] = useState(null);
   const [syncRequired, setSyncRequired] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("ALL");
+  const [activeTab, setActiveTab] = useState("HUB");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -468,7 +537,8 @@ export default function JudgmentsPage() {
         page: String(page),
         limit: String(PAGE_SIZE),
       });
-      if (activeTab !== "ALL") params.set("courts", activeTab);
+      if (activeTab !== "ALL" && activeTab !== "HUB")
+        params.set("courts", activeTab);
       if (debouncedSearch) params.set("search", debouncedSearch);
 
       const res = await apiFetch(`/api/legal-updates?${params.toString()}`);
@@ -507,14 +577,22 @@ export default function JudgmentsPage() {
     try {
       let currentOffset = 0;
       let hasMore = true;
-      let totalInserted = 0, totalUpdated = 0;
+      let totalInserted = 0,
+        totalUpdated = 0;
 
       while (hasMore) {
         setSyncMessage(`Syncing... (processed ${currentOffset} items)`);
-        const params = new URLSearchParams({ offset: currentOffset.toString(), limit: "500" });
-        if (activeTab !== "ALL") params.set("courts", activeTab);
+        const params = new URLSearchParams({
+          offset: currentOffset.toString(),
+          limit: "500",
+        });
+        if (activeTab !== "ALL" && activeTab !== "HUB")
+          params.set("courts", activeTab);
 
-        const res = await apiFetch(`/api/sync-judgments-sheet?${params.toString()}`, { method: "POST" });
+        const res = await apiFetch(
+          `/api/sync-judgments-sheet?${params.toString()}`,
+          { method: "POST" },
+        );
         if (!res.success) throw new Error(res.message || "Sync failed");
 
         totalInserted += res.inserted || 0;
@@ -526,7 +604,7 @@ export default function JudgmentsPage() {
       }
 
       setSyncMessage(
-        `Synced ${activeTab === "ALL" ? "all courts" : activeTab}: ${totalInserted} new, ${totalUpdated} updated.`
+        `Synced ${activeTab === "ALL" ? "all courts" : activeTab}: ${totalInserted} new, ${totalUpdated} updated.`,
       );
       await load();
     } catch (err) {
@@ -542,14 +620,23 @@ export default function JudgmentsPage() {
     try {
       let currentOffset = 0;
       let hasMore = true;
-      let totalInserted = 0, totalUpdated = 0;
+      let totalInserted = 0,
+        totalUpdated = 0;
 
       while (hasMore) {
         setSyncMessage(`Full Syncing... (processed ${currentOffset} items)`);
-        const params = new URLSearchParams({ full: "1", offset: currentOffset.toString(), limit: "500" });
-        if (activeTab !== "ALL") params.set("courts", activeTab);
+        const params = new URLSearchParams({
+          full: "1",
+          offset: currentOffset.toString(),
+          limit: "500",
+        });
+        if (activeTab !== "ALL" && activeTab !== "HUB")
+          params.set("courts", activeTab);
 
-        const res = await apiFetch(`/api/sync-judgments-sheet?${params.toString()}`, { method: "POST" });
+        const res = await apiFetch(
+          `/api/sync-judgments-sheet?${params.toString()}`,
+          { method: "POST" },
+        );
         if (!res.success) throw new Error(res.message || "Full sync failed");
 
         totalInserted += res.inserted || 0;
@@ -561,7 +648,7 @@ export default function JudgmentsPage() {
       }
 
       setSyncMessage(
-        `Full sync ${activeTab === "ALL" ? "all courts" : activeTab}: ${totalInserted} new, ${totalUpdated} updated.`
+        `Full sync ${activeTab === "ALL" ? "all courts" : activeTab}: ${totalInserted} new, ${totalUpdated} updated.`,
       );
       await load();
     } catch (err) {
@@ -595,7 +682,7 @@ export default function JudgmentsPage() {
                 <Scale className="w-6 h-6" />
               </div>
               <h1 className="text-3xl font-bold font-display">
-                Court Judgments
+                {activeTab === "HUB" ? "Judgment Hub" : "Court Judgments"}
               </h1>
             </div>
             <p className="text-[#eef5f3]/80 text-sm mt-2 max-w-2xl">
@@ -605,6 +692,15 @@ export default function JudgmentsPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {activeTab !== "HUB" && (
+              <button
+                onClick={() => setActiveTab("HUB")}
+                className="flex items-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2.5 transition-all hover:scale-105 mr-2"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back to Hub
+              </button>
+            )}
             {isAdmin && (
               <>
                 <button
@@ -683,34 +779,49 @@ export default function JudgmentsPage() {
         </div>
       )}
 
-      <div className="bg-white border-2 border-[#eef5f3] rounded-2xl p-6 space-y-4 shadow-lg shadow-[#026a69]/5">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40" />
-          <input
-            type="text"
-            placeholder="Search by title, citation, case number, or judge…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 text-sm border-2 border-[#eef5f3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#026a69]/20 focus:border-[#0e8e83] bg-[#f0f7f5] placeholder:text-black/40 transition-all"
-          />
+      {activeTab === "HUB" && (
+        <CourtHub counts={courtCounts} onSelectCourt={setActiveTab} />
+      )}
+
+      {activeTab !== "HUB" && (
+        <div className="bg-white border-2 border-[#eef5f3] rounded-2xl p-6 space-y-4 shadow-lg shadow-[#026a69]/5">
+          {/* Court label */}
+          <div className="flex items-center gap-2">
+            {(() => {
+              const court = COURT_TABS.find((c) => c.abbr === activeTab);
+              const Icon = court?.icon ?? Scale;
+              return (
+                <span className="inline-flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#eef5f3] to-[#f0f7f5] text-[#026a69] border border-[#d0e8e4]">
+                  <Icon className="w-3.5 h-3.5" />
+                  {court?.label ?? activeTab}
+                </span>
+              );
+            })()}
+          </div>
+
+          {/* Search bar */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-black/40" />
+            <input
+              type="text"
+              placeholder="Search by case number, title, judge, keywords…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 text-sm border-2 border-[#eef5f3] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#026a69]/20 focus:border-[#0e8e83] bg-[#f0f7f5] placeholder:text-black/40 transition-all"
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-black/60">
+            <span className="font-medium">
+              {loading
+                ? "Loading…"
+                : `${total} judgment${total !== 1 ? "s" : ""} found`}
+            </span>
+          </div>
         </div>
+      )}
 
-        <CourtTabs
-          active={activeTab}
-          onChange={(abbr) => setActiveTab(abbr)}
-          counts={courtCounts}
-        />
-
-        <div className="flex items-center justify-between text-xs text-black/60">
-          <span className="font-medium">
-            {loading
-              ? "Loading…"
-              : `${total} judgment${total !== 1 ? "s" : ""} found`}
-          </span>
-        </div>
-      </div>
-
-      {loading ? (
+      {activeTab === "HUB" ? null : loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <SkeletonCard key={i} />
