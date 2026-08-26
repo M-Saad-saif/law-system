@@ -83,28 +83,14 @@ export const GET = withAuth(async (request, context, user) => {
     let payments;
 
     if (statusFilter === null) {
+      // Every PaymentRequest is returned as its own item so that each
+      // invoice is visible and searchable, not just the pending/latest one.
       const allPaymentRequests = await PaymentRequest.find({})
         .sort({ createdAt: -1 })
         .lean();
-      const latestPRByChamber = new Map();
-      for (const pr of allPaymentRequests) {
-        const key = String(pr.chamber);
-        if (!latestPRByChamber.has(key)) {
-          latestPRByChamber.set(key, pr);
-        }
-      }
 
-      const pendingChamberIds = new Set();
-      const pendingItems = [];
-      for (const [chamberId, pr] of latestPRByChamber.entries()) {
-        if (pr.status === PAYMENT_STATUS.PENDING) {
-          pendingChamberIds.add(chamberId);
-          pendingItems.push(pr);
-        }
-      }
-
-      const pendingPaymentItems = await Promise.all(
-        pendingItems.map((pr) => buildPaymentItem(pr)),
+      const chambersWithPayments = new Set(
+        allPaymentRequests.map((pr) => String(pr.chamber)),
       );
 
       const allSubscriptions = await Subscription.find({})
@@ -115,13 +101,19 @@ export const GET = withAuth(async (request, context, user) => {
         })
         .lean();
 
+      const paymentItems = await Promise.all(
+        allPaymentRequests.map((pr) => buildPaymentItem(pr)),
+      );
+
+      // Subscription-only fallback for chambers that have no PaymentRequest
+      // (e.g. trials granted directly), to avoid duplicate cards.
       const subscriptionItems = await Promise.all(
         allSubscriptions
-          .filter((s) => !pendingChamberIds.has(String(s.chamber)))
+          .filter((s) => !chambersWithPayments.has(String(s.chamber)))
           .map((s) => buildSubscriptionItem(s)),
       );
 
-      payments = [...pendingPaymentItems, ...subscriptionItems];
+      payments = [...paymentItems, ...subscriptionItems];
     } else if (subscriptionStatuses.includes(statusFilter)) {
       // Filter by subscription status (trialing, active, expired, etc.)
       const subscriptions = await Subscription.find({ status: statusFilter })

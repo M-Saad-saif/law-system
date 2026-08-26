@@ -799,7 +799,7 @@ export default function AdminPaymentsPage() {
     return payments
       .filter((p) => {
         if (!search.trim()) return true;
-        const q = search.toLowerCase();
+        const q = search.trim().toLowerCase();
         return (
           p.invoice_id?.toLowerCase().includes(q) ||
           p.chamber?.name?.toLowerCase().includes(q) ||

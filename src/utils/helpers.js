@@ -6,6 +6,29 @@ import {
   formatDistanceToNow,
 } from "date-fns";
 
+const EXCEL_EPOCH_MS = Date.UTC(1899, 11, 30);
+
+export function parseDate(value) {
+  if (value === null || value === undefined || value === "") return null;
+
+  const trimmed = String(value).trim();
+
+  if (trimmed === "") return null;
+
+  // Purely numeric values in a date column are almost always Excel serial
+  // dates (e.g. 45896 => 25 Aug 2025), NOT years. `new Date("45896")` would
+  // otherwise be parsed as the year 45896 -> "1 Jan 45896".
+  if (/^[+-]?\d+(\.\d+)?$/.test(trimmed)) {
+    const serial = Number(trimmed);
+    if (Number.isFinite(serial) && serial > 0) {
+      return new Date(EXCEL_EPOCH_MS + serial * 86400000);
+    }
+  }
+
+  const d = new Date(trimmed);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function formatDate(date, fmt = "dd MMM yyyy") {
   if (!date) return "—";
   return format(new Date(date), fmt);

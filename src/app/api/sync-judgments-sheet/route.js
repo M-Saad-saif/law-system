@@ -5,6 +5,7 @@ import connectDB from "@/lib/db";
 import { parseCSV } from "@/lib/csv";
 import { fetchSheetCSV, getJudgmentsSheetConfig } from "@/lib/googleSheet";
 import { resolveCourtAbbr } from "@/lib/courtMapping";
+import { parseDate } from "@/utils/helpers";
 import Judgment from "@/models/Judgment";
 
 export const maxDuration = 300;
@@ -27,9 +28,7 @@ function isAuthorised(request) {
 }
 
 function toDate(value) {
-  if (!value) return null;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
+  return parseDate(value);
 }
 
 function toNumber(value) {

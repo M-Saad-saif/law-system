@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/authtoken";
 import connectDB from "@/lib/db";
+import { parseDate } from "@/utils/helpers";
 import Judgment from "@/models/Judgment";
 
 export const maxDuration = 300;
@@ -50,10 +51,10 @@ function normalise(raw) {
     citation: raw.citation ? raw.citation.toString().trim() : null,
     judge: raw.judge ? raw.judge.toString().trim().slice(0, 300) : null,
     matter: raw.matter ? raw.matter.toString().trim().slice(0, 200) : null,
-    orderDate: raw.orderDate ? new Date(raw.orderDate) : null,
+    orderDate: parseDate(raw.orderDate),
     sourceUrl: raw.sourceUrl ? raw.sourceUrl.toString().trim() : null,
     approved: Boolean(raw.approved),
-    fetchedAt: raw.fetchedAt ? new Date(raw.fetchedAt) : new Date(),
+    fetchedAt: parseDate(raw.fetchedAt) || new Date(),
   };
 }
 
