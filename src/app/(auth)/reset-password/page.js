@@ -4,11 +4,9 @@ export const dynamic = "force-dynamic";
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Scale, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
+import { Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 import { api } from "@/utils/api";
-import logo from "/images/Horizontal-Logo.png";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -71,14 +69,6 @@ function ResetPasswordForm() {
 
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <Image
-            src={logo}
-            width={260}
-            height={220}
-            alt="Logo"
-            className="object-contain"
-            priority
-          />
           <p className="text-white/50 text-sm mt-1">
             Legal Practice Management System
           </p>
