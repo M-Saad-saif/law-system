@@ -126,7 +126,7 @@ export default function LogoutOverlay() {
                 className="relative w-14 h-14 rounded-2xl bg-[#026665] flex items-center justify-center shadow-lg shadow-black/30"
               >
                 <Image
-                  src="/Monogram.png"
+                  src="/images/Monogram.png"
                   height={50}
                   width={50}
                   alt="Monogram"
