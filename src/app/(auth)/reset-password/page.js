@@ -8,7 +8,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Scale, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 import { api } from "@/utils/api";
-import logo from "/public/Horizontal-Logo.png";
+import logo from "/images/Horizontal-Logo.png";
 
 function ResetPasswordForm() {
   const router = useRouter();
