@@ -12,7 +12,7 @@ import { api } from "@/utils/api";
 import { LaptopMockup } from "@/components/auth/LaptopMockup";
 import BackgroundPattern from "@/components/auth/BackgroundPattern";
 import { FormField } from "@/components/auth/Field";
-import logo from "/public/Horizontal-Logo.png";
+import logo from "/public/images/Horizontal-Logo.png";
 
 function LoadingSpinner({ className = "" }) {
   return (
